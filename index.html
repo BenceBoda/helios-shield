@@ -334,14 +334,10 @@ async function fetchRealData(){
   const btn=document.getElementById('btn-live');
   btn.textContent='⟳ Loading…';
   try{
-    const [kpRes,bzRes]=await Promise.all([
-  fetch('./kp.json'),
-fetch('./bz.json')
-]);
-    if(!kpRes.ok||!bzRes.ok)throw new Error('API error');
-    const kpRaw=await kpRes.json();
-    const bzRaw=await bzRes.json();
-    const bzData=bzRaw.slice(1); // skip header row
+    const kpRes=await fetch('./kp.json');
+if(!kpRes.ok)throw new Error('API error');
+const kpRaw=await kpRes.json();
+const bzData=[]; // skip header row
 
     // Sample ~24 hourly points from ~1440 minute points
     const step=Math.max(1,Math.floor(kpRaw.length/24));
