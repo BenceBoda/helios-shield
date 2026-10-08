@@ -142,6 +142,8 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .sim-lbl{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:8px}
 .storm-cards{display:flex;flex-direction:column;gap:6px}
 .storm-card{padding:10px 14px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:all .2s;text-align:left;width:100%}
+.storm-live-btn{padding:6px 14px;border-radius:20px;border:1px solid rgba(0,204,122,.35);background:rgba(0,204,122,.08);color:#00CC7A;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center}
+.storm-live-btn:hover,.storm-live-btn.active{background:rgba(0,204,122,.18);border-color:rgba(0,204,122,.6)}
 .storm-card:hover{border-color:var(--accent);color:var(--text)}
 .storm-card.active{background:rgba(0,200,255,.07);border-color:var(--accent);color:#fff}
 .storm-card-name{font-size:12px;font-weight:500}
@@ -309,6 +311,12 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
     <div class="sim-ctrl">
       <div>
         <div class="sim-lbl">01 · select storm event</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <button class="storm-live-btn" id="sc-live" onclick="simSelectLive()" title="Overlay current SuperMAG station readings on the map">
+            <span class="pulse" style="width:6px;height:6px;border-radius:50%;background:#00CC7A;display:inline-block;margin-right:6px"></span>Live now
+          </button>
+          <span style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace" id="live-stations-badge"></span>
+        </div>
         <div class="storm-cards">
           <button class="storm-card active" id="sc-q89" onclick="simSelectStorm('quebec1989')">
             <div class="storm-card-name">Hydro-Québec Storm</div>
@@ -409,6 +417,77 @@ function switchTab(t){
   document.getElementById('tab-'+t+'-btn').classList.add('active');
   if(t==='simulator'&&!mapReady)setTimeout(initMap,60);
   if(t==='simulator'&&mapReady)setTimeout(()=>map.invalidateSize(),100);
+  if(t==='simulator')setTimeout(tryLoadLiveStations,200);
+}
+
+async function tryLoadLiveStations(){
+  try{
+    const r=await fetch('./supermag.json?_='+Date.now());
+    if(!r.ok)return;
+    const d=await r.json();
+    if(d&&d.stations&&d.stations.length>0){
+      const badge=document.getElementById('live-stations-badge');
+      const age=d.fetched_at?Math.round((Date.now()-new Date(d.fetched_at))/60000):null;
+      if(badge)badge.textContent=d.stations.length+' stations · '+(age!==null?age+'min ago':'live');
+      window._liveSmData=d;
+    }
+  }catch(e){}
+}
+
+function simSelectLive(){
+  if(!window._liveSmData||!window._liveSmData.stations||window._liveSmData.stations.length===0){
+    tryLoadLiveStations().then(()=>{
+      if(window._liveSmData&&window._liveSmData.stations&&window._liveSmData.stations.length>0)
+        _renderLiveOverlay();
+      else alert('No live SuperMAG data yet — check back in a few minutes.');
+    });
+    return;
+  }
+  _renderLiveOverlay();
+}
+
+function _renderLiveOverlay(){
+  if(!mapReady)return;
+  const d=window._liveSmData;
+  // Clear historic layers, show live stations only
+  clearMapLayers();
+  // Fly to global view
+  map.flyTo([30,10],2,{duration:1.2});
+  const fetchedAt=d.fetched_at?d.fetched_at.slice(11,16)+' UTC':'';
+  d.stations.forEach(st=>{
+    if(!st.lat&&!st.lng)return;
+    const col=dbdtColor(st.dbdt);
+    const r=Math.max(5,Math.min(20,4+st.dbdt/45));
+    const m=L.circleMarker([st.lat,st.lng],{
+      radius:r,color:col,fillColor:col,fillOpacity:0.82,weight:1.5
+    }).bindPopup(
+      `<div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#C5D8EE;background:#08162A;padding:8px;border-radius:6px;min-width:160px">
+        <b style="color:#fff;font-size:13px">${st.id}</b><br>
+        <span style="color:#4A6A8A">dB/dt</span> <b style="color:${col}">${st.dbdt} nT/min</b><br>
+        <span style="color:#4A6A8A">GIC est.</span> ${Math.round(st.dbdt*0.55)} A<br>
+        <span style="color:#4A6A8A;font-size:10px">Live · ${fetchedAt}</span>
+      </div>`,{className:'dark-popup'}
+    );
+    m.addTo(map);
+    mapLayers.push(m);
+  });
+  // Highlight the Live now button
+  document.querySelectorAll('.storm-card,.storm-live-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sc-live').classList.add('active');
+  // Update dbdt panel
+  const rows=document.getElementById('dbdt-rows');
+  if(rows){
+    const sorted=[...d.stations].sort((a,b)=>b.dbdt-a.dbdt);
+    rows.innerHTML=sorted.map(st=>`
+      <div class="dbdt-chip" style="border-color:${dbdtColor(st.dbdt)}22">
+        <span class="chip-dot" style="background:${dbdtColor(st.dbdt)}"></span>
+        <span class="chip-id">${st.id}</span>
+        <span class="chip-val" style="color:${dbdtColor(st.dbdt)}">${st.dbdt}</span>
+        <span class="chip-unit">nT/min</span>
+      </div>`).join('');
+    const src=document.getElementById('dbdt-source');
+    if(src)src.textContent='Live SuperMAG data · '+fetchedAt+' · supermag.jhuapl.edu';
+  }
 }
 
 /* ══════════════════════════════════════════════════════
