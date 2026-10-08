@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Helios Shield — GIC Early Warning Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg:#040C18; --surface:#08162A; --surface2:#0C1E36; --border:#142B45;
+  --text:#C5D8EE; --muted:#4A6A8A; --dim:#1E3550;
+  --accent:#00C8FF; --solar:#FFB347; --danger:#FF4040; --safe:#00CC7A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit;margin:0;padding:0}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:14px;line-height:1.5;min-height:100%}
+
+.hdr{position:sticky;top:env(safe-area-inset-top,0px);z-index:100;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:20px;padding:11px 24px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:600;color:#fff;letter-spacing:-.3px;flex-shrink:0}
+.status-bar{display:flex;align-items:center;gap:20px;flex-wrap:wrap;flex:1}
+.stat{display:flex;flex-direction:column;gap:1px}
+.stat-lbl{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.stat-val{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;color:#fff;transition:color .3s}
+.badge{display:flex;align-items:center;gap:7px;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:500;background:rgba(0,200,122,.1);color:var(--safe);border:1px solid rgba(0,200,122,.25);transition:all .3s;margin-left:auto}
+.badge.warn{background:rgba(255,179,71,.1);color:var(--solar);border-color:rgba(255,179,71,.25)}
+.badge.alrt{background:rgba(255,64,64,.15);color:var(--danger);border-color:rgba(255,64,64,.3)}
+.pulse{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 2s ease-in-out infinite}
+.badge.alrt .pulse{animation:pulse-f .8s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+@keyframes pulse-f{0%,100%{opacity:1;transform:scale(1.2)}50%{opacity:.3;transform:scale(.7)}}
+
+.main{max-width:1200px;margin:0 auto;padding:20px 24px}
+
+.chart-section{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:14px}
+.chart-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;gap:12px;flex-wrap:wrap}
+.chart-title{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:2px}
+.chart-sub{font-size:15px;font-weight:500;color:#fff}
+.controls{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.sbtn{padding:5px 10px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:500;cursor:pointer;transition:all .2s}
+.sbtn:hover{border-color:var(--accent);color:var(--accent)}
+.sbtn.on{background:rgba(0,200,255,.1);border-color:var(--accent);color:var(--accent)}
+.sbtn.live.on{background:rgba(0,204,122,.1);border-color:rgba(0,204,122,.4);color:var(--safe)}
+.pbtn{padding:5px 14px;border-radius:4px;border:none;background:var(--accent);color:var(--bg);font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:background .2s;display:flex;align-items:center;gap:5px}
+.pbtn:hover{background:#33D4FF}
+.pbtn:disabled{background:var(--dim);color:var(--muted);cursor:not-allowed}
+.chart-wrap{position:relative;height:260px}
+.alert-pop{position:absolute;top:8px;left:50%;transform:translateX(-50%);background:rgba(255,50,50,.92);backdrop-filter:blur(4px);color:#fff;padding:7px 18px;border-radius:4px;font-size:11px;font-weight:600;letter-spacing:.4px;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;z-index:10;font-family:'JetBrains Mono',monospace}
+.alert-pop.show{opacity:1}
+.chart-foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:12px;flex-wrap:wrap}
+.legend{display:flex;gap:16px;flex-wrap:wrap}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.leg-line{width:16px;height:2px;border-radius:1px}
+.replay-info{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.rtime{color:var(--accent);font-weight:500}
+.afired{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:10px;background:rgba(255,64,64,.15);border:1px solid rgba(255,64,64,.3);color:var(--danger);font-size:10px;font-weight:600}
+
+.panels{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:680px){.panels{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px}
+.panel-lbl{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:3px}
+.panel-hdg{font-size:15px;font-weight:500;color:#fff;margin-bottom:18px}
+
+.th-display{text-align:center;margin-bottom:4px}
+.th-val{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:500;transition:color .3s}
+.th-desc{font-size:11px;color:var(--muted);text-align:center;margin-bottom:16px;min-height:28px}
+.th-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:5px}
+input[type=range]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;outline:none;background:linear-gradient(to right,#00CC7A 0%,#FFD700 35%,#FF8C00 65%,#FF4040 100%);cursor:pointer;display:block}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff;border:2px solid var(--accent);cursor:pointer;box-shadow:0 0 8px rgba(0,200,255,.4)}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:2px solid var(--accent);cursor:pointer}
+.th-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.tstat{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px}
+.tstat.fn{border-left:3px solid var(--danger)}
+.tstat.fp{border-left:3px solid var(--solar)}
+.tstat.tp{border-left:3px solid var(--safe)}
+.tstat.al{border-left:3px solid var(--accent)}
+.tstat-v{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:500;margin-bottom:2px;transition:color .3s}
+.tstat-l{font-size:10px;color:var(--muted)}
+.aeb-wrap{margin-top:16px}
+.aeb-title{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:6px}
+.aeb-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;gap:1px}
+.aeb-seg{transition:flex .4s ease;border-radius:1px;min-width:2px}
+.aeb-c{background:var(--safe)}
+.aeb-m{background:var(--danger)}
+.aeb-f{background:var(--solar)}
+.aeb-leg{display:flex;gap:12px;margin-top:6px;flex-wrap:wrap}
+.aeb-li{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.aeb-dot{width:8px;height:8px;border-radius:2px}
+
+.impact-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.imp{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px}
+.imp-l{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:3px}
+.imp-v{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;color:#fff}
+.imp-note{margin-top:10px;padding:10px 12px;background:rgba(255,64,64,.06);border:1px solid rgba(255,64,64,.15);border-radius:6px;font-size:11px;color:var(--text);font-style:italic}
+.imp-empty{color:var(--muted);font-size:11px;text-align:center;padding:28px 0;font-family:'JetBrains Mono',monospace}
+.imp-region{grid-column:1/-1}
+
+footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.fn{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.vigil{font-size:10px;color:var(--accent);opacity:.6;font-family:'JetBrains Mono',monospace}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="logo">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2L3 6v5c0 4.4 3.4 8.5 8 9.5 4.6-1 8-5.1 8-9.5V6L11 2z" fill="#00C8FF" opacity=".18" stroke="#00C8FF" stroke-width="1.5"/><path d="M11 5l-5 2.5v3.3c0 2.8 2.1 5.4 5 6.2 2.9-.8 5-3.4 5-6.2V7.5L11 5z" fill="#00C8FF" opacity=".35"/></svg>
+    Helios Shield
+  </div>
+  <div class="status-bar">
+    <div class="stat">
+      <span class="stat-lbl">Kp-index</span>
+      <span class="stat-val" id="live-kp">2.3</span>
+    </div>
+    <div class="stat">
+      <span class="stat-lbl">Bz (nT)</span>
+      <span class="stat-val" id="live-bz">−4.1</span>
+    </div>
+    <div class="stat">
+      <span class="stat-lbl">Warning window</span>
+      <span class="stat-val" id="live-win">47 min</span>
+    </div>
+    <div class="badge" id="status-badge">
+      <span class="pulse"></span>
+      <span id="status-text">NOMINAL</span>
+    </div>
+  </div>
+</header>
+
+<div class="main">
+  <div class="chart-section">
+    <div class="chart-hdr">
+      <div>
+        <div class="chart-title">geomagnetic activity monitor · 24-hour rolling window</div>
+        <div class="chart-sub">Planetary Kp-index &amp; Bz component</div>
+      </div>
+      <div class="controls">
+        <button class="sbtn live on" id="btn-live" onclick="selectLive()">● Live feed</button>
+        <button class="sbtn" id="btn-q89" onclick="selectStorm('quebec1989')">Québec 1989</button>
+        <button class="sbtn" id="btn-h03" onclick="selectStorm('halloween2003')">Halloween 2003</button>
+        <button class="sbtn" id="btn-g24" onclick="selectStorm('gannon2024')">Gannon 2024</button>
+        <button class="pbtn" id="play-btn" onclick="playSelected()" disabled>▶ Replay</button>
+      </div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="mainChart"></canvas>
+      <div class="alert-pop" id="alert-pop">⚡ ALERT THRESHOLD CROSSED</div>
+    </div>
+    <div class="chart-foot">
+      <div class="legend">
+        <div class="leg-item"><div class="leg-line" style="background:var(--accent)"></div>Kp-index</div>
+        <div class="leg-item"><div class="leg-line" style="background:var(--solar);opacity:.6"></div>Bz (nT, scaled)</div>
+        <div class="leg-item"><div class="leg-line" style="background:var(--danger);border-top:2px dashed var(--danger);height:0"></div>Alert threshold</div>
+        <div class="leg-item"><div class="leg-line" style="background:var(--safe);opacity:.4;height:8px;border-radius:2px"></div>Nominal</div>
+        <div class="leg-item"><div class="leg-line" style="background:var(--danger);opacity:.3;height:8px;border-radius:2px"></div>Extreme</div>
+      </div>
+      <div class="replay-info" id="replay-info"></div>
+    </div>
+  </div>
+
+  <div class="panels">
+    <div class="panel">
+      <div class="panel-lbl">alert calibration</div>
+      <div class="panel-hdg">Sensitivity threshold</div>
+      <div class="th-display">
+        <div class="th-val" id="th-val" style="color:var(--solar)">Kp ≥ 7</div>
+      </div>
+      <div class="th-desc" id="th-desc">G3 storm — severe GIC risk · recommended for TSOs</div>
+      <div class="th-labels"><span>Kp 5</span><span>Kp 6</span><span>Kp 7</span><span>Kp 8</span><span>Kp 9</span></div>
+      <input type="range" id="threshold" min="5" max="9" value="7" step="1" oninput="updateThreshold(+this.value)">
+      <div class="th-stats" id="th-stats">
+        <div class="tstat tp"><div class="tstat-v" style="color:var(--safe)" id="ts-caught">~8</div><div class="tstat-l">events caught / yr</div></div>
+        <div class="tstat al"><div class="tstat-v" style="color:var(--accent)" id="ts-alerts">~8</div><div class="tstat-l">total alerts / yr</div></div>
+        <div class="tstat fp"><div class="tstat-v" style="color:var(--solar)" id="ts-fp">~0</div><div class="tstat-l">false positives / yr</div></div>
+        <div class="tstat fn"><div class="tstat-v" style="color:var(--danger)" id="ts-fn">~0</div><div class="tstat-l">missed events / yr</div></div>
+      </div>
+      <div class="aeb-wrap">
+        <div class="aeb-title">event coverage ← like AEB: both over- and under-alerting carry cost</div>
+        <div class="aeb-bar">
+          <div class="aeb-seg aeb-c" id="aeb-c" style="flex:8"></div>
+          <div class="aeb-seg aeb-m" id="aeb-m" style="flex:0"></div>
+          <div class="aeb-seg aeb-f" id="aeb-f" style="flex:0"></div>
+        </div>
+        <div class="aeb-leg">
+          <div class="aeb-li"><div class="aeb-dot" style="background:var(--safe)"></div>caught</div>
+          <div class="aeb-li"><div class="aeb-dot" style="background:var(--danger)"></div>missed</div>
+          <div class="aeb-li"><div class="aeb-dot" style="background:var(--solar)"></div>false alarm</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-lbl">impact model</div>
+      <div class="panel-hdg">Storm projection</div>
+      <div id="impact-body">
+        <div class="imp-empty">← select a historical storm<br>to load impact data</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span class="fn">Helios Shield · Concept demonstration · Data: NOAA/SWPC historical records &amp; academic literature</span>
+  <span class="vigil">ESA Vigil (2031): warning window → ~8 hours</span>
+</footer>
+
+<script>
+const STORMS = {
+  quebec1989: {
+    name:"Hydro-Québec Storm",date:"March 13, 1989",mag:"Extreme (Kp 9)",
+    kp:[3,4,5,6,7,8,9,9,9,8,8,9,9,8,7,6,5,4,3,3,2,2,3,3],
+    bz:[-5,-12,-28,-52,-75,-92,-105,-98,-88,-72,-60,-85,-97,-88,-70,-52,-38,-25,-18,-12,-8,-5,-4,-5],
+    imp:{gic:"~300 A",econ:"$6B (today)",outage:"9 hours",people:"6 million",region:"Québec, Canada",note:"Grid collapsed in 92 seconds. Multiple EHV transformers permanently destroyed."}
+  },
+  halloween2003:{
+    name:"Halloween Storms",date:"Oct 29–30, 2003",mag:"Extreme (Kp 9+)",
+    kp:[4,5,5,7,8,9,9,9,8,7,6,5,5,7,8,9,9,8,7,6,5,4,4,3],
+    bz:[-8,-18,-35,-65,-88,-82,-78,-72,-58,-42,-30,-22,-28,-55,-75,-85,-82,-68,-52,-38,-25,-16,-10,-8],
+    imp:{gic:"~250 A",econ:"$1.5B direct",outage:"Multiple regions",people:"50,000+ transformers",region:"Sweden, South Africa",note:"Malmö, Sweden: 20-min blackout. Eskom (S. Africa) lost 14 transformers."}
+  },
+  gannon2024:{
+    name:"Gannon Storm",date:"May 10–11, 2024",mag:"Extreme (Kp 9)",
+    kp:[3,4,6,7,8,9,9,8,8,7,6,5,6,8,9,8,7,6,5,4,3,3,2,2],
+    bz:[-5,-15,-32,-60,-82,-78,-72,-65,-58,-45,-32,-28,-38,-65,-78,-72,-58,-45,-32,-22,-15,-10,-7,-5],
+    imp:{gic:"~200 A",econ:"$2.4B estimated",outage:"Partial (prepared)",people:"GPS, grids affected",region:"Global",note:"Strongest storm in 20 years. First major test of modern grid protection standards."}
+  }
+};
+
+const TH_META = {
+  5:{desc:"G1–G5 · catches all — ~40 alerts/yr incl. minor events",color:"#00CC7A",caught:8,alerts:40,fp:32,fn:0},
+  6:{desc:"G2+ · good coverage, lower noise",color:"#8BE040",caught:8,alerts:20,fp:12,fn:0},
+  7:{desc:"G3+ · severe GIC risk · recommended for TSOs",color:"#FFB347",caught:8,alerts:8,fp:0,fn:0},
+  8:{desc:"G4+ · extreme only — some G3 events missed",color:"#FF8030",caught:5,alerts:3,fp:0,fn:3},
+  9:{desc:"G5 · Carrington-class only — high miss rate",color:"#FF4040",caught:2,alerts:0.5,fp:0,fn:6}
+};
+
+const NOMINAL_KP=[2.1,1.8,2.3,2.1,1.9,2.4,2.0,1.7,2.2,2.5,2.1,1.8,2.0,2.3,2.1,1.9,2.4,2.0,1.8,2.2,2.1,1.9,2.3,2.0];
+const NOMINAL_BZ=[-3,2,-1,4,-2,3,-4,1,-2,3,-1,4,-3,2,-1,3,-4,2,-3,1,-2,3,-1,2];
+const HOURS=Array.from({length:24},(_,i)=>`${String(i).padStart(2,'0')}:00`);
+
+let threshold=7,currentStorm=null,isReplaying=false,replayTimer=null,liveTimer=null,liveOffset=0,replayStep=0,alertFiredAt=null;
+
+// Chart setup
+const bgZones={id:'bgZones',beforeDraw(c){
+  const {ctx,chartArea:{top,bottom,left,right,width},scales}=c;
+  if(!scales.y)return;
+  [[0,4,'rgba(0,204,122,.06)'],[4,6,'rgba(255,210,0,.06)'],[6,8,'rgba(255,130,0,.08)'],[8,9.5,'rgba(255,60,60,.1)']].forEach(([mn,mx,col])=>{
+    const yT=scales.y.getPixelForValue(mx),yB=scales.y.getPixelForValue(mn);
+    ctx.fillStyle=col;ctx.fillRect(left,yT,width,yB-yT);
+  });
+}};
+
+const ctx=document.getElementById('mainChart').getContext('2d');
+const chart=new Chart(ctx,{
+  type:'line',
+  plugins:[bgZones],
+  data:{
+    labels:HOURS.slice(),
+    datasets:[
+      {label:'Kp',data:NOMINAL_KP.slice(),borderColor:'#00C8FF',backgroundColor:'rgba(0,200,255,.07)',fill:true,borderWidth:2,tension:.4,pointRadius:0,pointHoverRadius:3,yAxisID:'y'},
+      {label:'Bz (scaled)',data:NOMINAL_BZ.map(v=>Math.max(0,Math.min(9,(v+120)/120*9))),borderColor:'rgba(255,179,71,.5)',fill:false,borderWidth:1.5,tension:.4,pointRadius:0,borderDash:[],yAxisID:'y'},
+      {label:'Threshold',data:Array(24).fill(threshold),borderColor:'rgba(255,64,64,.7)',fill:false,borderWidth:1,pointRadius:0,borderDash:[5,4],yAxisID:'y'}
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,animation:{duration:0},
+    interaction:{mode:'index',intersect:false},
+    plugins:{legend:{display:false},tooltip:{
+      backgroundColor:'rgba(8,22,42,.95)',borderColor:'#142B45',borderWidth:1,
+      titleColor:'#C5D8EE',bodyColor:'#4A6A8A',titleFont:{family:'JetBrains Mono'},bodyFont:{family:'JetBrains Mono'},
+      callbacks:{label:ctx=>{
+        if(ctx.datasetIndex===0)return ` Kp: ${ctx.raw.toFixed(1)}`;
+        if(ctx.datasetIndex===1)return ` Bz (norm): ${ctx.raw.toFixed(1)}`;
+        return ` Threshold: Kp ${threshold}`;
+      }}
+    }},
+    scales:{
+      x:{grid:{color:'rgba(20,43,69,.8)'},ticks:{color:'#2A4A6A',font:{family:'JetBrains Mono',size:10},maxTicksLimit:8}},
+      y:{min:0,max:9.5,grid:{color:'rgba(20,43,69,.8)'},ticks:{color:'#2A4A6A',font:{family:'JetBrains Mono',size:10},callback:v=>v%1===0?`Kp ${v}`:''},stepSize:1}
+    }
+  }
+});
+
+// Live feed animation
+function startLive(){
+  clearInterval(liveTimer);
+  liveTimer=setInterval(()=>{
+    liveOffset=(liveOffset+1)%NOMINAL_KP.length;
+    const kp=NOMINAL_KP[liveOffset]+(Math.random()-.5)*.4;
+    const bz=NOMINAL_BZ[liveOffset]+(Math.random()-.5)*2;
+    chart.data.labels.push(new Date().toTimeString().slice(0,5));chart.data.labels.shift();
+    chart.data.datasets[0].data.push(Math.max(.5,Math.min(3.5,kp)));chart.data.datasets[0].data.shift();
+    chart.data.datasets[1].data.push(Math.max(0,Math.min(9,(bz+120)/120*9)));chart.data.datasets[1].data.shift();
+    chart.update('none');
+    updateStatusBar(kp,bz);
+  },1800);
+}
+
+function updateStatusBar(kp,bz){
+  document.getElementById('live-kp').textContent=kp.toFixed(1);
+  document.getElementById('live-bz').textContent=(bz<0?'−'+Math.abs(bz).toFixed(1):'+'+bz.toFixed(1))+' nT';
+  const b=document.getElementById('status-badge'),t=document.getElementById('status-text');
+  if(kp>=threshold){b.className='badge alrt';t.textContent='ALERT';document.getElementById('live-kp').style.color='var(--danger)'}
+  else if(kp>=5){b.className='badge warn';t.textContent='WATCH';document.getElementById('live-kp').style.color='var(--solar)'}
+  else{b.className='badge';t.textContent='NOMINAL';document.getElementById('live-kp').style.color='#fff'}
+}
+
+function selectLive(){
+  clearInterval(replayTimer);isReplaying=false;currentStorm=null;
+  document.querySelectorAll('.sbtn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('btn-live').classList.add('on');
+  document.getElementById('play-btn').disabled=true;
+  chart.data.labels=HOURS.slice();
+  chart.data.datasets[0].data=NOMINAL_KP.slice();
+  chart.data.datasets[1].data=NOMINAL_BZ.map(v=>Math.max(0,Math.min(9,(v+120)/120*9)));
+  chart.update('none');
+  document.getElementById('replay-info').innerHTML='';
+  document.getElementById('impact-body').innerHTML='<div class="imp-empty">← select a historical storm<br>to load impact data</div>';
+  startLive();
+}
+
+function selectStorm(key){
+  clearInterval(liveTimer);
+  document.querySelectorAll('.sbtn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('btn-'+{quebec1989:'q89',halloween2003:'h03',gannon2024:'g24'}[key]).classList.add('on');
+  currentStorm=key;
+  document.getElementById('play-btn').disabled=false;
+  if(!isReplaying){
+    // Show full storm immediately
+    const s=STORMS[key];
+    chart.data.labels=HOURS.slice();
+    chart.data.datasets[0].data=s.kp.slice();
+    chart.data.datasets[1].data=s.bz.map(v=>Math.max(0,Math.min(9,(v+120)/120*9)));
+    chart.update('none');
+    document.getElementById('replay-info').innerHTML=`<span>${s.date} · ${s.mag}</span>`;
+    showImpact(key);
+  }
+}
+
+function playSelected(){
+  if(!currentStorm)return;
+  clearInterval(replayTimer);clearInterval(liveTimer);
+  isReplaying=true;replayStep=0;alertFiredAt=null;
+  const s=STORMS[currentStorm];
+  document.getElementById('alert-pop').classList.remove('show');
+  chart.data.labels=[];chart.data.datasets[0].data=[];chart.data.datasets[1].data=[];
+  chart.update('none');
+  document.getElementById('play-btn').disabled=true;
+  document.getElementById('replay-info').innerHTML=`<span class="rtime">T+00:00</span><span>replaying ${s.date}…</span>`;
+  document.getElementById('impact-body').innerHTML='<div class="imp-empty">replaying…</div>';
+
+  replayTimer=setInterval(()=>{
+    if(replayStep>=24){
+      clearInterval(replayTimer);isReplaying=false;
+      document.getElementById('play-btn').disabled=false;
+      showImpact(currentStorm);
+      const ri=document.getElementById('replay-info');
+      if(alertFiredAt!==null){
+        const hoursBeforePeak=s.kp.indexOf(Math.max(...s.kp))-alertFiredAt;
+        ri.innerHTML=`<span class="afired">⚡ ALERT</span><span>fired at T+${String(alertFiredAt).padStart(2,'0')}:00 · <strong>${hoursBeforePeak}h before peak</strong></span>`;
+      } else {
+        ri.innerHTML=`<span style="color:var(--danger)">⚠ no alert — threshold not reached during replay</span>`;
+      }
+      return;
+    }
+    chart.data.labels.push(HOURS[replayStep]);
+    chart.data.datasets[0].data.push(s.kp[replayStep]);
+    chart.data.datasets[1].data.push(Math.max(0,Math.min(9,(s.bz[replayStep]+120)/120*9)));
+    if(!alertFiredAt&&s.kp[replayStep]>=threshold){
+      alertFiredAt=replayStep;
+      const pop=document.getElementById('alert-pop');
+      pop.textContent=`⚡ ALERT FIRED — Kp ${s.kp[replayStep].toFixed(0)} ≥ threshold ${threshold}`;
+      pop.classList.add('show');
+      setTimeout(()=>pop.classList.remove('show'),2800);
+      document.getElementById('live-kp').style.color='var(--danger)';
+      document.getElementById('status-badge').className='badge alrt';
+      document.getElementById('status-text').textContent='ALERT';
+    }
+    chart.data.datasets[2].data=Array(chart.data.labels.length).fill(threshold);
+    chart.update('none');
+    document.getElementById('replay-info').innerHTML=`<span class="rtime">T+${String(replayStep).padStart(2,'0')}:00</span><span>replaying ${s.date}</span>`;
+    replayStep++;
+  },380);
+}
+
+function showImpact(key){
+  const s=STORMS[key],i=s.imp;
+  document.getElementById('impact-body').innerHTML=`
+    <div class="impact-grid">
+      <div class="imp"><div class="imp-l">peak GIC current</div><div class="imp-v" style="color:var(--danger)">${i.gic}</div></div>
+      <div class="imp"><div class="imp-l">economic exposure</div><div class="imp-v" style="color:var(--solar)">${i.econ}</div></div>
+      <div class="imp"><div class="imp-l">outage duration</div><div class="imp-v">${i.outage}</div></div>
+      <div class="imp"><div class="imp-l">affected</div><div class="imp-v">${i.people}</div></div>
+      <div class="imp imp-region"><div class="imp-l">region</div><div class="imp-v">${i.region}</div></div>
+    </div>
+    <div class="imp-note">${i.note}</div>`;
+}
+
+function updateThreshold(v){
+  threshold=v;
+  chart.data.datasets[2].data=Array(chart.data.datasets[0].data.length).fill(v);
+  chart.update('none');
+  const m=TH_META[v];
+  document.getElementById('th-val').textContent=`Kp ≥ ${v}`;
+  document.getElementById('th-val').style.color=m.color;
+  document.getElementById('th-desc').textContent=m.desc;
+  document.getElementById('ts-caught').textContent=`~${m.caught}`;
+  document.getElementById('ts-alerts').textContent=`~${Math.max(.5,m.alerts)}`;
+  document.getElementById('ts-fp').textContent=`~${m.fp}`;
+  document.getElementById('ts-fn').textContent=`~${m.fn}`;
+  document.getElementById('ts-fn').style.color=m.fn>0?'var(--danger)':'var(--safe)';
+  document.getElementById('ts-fp').style.color=m.fp>0?'var(--solar)':'var(--safe)';
+  // AEB bar
+  const total=m.caught+m.fn+m.fp||1;
+  document.getElementById('aeb-c').style.flex=m.caught/total*10;
+  document.getElementById('aeb-m').style.flex=m.fn/total*10;
+  document.getElementById('aeb-f').style.flex=m.fp/total*10;
+}
+
+// Init
+updateThreshold(7);
+selectLive();
+</script>
+</body>
+</html>
