@@ -1,0 +1,22 @@
+name: Fetch NOAA data
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch NOAA data
+        run: |
+          curl -s https://services.swpc.noaa.gov/json/planetary_k_index_1m.json > kp.json
+          curl -s https://services.swpc.noaa.gov/json/solar-wind/mag-1-minute.json > bz.json
+      - name: Commit data
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add kp.json bz.json
+          git diff --staged --quiet || git commit -m "Update NOAA data"
+          git push
