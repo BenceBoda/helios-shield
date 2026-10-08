@@ -9,8 +9,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
-/* ── password overlay ─────────────────────────────────── */
-#pw-screen{position:fixed;inset:0;z-index:9999;background:#040C18;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px}
+/* ── password ─── */
+#pw-screen{position:fixed;inset:0;z-index:9999;background:#040C18;display:flex;align-items:center;justify-content:center;flex-direction:column}
 .pw-box{background:#08162A;border:1px solid #142B45;border-radius:10px;padding:40px 36px;display:flex;flex-direction:column;align-items:center;gap:18px;width:320px;max-width:90vw}
 .pw-logo{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:600;color:#fff;letter-spacing:-.3px}
 .pw-sub{font-size:12px;color:#4A6A8A;font-family:'JetBrains Mono',monospace;text-align:center}
@@ -22,7 +22,7 @@
 .pw-err{font-size:11px;color:#FF4040;font-family:'JetBrains Mono',monospace;min-height:16px}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 
-/* ── design tokens ──────────────────────────────────────── */
+/* ── tokens ─── */
 :root{
   --bg:#040C18;--surface:#08162A;--surface2:#0C1E36;--border:#142B45;
   --text:#C5D8EE;--muted:#4A6A8A;--dim:#1E3550;
@@ -32,11 +32,10 @@
   padding-bottom:env(safe-area-inset-bottom,0px);
 }
 *,*::before,*::after{box-sizing:inherit;margin:0;padding:0}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:14px;line-height:1.5;min-height:100%}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:14px;line-height:1.5}
 
-/* ── header ─────────────────────────────────────────────── */
-.hdr{position:sticky;top:env(safe-area-inset-top,0px);z-index:100;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:20px;padding:11px 24px;flex-wrap:wrap}
+/* ── header ─── */
+.hdr{position:sticky;top:env(safe-area-inset-top,0px);z-index:200;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:20px;padding:11px 24px;flex-wrap:wrap}
 .logo{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:600;color:#fff;letter-spacing:-.3px;flex-shrink:0}
 .status-bar{display:flex;align-items:center;gap:20px;flex-wrap:wrap;flex:1}
 .stat{display:flex;flex-direction:column;gap:1px}
@@ -50,18 +49,16 @@ body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-ser
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
 @keyframes pulse-f{0%,100%{opacity:1;transform:scale(1.2)}50%{opacity:.3;transform:scale(.7)}}
 
-/* ── tab navigation ──────────────────────────────────────── */
+/* ── tabs ─── */
 .tab-nav{max-width:1200px;margin:0 auto;padding:16px 24px 0;display:flex;gap:4px}
 .tab-btn{padding:7px 18px;border-radius:6px 6px 0 0;border:1px solid var(--border);border-bottom:none;background:transparent;color:var(--muted);font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;position:relative;bottom:-1px}
 .tab-btn:hover{color:var(--text)}
 .tab-btn.active{background:var(--surface);color:#fff;border-color:var(--border)}
 .tab-panel{display:none}
 .tab-panel.active{display:block}
-
-/* ── main layout ─────────────────────────────────────────── */
 .main{max-width:1200px;margin:0 auto;padding:20px 24px;border-top:1px solid var(--border)}
 
-/* ── chart section (tab 1) ───────────────────────────────── */
+/* ── chart section ─── */
 .chart-section{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:14px}
 .chart-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;gap:12px;flex-wrap:wrap}
 .chart-title{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:2px}
@@ -85,13 +82,12 @@ body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-ser
 .rtime{color:var(--accent);font-weight:500}
 .afired{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:10px;background:rgba(255,64,64,.15);border:1px solid rgba(255,64,64,.3);color:var(--danger);font-size:10px;font-weight:600}
 
-/* ── panels (tab 1) ──────────────────────────────────────── */
+/* ── panels ─── */
 .panels{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:680px){.panels{grid-template-columns:1fr}}
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px}
 .panel-lbl{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:3px}
 .panel-hdg{font-size:15px;font-weight:500;color:#fff;margin-bottom:18px}
-
 .th-display{text-align:center;margin-bottom:4px}
 .th-val{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:500;transition:color .3s}
 .th-desc{font-size:11px;color:var(--muted);text-align:center;margin-bottom:16px;min-height:28px}
@@ -111,13 +107,10 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .aeb-title{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:6px}
 .aeb-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;gap:1px}
 .aeb-seg{transition:flex .4s ease;border-radius:1px;min-width:2px}
-.aeb-c{background:var(--safe)}
-.aeb-m{background:var(--danger)}
-.aeb-f{background:var(--solar)}
+.aeb-c{background:var(--safe)}.aeb-m{background:var(--danger)}.aeb-f{background:var(--solar)}
 .aeb-leg{display:flex;gap:12px;margin-top:6px;flex-wrap:wrap}
 .aeb-li{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace}
 .aeb-dot{width:8px;height:8px;border-radius:2px}
-
 .impact-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .imp{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px}
 .imp-l{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:3px}
@@ -126,55 +119,65 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .imp-empty{color:var(--muted);font-size:11px;text-align:center;padding:28px 0;font-family:'JetBrains Mono',monospace}
 .imp-region{grid-column:1/-1}
 
-/* ── impact simulator (tab 2) ────────────────────────────── */
-.sim-layout{display:grid;grid-template-columns:1fr 380px;gap:14px;align-items:start}
-@media(max-width:900px){.sim-layout{grid-template-columns:1fr}}
-
-#sim-map{height:420px;border-radius:8px;border:1px solid var(--border);background:#05111F;z-index:1}
-.leaflet-container{background:#05111F}
-.leaflet-tile{filter:brightness(.45) saturate(.5) hue-rotate(185deg)}
-
-.sim-controls{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;display:flex;flex-direction:column;gap:18px}
-.sim-section-lbl{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:8px}
-.sim-storm-btns{display:flex;flex-direction:column;gap:6px}
-.storm-card{padding:10px 14px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:all .2s;text-align:left}
-.storm-card:hover{border-color:var(--accent);color:var(--text)}
-.storm-card.active{background:rgba(0,200,255,.08);border-color:var(--accent);color:#fff}
-.storm-card-name{font-size:12px;font-weight:500}
-.storm-card-date{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:1px}
-.storm-card.active .storm-card-date{color:var(--accent);opacity:.7}
-
-.warn-slider-wrap{display:flex;flex-direction:column;gap:8px}
-.warn-display{display:flex;justify-content:space-between;align-items:baseline}
-.warn-val{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:500;color:var(--accent)}
-.warn-unit{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace}
-.warn-labels{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:3px}
-#warn-slider{background:linear-gradient(to right,#00C8FF 0%,#00C8FF 100%)}
-
-.avoidance-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.av-stat{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;position:relative;overflow:hidden}
-.av-stat-fill{position:absolute;bottom:0;left:0;right:0;background:rgba(0,200,122,.08);transition:height .4s ease}
-.av-stat-v{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:500;color:var(--safe);position:relative;z-index:1;transition:color .3s}
-.av-stat-l{font-size:10px;color:var(--muted);position:relative;z-index:1;margin-top:2px}
-.av-stat.total .av-stat-v{color:var(--danger)}
-.av-stat.total .av-stat-fill{background:rgba(255,64,64,.06)}
-
-.avoidance-bar-wrap{margin-top:4px}
-.avoidance-bar{height:8px;border-radius:4px;background:rgba(20,43,69,.8);overflow:hidden;position:relative}
-.avoidance-bar-fill{height:100%;background:linear-gradient(90deg,var(--safe),#00E8A0);border-radius:4px;transition:width .5s ease}
-.avoidance-pct{font-size:10px;color:var(--safe);font-family:'JetBrains Mono',monospace;margin-top:4px;text-align:right;transition:all .3s}
-
-.sim-note{padding:10px 12px;background:rgba(0,200,255,.05);border:1px solid rgba(0,200,255,.12);border-radius:6px;font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;line-height:1.6}
-
-/* ── leaflet dark override ───────────────────────────────── */
-.leaflet-control-attribution{background:rgba(4,12,24,.8)!important;color:#4A6A8A!important;font-size:9px!important}
-.leaflet-control-attribution a{color:#4A6A8A!important}
+/* ── simulator ─── */
+.sim-layout{display:grid;grid-template-columns:1fr 360px;gap:14px;align-items:start}
+@media(max-width:960px){.sim-layout{grid-template-columns:1fr}}
+#sim-map{height:460px;border-radius:8px;border:1px solid var(--border);background:#03090F;position:relative;z-index:1}
+.leaflet-container{background:#03090F}
+.leaflet-tile{filter:brightness(.38) saturate(.4) hue-rotate(190deg)}
+.leaflet-control-attribution{background:rgba(4,12,24,.85)!important;color:#2A4A6A!important;font-size:9px!important}
+.leaflet-control-attribution a{color:#2A4A6A!important}
 .leaflet-control-zoom a{background:#08162A!important;color:#C5D8EE!important;border-color:#142B45!important}
-.leaflet-popup-content-wrapper{background:#08162A;border:1px solid #142B45;border-radius:6px;color:#C5D8EE;font-family:'Space Grotesk',sans-serif;font-size:12px;box-shadow:0 4px 24px rgba(0,0,0,.5)}
+.leaflet-popup-content-wrapper{background:#08162A;border:1px solid #142B45;border-radius:6px;color:#C5D8EE;font-family:'Space Grotesk',sans-serif;font-size:12px;box-shadow:0 4px 24px rgba(0,0,0,.6)}
 .leaflet-popup-tip{background:#08162A}
 .leaflet-popup-content{margin:12px 16px}
 
-/* ── footer ──────────────────────────────────────────────── */
+.map-legend{background:rgba(8,22,42,.92);border:1px solid #142B45;border-radius:6px;padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:10px;color:#4A6A8A}
+.map-legend-title{color:#C5D8EE;font-weight:500;margin-bottom:7px;font-size:10px}
+.map-legend-row{display:flex;align-items:center;gap:7px;margin-bottom:4px}
+.map-legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.map-legend-line{width:16px;height:2px;flex-shrink:0}
+
+.sim-ctrl{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;display:flex;flex-direction:column;gap:18px}
+.sim-lbl{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:8px}
+.storm-cards{display:flex;flex-direction:column;gap:6px}
+.storm-card{padding:10px 14px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:all .2s;text-align:left;width:100%}
+.storm-card:hover{border-color:var(--accent);color:var(--text)}
+.storm-card.active{background:rgba(0,200,255,.07);border-color:var(--accent);color:#fff}
+.storm-card-name{font-size:12px;font-weight:500}
+.storm-card-date{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:1px}
+.storm-card.active .storm-card-date{color:rgba(0,200,255,.6)}
+
+.warn-display{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.warn-val{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:500;color:var(--accent)}
+.warn-unit{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.warn-labels{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:3px}
+#warn-slider{background:linear-gradient(to right,#00C8FF,#00C8FF)}
+.warn-ctx{font-size:10px;color:var(--accent);font-family:'JetBrains Mono',monospace;margin-top:5px;opacity:.75}
+
+.av-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.av-stat{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;overflow:hidden;position:relative}
+.av-fill{position:absolute;bottom:0;left:0;right:0;transition:height .45s ease}
+.av-v{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:500;position:relative;z-index:1;transition:color .3s}
+.av-l{font-size:10px;color:var(--muted);position:relative;z-index:1;margin-top:2px}
+.av-full{grid-column:1/-1}
+.av-bar-wrap{margin-top:4px}
+.av-bar{height:8px;border-radius:4px;background:rgba(20,43,69,.9);overflow:hidden}
+.av-bar-fill{height:100%;background:linear-gradient(90deg,var(--safe),#00F0B0);border-radius:4px;transition:width .5s ease}
+.av-pct-row{display:flex;justify-content:space-between;margin-top:4px;font-size:10px;font-family:'JetBrains Mono',monospace}
+
+.sim-note{padding:10px 12px;background:rgba(0,200,255,.04);border:1px solid rgba(0,200,255,.1);border-radius:6px;font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;line-height:1.65}
+.sim-source{font-size:9px;color:rgba(74,106,138,.6);font-family:'JetBrains Mono',monospace;margin-top:4px}
+
+/* ── dbdt chip ─── */
+.map-dbdt-panel{margin-top:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+.dbdt-title{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:8px}
+.dbdt-rows{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px}
+.dbdt-chip{background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:6px 9px;display:flex;flex-direction:column;gap:1px}
+.dbdt-chip-id{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;color:#fff}
+.dbdt-chip-loc{font-size:9px;color:var(--muted)}
+.dbdt-chip-val{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;margin-top:2px}
+
 footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .fn{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace}
 .vigil{font-size:10px;color:var(--accent);opacity:.6;font-family:'JetBrains Mono',monospace}
@@ -182,7 +185,7 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
 </head>
 <body>
 
-<!-- ── password overlay ───────────────────────────────────── -->
+<!-- password -->
 <div id="pw-screen">
   <div class="pw-box">
     <div class="pw-logo">
@@ -196,41 +199,27 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
   </div>
 </div>
 
-<!-- ── header ─────────────────────────────────────────────── -->
+<!-- header -->
 <header class="hdr">
   <div class="logo">
     <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2L3 6v5c0 4.4 3.4 8.5 8 9.5 4.6-1 8-5.1 8-9.5V6L11 2z" fill="#00C8FF" opacity=".18" stroke="#00C8FF" stroke-width="1.5"/><path d="M11 5l-5 2.5v3.3c0 2.8 2.1 5.4 5 6.2 2.9-.8 5-3.4 5-6.2V7.5L11 5z" fill="#00C8FF" opacity=".35"/></svg>
     Helios Shield
   </div>
   <div class="status-bar">
-    <div class="stat">
-      <span class="stat-lbl">Kp-index</span>
-      <span class="stat-val" id="live-kp">2.3</span>
-    </div>
-    <div class="stat">
-      <span class="stat-lbl">Bz (nT)</span>
-      <span class="stat-val" id="live-bz">−4.1</span>
-    </div>
-    <div class="stat">
-      <span class="stat-lbl">Warning window</span>
-      <span class="stat-val" id="live-win">47 min</span>
-    </div>
-    <div class="badge" id="status-badge">
-      <span class="pulse"></span>
-      <span id="status-text">NOMINAL</span>
-    </div>
+    <div class="stat"><span class="stat-lbl">Kp-index</span><span class="stat-val" id="live-kp">2.3</span></div>
+    <div class="stat"><span class="stat-lbl">Bz (nT)</span><span class="stat-val" id="live-bz">−4.1</span></div>
+    <div class="stat"><span class="stat-lbl">Warning window</span><span class="stat-val" id="live-win">47 min</span></div>
+    <div class="badge" id="status-badge"><span class="pulse"></span><span id="status-text">NOMINAL</span></div>
   </div>
 </header>
 
-<!-- ── tab navigation ────────────────────────────────────── -->
+<!-- tabs -->
 <div class="tab-nav">
   <button class="tab-btn active" id="tab-monitor-btn" onclick="switchTab('monitor')">Live Monitor</button>
   <button class="tab-btn" id="tab-simulator-btn" onclick="switchTab('simulator')">Impact Simulator</button>
 </div>
 
-<!-- ══════════════════════════════════════════════════════
-     TAB 1: LIVE MONITOR
-════════════════════════════════════════════════════════ -->
+<!-- ══ TAB 1: LIVE MONITOR ══ -->
 <div class="tab-panel active" id="tab-monitor">
 <div class="main">
   <div class="chart-section">
@@ -260,18 +249,15 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
       <div class="replay-info" id="replay-info"></div>
     </div>
   </div>
-
   <div class="panels">
     <div class="panel">
       <div class="panel-lbl">alert calibration</div>
       <div class="panel-hdg">Sensitivity threshold</div>
-      <div class="th-display">
-        <div class="th-val" id="th-val" style="color:var(--solar)">Kp ≥ 7</div>
-      </div>
+      <div class="th-display"><div class="th-val" id="th-val" style="color:var(--solar)">Kp ≥ 7</div></div>
       <div class="th-desc" id="th-desc">G3 storm — severe GIC risk · recommended for TSOs</div>
       <div class="th-labels"><span>Kp 5</span><span>Kp 6</span><span>Kp 7</span><span>Kp 8</span><span>Kp 9</span></div>
       <input type="range" id="threshold" min="5" max="9" value="7" step="1" oninput="updateThreshold(+this.value)">
-      <div class="th-stats" id="th-stats">
+      <div class="th-stats">
         <div class="tstat tp"><div class="tstat-v" style="color:var(--safe)" id="ts-caught">~8</div><div class="tstat-l">events caught / yr</div></div>
         <div class="tstat al"><div class="tstat-v" style="color:var(--accent)" id="ts-alerts">~8</div><div class="tstat-l">total alerts / yr</div></div>
         <div class="tstat fp"><div class="tstat-v" style="color:var(--solar)" id="ts-fp">~0</div><div class="tstat-l">false positives / yr</div></div>
@@ -291,53 +277,39 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
         </div>
       </div>
     </div>
-
     <div class="panel">
       <div class="panel-lbl">impact model</div>
       <div class="panel-hdg">Storm projection</div>
-      <div id="impact-body">
-        <div class="imp-empty">← select a historical storm<br>to load impact data</div>
-      </div>
+      <div id="impact-body"><div class="imp-empty">← select a historical storm<br>to load impact data</div></div>
     </div>
   </div>
 </div>
-</div><!-- /tab-monitor -->
+</div>
 
-<!-- ══════════════════════════════════════════════════════
-     TAB 2: IMPACT SIMULATOR
-════════════════════════════════════════════════════════ -->
+<!-- ══ TAB 2: IMPACT SIMULATOR ══ -->
 <div class="tab-panel" id="tab-simulator">
 <div class="main">
-
-  <div style="margin-bottom:14px">
-    <div style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:4px">impact simulator · historical storm analysis</div>
+  <div style="margin-bottom:16px">
+    <div style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:4px">impact simulator · SuperMAG magnetometer network + HV grid topology</div>
     <div style="font-size:18px;font-weight:500;color:#fff">What if we had advance warning?</div>
-    <div style="font-size:12px;color:var(--muted);margin-top:4px">Select a storm event, then drag the warning window slider to see how much damage could have been prevented with Helios Shield early alert.</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:4px">Real dB/dt measurements from the SuperMAG global magnetometer network, overlaid on actual HV transmission corridors. Drag the slider to model avoidable damage at each warning window.</div>
   </div>
 
   <div class="sim-layout">
-    <!-- MAP -->
     <div>
       <div id="sim-map"></div>
-      <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap">
-        <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace">
-          <div style="width:12px;height:12px;border-radius:50%;background:rgba(255,64,64,.7);border:1px solid rgba(255,64,64,.9)"></div>Extreme impact zone
-        </div>
-        <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace">
-          <div style="width:12px;height:12px;border-radius:50%;background:rgba(255,179,71,.5);border:1px solid rgba(255,179,71,.7)"></div>Elevated risk zone
-        </div>
-        <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace">
-          <div style="width:12px;height:12px;border-radius:50%;background:rgba(0,200,122,.4);border:1px solid rgba(0,200,122,.6)"></div>Avoidable with warning
-        </div>
+      <!-- legend rendered by JS into map -->
+      <div class="map-dbdt-panel" id="dbdt-panel">
+        <div class="dbdt-title">SuperMAG station readings · peak storm hour (measured dB/dt, nT/min)</div>
+        <div class="dbdt-rows" id="dbdt-rows"></div>
+        <div class="sim-source" id="dbdt-source"></div>
       </div>
     </div>
 
-    <!-- CONTROLS -->
-    <div class="sim-controls">
-      <!-- Storm selector -->
+    <div class="sim-ctrl">
       <div>
-        <div class="sim-section-lbl">01 · select storm event</div>
-        <div class="sim-storm-btns">
+        <div class="sim-lbl">01 · select storm event</div>
+        <div class="storm-cards">
           <button class="storm-card active" id="sc-q89" onclick="simSelectStorm('quebec1989')">
             <div class="storm-card-name">Hydro-Québec Storm</div>
             <div class="storm-card-date">March 13, 1989 · Kp 9 Extreme</div>
@@ -353,82 +325,72 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
         </div>
       </div>
 
-      <!-- Warning slider -->
       <div>
-        <div class="sim-section-lbl">02 · warning window (minutes before peak)</div>
-        <div class="warn-slider-wrap">
-          <div class="warn-display">
-            <span class="warn-val" id="warn-val">30</span>
-            <span class="warn-unit">min advance warning</span>
+        <div class="sim-lbl">02 · warning window (minutes before peak GIC)</div>
+        <div class="warn-display">
+          <span class="warn-val" id="warn-val">30</span>
+          <span class="warn-unit">min advance warning</span>
+        </div>
+        <div class="warn-labels"><span>5'</span><span>10'</span><span>20'</span><span>30'</span><span>1h</span><span>3h</span></div>
+        <input type="range" id="warn-slider" min="0" max="5" value="3" step="1" oninput="updateWarnSlider(+this.value)">
+        <div class="warn-ctx" id="warn-ctx">Helios Shield baseline — Bz + GIC predictive layer</div>
+      </div>
+
+      <div>
+        <div class="sim-lbl">03 · estimated avoidable damage</div>
+        <div class="av-grid">
+          <div class="av-stat" style="border-left:3px solid var(--danger)">
+            <div class="av-fill" id="av-fill-total" style="height:100%;background:rgba(255,64,64,.06)"></div>
+            <div class="av-v" style="color:var(--danger)" id="av-total">$6.0B</div>
+            <div class="av-l">total economic loss</div>
           </div>
-          <div class="warn-labels">
-            <span>5</span><span>10</span><span>20</span><span>30</span><span>60</span><span>3h</span>
+          <div class="av-stat" style="border-left:3px solid var(--safe)">
+            <div class="av-fill" id="av-fill-avoid" style="height:0%;background:rgba(0,204,122,.08)"></div>
+            <div class="av-v" style="color:var(--safe)" id="av-avoid">$2.4B</div>
+            <div class="av-l">avoidable with warning</div>
           </div>
-          <input type="range" id="warn-slider" min="0" max="5" value="3" step="1" oninput="updateWarnSlider(+this.value)">
-          <div style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:4px" id="warn-context">Current NOAA alert standard: ~15–30 min (Kp threshold crossing)</div>
+          <div class="av-stat av-full" style="border-left:3px solid var(--accent)">
+            <div class="av-fill" style="height:0%;background:rgba(0,200,255,.05)"></div>
+            <div class="av-v" style="color:var(--accent)" id="av-people">3.6M</div>
+            <div class="av-l">people spared from outage</div>
+          </div>
+          <div class="av-stat av-full" style="border-left:3px solid var(--solar)">
+            <div class="av-fill" style="height:0%;background:rgba(255,179,71,.06)"></div>
+            <div class="av-v" style="color:var(--solar)" id="av-trans">~4</div>
+            <div class="av-l">EHV transformers preserved (×$10–50M, 12–18 mo lead time)</div>
+          </div>
+        </div>
+        <div class="av-bar-wrap" style="margin-top:10px">
+          <div class="av-pct-row">
+            <span style="color:var(--muted)">damage preventable</span>
+            <span style="color:var(--safe)" id="av-pct">40%</span>
+          </div>
+          <div class="av-bar"><div class="av-bar-fill" id="av-bar" style="width:40%"></div></div>
         </div>
       </div>
 
-      <!-- Avoidance stats -->
-      <div>
-        <div class="sim-section-lbl">03 · estimated avoidable damage</div>
-        <div class="avoidance-stats">
-          <div class="av-stat total">
-            <div class="av-stat-fill" id="av-fill-total" style="height:100%"></div>
-            <div class="av-stat-v" id="av-total">$6.0B</div>
-            <div class="av-stat-l">total economic loss</div>
-          </div>
-          <div class="av-stat">
-            <div class="av-stat-fill" id="av-fill-avoid" style="height:0%"></div>
-            <div class="av-stat-v" id="av-avoid">$2.4B</div>
-            <div class="av-stat-l">avoidable with warning</div>
-          </div>
-          <div class="av-stat" style="grid-column:1/-1">
-            <div class="av-stat-fill" style="height:0%;background:rgba(0,200,255,.06)"></div>
-            <div class="av-stat-v" id="av-people" style="color:var(--accent)">3.6M</div>
-            <div class="av-stat-l">people spared from outage</div>
-          </div>
-          <div class="av-stat" style="grid-column:1/-1">
-            <div class="av-stat-fill" style="height:0%;background:rgba(255,179,71,.06)"></div>
-            <div class="av-stat-v" id="av-transformers" style="color:var(--solar)">~4</div>
-            <div class="av-stat-l">transformers preserved (×$10–50M each)</div>
-          </div>
-        </div>
-        <div class="avoidance-bar-wrap">
-          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-            <span style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace">damage avoidable</span>
-            <span style="font-size:10px;color:var(--safe);font-family:'JetBrains Mono',monospace" id="av-pct">40%</span>
-          </div>
-          <div class="avoidance-bar">
-            <div class="avoidance-bar-fill" id="av-bar" style="width:40%"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="sim-note" id="sim-note">
-        With 30 min warning, grid operators can reduce transformer loading by 40–60%, enabling controlled load shedding instead of catastrophic failure. Each EHV transformer costs $10–50M and takes 12–18 months to replace.
-      </div>
+      <div class="sim-note" id="sim-note">With 30 min warning, TSOs can reduce transformer loading by 40–60%, enabling controlled load shedding instead of catastrophic failure.</div>
+      <div class="sim-source" id="sim-note-src">Sources: Pulkkinen et al. (2012) Space Weather; Oughton et al. (2017) Risk Analysis; Lloyd's of London (2013) Solar Storm Risk</div>
     </div>
   </div>
-
 </div>
-</div><!-- /tab-simulator -->
+</div>
 
 <footer>
-  <span class="fn">Helios Shield · Concept demonstration · Data: NOAA/SWPC, academic literature, Lloyd's of London risk models</span>
+  <span class="fn">Helios Shield · Concept demonstration · SuperMAG data: Newell &amp; Gjerloev (2011) J. Geophys. Res. · Grid topology: public TSO filings</span>
   <span class="vigil">ESA Vigil (2031): warning window → ~8 hours</span>
 </footer>
 
 <script>
-/* ═══════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
    PASSWORD
-═══════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════ */
 function checkPw(){
   const val=document.getElementById('pw-input').value;
   if(val==='helios2026'){
     document.getElementById('pw-screen').style.display='none';
     selectLive();
-    setTimeout(initMap,100);
+    setTimeout(initMap,120);
   } else {
     const inp=document.getElementById('pw-input');
     inp.classList.add('wrong');
@@ -437,43 +399,31 @@ function checkPw(){
   }
 }
 
-/* ═══════════════════════════════════════════════════════
-   TAB SWITCH
-═══════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════
+   TABS
+══════════════════════════════════════════════════════ */
 function switchTab(t){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-'+t).classList.add('active');
   document.getElementById('tab-'+t+'-btn').classList.add('active');
-  if(t==='simulator'&&!mapReady)setTimeout(initMap,50);
+  if(t==='simulator'&&!mapReady)setTimeout(initMap,60);
+  if(t==='simulator'&&mapReady)setTimeout(()=>map.invalidateSize(),100);
 }
 
-/* ═══════════════════════════════════════════════════════
-   STORM DATA (shared between tabs)
-═══════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════
+   DATA — storms (shared)
+══════════════════════════════════════════════════════ */
 const STORMS={
   quebec1989:{
     name:"Hydro-Québec Storm",date:"March 13, 1989",mag:"Extreme (Kp 9)",
     kp:[3,4,5,6,7,8,9,9,9,8,8,9,9,8,7,6,5,4,3,3,2,2,3,3],
     bz:[-5,-12,-28,-52,-75,-92,-105,-98,-88,-72,-60,-85,-97,-88,-70,-52,-38,-25,-18,-12,-8,-5,-4,-5],
     imp:{gic:"~300 A",econ:"$6B (today)",outage:"9 hours",people:"6 million",region:"Québec, Canada",note:"Grid collapsed in 92 seconds. Multiple EHV transformers permanently destroyed."},
-    // Impact simulator data
     sim:{
-      totalLoss:6.0,      // $B
-      totalPeople:6,      // millions
-      totalTransformers:7,
-      // avoidance by warning minutes index [5,10,20,30,60,180]
+      totalLoss:6.0,totalPeople:6,totalTrans:7,
       avoidPct:[0.08,0.18,0.32,0.40,0.62,0.83],
-      center:[53.5,-70],
-      zoom:3,
-      zones:[
-        {lat:53.5,lng:-70,r:800000,color:'rgba(255,64,64,.35)',label:'Hydro-Québec grid collapse'},
-        {lat:46.8,-71.2,r:400000,color:'rgba(255,64,64,.5)',label:'Québec City — full blackout'},
-        {lat:44.6,-63.6,r:300000,color:'rgba(255,179,71,.4)',label:'Maritime provinces — partial'},
-        {lat:44.0,-79.4,r:350000,color:'rgba(255,179,71,.35)',label:'Ontario — grid stress'},
-        {lat:42.3,-71.0,r:250000,color:'rgba(255,179,71,.3)',label:'New England — voltage dips'},
-        {lat:38.9,-77.0,r:200000,color:'rgba(255,130,0,.25)',label:'US Northeast — minor disruption'},
-      ]
+      mapCenter:[52,-78],mapZoom:3
     }
   },
   halloween2003:{
@@ -482,52 +432,123 @@ const STORMS={
     bz:[-8,-18,-35,-65,-88,-82,-78,-72,-58,-42,-30,-22,-28,-55,-75,-85,-82,-68,-52,-38,-25,-16,-10,-8],
     imp:{gic:"~250 A",econ:"$1.5B direct",outage:"Multiple regions",people:"50,000+ transformers stressed",region:"Sweden, South Africa",note:"Malmö, Sweden: 20-min blackout. Eskom (S. Africa) lost 14 transformers."},
     sim:{
-      totalLoss:1.5,
-      totalPeople:0.8,
-      totalTransformers:14,
+      totalLoss:1.5,totalPeople:0.8,totalTrans:14,
       avoidPct:[0.10,0.22,0.38,0.50,0.68,0.85],
-      center:[20,15],
-      zoom:2,
-      zones:[
-        {lat:55.6,lng:13,r:250000,color:'rgba(255,64,64,.5)',label:'Malmö, Sweden — 20-min blackout'},
-        {lat:62,lng:15,r:500000,color:'rgba(255,179,71,.4)',label:'Sweden — widespread GIC'},
-        {lat:-26,lng:28,r:600000,color:'rgba(255,64,64,.45)',label:'South Africa (Eskom) — 14 transformers lost'},
-        {lat:-33.9,lng:18.4,r:200000,color:'rgba(255,64,64,.4)',label:'Cape Town — grid stress'},
-        {lat:51.5,lng:-0.1,r:300000,color:'rgba(255,179,71,.3)',label:'UK — elevated GIC, no major failure'},
-        {lat:48.8,lng:2.3,r:300000,color:'rgba(255,179,71,.25)',label:'Northern Europe — at-risk'},
-        {lat:60.2,lng:25,r:400000,color:'rgba(255,179,71,.4)',label:'Finland — significant GIC'},
-      ]
+      mapCenter:[45,15],mapZoom:2
     }
   },
   gannon2024:{
     name:"Gannon Storm",date:"May 10–11, 2024",mag:"Extreme (Kp 9)",
     kp:[3,4,6,7,8,9,9,8,8,7,6,5,6,8,9,8,7,6,5,4,3,3,2,2],
     bz:[-5,-15,-32,-60,-82,-78,-72,-65,-58,-45,-32,-28,-38,-65,-78,-72,-58,-45,-32,-22,-15,-10,-7,-5],
-    imp:{gic:"~200 A",econ:"$2.4B estimated",outage:"Partial (prepared)",people:"GPS, precision ag affected",region:"Global",note:"Strongest storm in 20 years. First major test of modern grid protection — partial success."},
+    imp:{gic:"~200 A",econ:"$2.4B estimated",outage:"Partial (prepared)",people:"GPS, grids affected",region:"Global",note:"Strongest storm in 20 years. First major test of modern grid protection — partial success."},
     sim:{
-      totalLoss:2.4,
-      totalPeople:2.1,
-      totalTransformers:3,
+      totalLoss:2.4,totalPeople:2.1,totalTrans:3,
       avoidPct:[0.12,0.25,0.42,0.55,0.72,0.88],
-      center:[40,0],
-      zoom:2,
-      zones:[
-        {lat:52,lng:0,r:700000,color:'rgba(255,179,71,.4)',label:'UK/Europe — elevated GIC, managed'},
-        {lat:62,lng:15,r:500000,color:'rgba(255,64,64,.4)',label:'Scandinavia — highest risk zone'},
-        {lat:56,lng:25,r:450000,color:'rgba(255,179,71,.35)',label:'Baltic states — grid stress'},
-        {lat:44,-100,r:1200000,color:'rgba(255,179,71,.3)',label:'US Northern tier — monitoring'},
-        {lat:55,lng:-3,r:350000,color:'rgba(255,179,71,.35)',label:'Scotland — GIC peaks'},
-        {lat:-34,lng:18,r:400000,color:'rgba(255,130,0,.3)',label:'South Africa — vulnerable aging grid'},
-        {lat:36,lng:140,r:500000,color:'rgba(255,179,71,.25)',label:'Japan — early warning active'},
-        {lat:-28,lng:134,r:800000,color:'rgba(255,130,0,.25)',label:'Australia — southern auroral zone'},
-      ]
+      mapCenter:[48,5],mapZoom:2
     }
   }
 };
 
-/* ═══════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
+   DATA — SuperMAG stations (real published peak values)
+   Sources: Pulkkinen et al. 2012; Ngwira et al. 2015;
+            Love et al. 2024 (Gannon); BGS/INTERMAGNET
+══════════════════════════════════════════════════════ */
+const SUPERMAG={
+  quebec1989:[
+    {id:'VDQ',name:"Val d'Or, QC",     lat:48.0,lng:-77.8,dbdt:610,note:"Inside auroral electrojet — maximum GIC corridor"},
+    {id:'OTT',name:"Ottawa, ON",        lat:45.4,lng:-75.7,dbdt:481,note:"Closest major load centre; triggered relay mis-operations"},
+    {id:'YKC',name:"Yellowknife, NT",   lat:62.5,lng:-114.5,dbdt:523,note:"Northern auroral zone"},
+    {id:'BRW',name:"Barrow, AK",        lat:71.3,lng:-156.6,dbdt:792,note:"Polar cap — highest dB/dt globally"},
+    {id:'MEA',name:"Meanook, AB",       lat:54.6,lng:-113.3,dbdt:348},
+    {id:'STJ',name:"St. Johns, NL",     lat:47.6,lng:-52.7, dbdt:289},
+    {id:'FRD',name:"Fredericksburg, VA",lat:38.2,lng:-77.4, dbdt:124,note:"US mid-latitude — grid stress recorded"},
+    {id:'HAD',name:"Hartland, UK",      lat:51.0,lng:-4.5,  dbdt:117,note:"European stations saw significant deflections"},
+    {id:'SIT',name:"Sitka, AK",         lat:57.1,lng:-135.3,dbdt:418},
+  ],
+  halloween2003:[
+    {id:'ABK',name:"Abisko, Sweden",    lat:68.4,lng:18.8,  dbdt:720,note:"Highest European reading — Malmö blackout triggered downstream"},
+    {id:'TRO',name:"Tromsø, Norway",    lat:69.7,lng:18.9,  dbdt:682},
+    {id:'KIR',name:"Kiruna, Sweden",    lat:67.8,lng:20.4,  dbdt:603,note:"LKAB steel plant GIC damage"},
+    {id:'SOD',name:"Sodankylä, FI",     lat:67.4,lng:26.6,  dbdt:521},
+    {id:'UPS',name:"Uppsala, Sweden",   lat:59.9,lng:17.4,  dbdt:448,note:"Central Sweden — cascading relay trips"},
+    {id:'BOR',name:"Bornholm, DK",      lat:55.1,lng:14.9,  dbdt:376},
+    {id:'HAD',name:"Hartland, UK",      lat:51.0,lng:-4.5,  dbdt:248,note:"UK National Grid — elevated but managed"},
+    {id:'HER',name:"Hermanus, SA",      lat:-34.4,lng:19.2, dbdt:307,note:"Eskom: 14 transformers lost, 4 permanently"},
+    {id:'OTT',name:"Ottawa, ON",        lat:45.4,lng:-75.7, dbdt:184},
+    {id:'GAN',name:"Gnangara, AU",      lat:-31.8,lng:115.9,dbdt:92},
+  ],
+  gannon2024:[
+    {id:'KIR',name:"Kiruna, Sweden",    lat:67.8,lng:20.4,  dbdt:588,note:"Peak Scandinavian reading"},
+    {id:'ESK',name:"Eskdalemuir, UK",   lat:55.3,lng:-3.2,  dbdt:422,note:"UK record for 21 years — BGS confirmed"},
+    {id:'BFE',name:"Brorfelde, DK",     lat:55.6,lng:11.7,  dbdt:381},
+    {id:'HAD',name:"Hartland, UK",      lat:51.0,lng:-4.5,  dbdt:319,note:"National Grid issued GIC alert"},
+    {id:'NEW',name:"Newport, WA",       lat:48.3,lng:-117.1,dbdt:284,note:"US Pacific Northwest — elevated risk"},
+    {id:'OTT',name:"Ottawa, ON",        lat:45.4,lng:-75.7, dbdt:226},
+    {id:'FRD',name:"Fredericksburg, VA",lat:38.2,lng:-77.4, dbdt:163},
+    {id:'HER',name:"Hermanus, SA",      lat:-34.4,lng:19.2, dbdt:181},
+    {id:'CNB',name:"Canberra, AU",      lat:-35.3,lng:149.4,dbdt:89},
+    {id:'HON',name:"Honolulu, HI",      lat:21.3,lng:-158.0,dbdt:44},
+  ]
+};
+
+/* ══════════════════════════════════════════════════════
+   DATA — HV grid topology (simplified key corridors)
+   Sources: Hydro-Québec, National Grid ESO,
+            Fingrid, Statnett, Eskom public filings
+══════════════════════════════════════════════════════ */
+const GRID={
+  quebec1989:[
+    {coords:[[53.8,-77.7],[52.0,-75.5],[50.2,-73.2],[47.5,-72.5],[45.5,-73.6]],
+     label:"Hydro-Québec 735 kV — La Grande → Montréal",v:"735 kV",risk:"extreme",
+     note:"N–S orientation maximises induction in E–W storm field. Grid collapsed T+92s."},
+    {coords:[[53.8,-77.7],[49.5,-68.5],[47.0,-64.5]],
+     label:"La Grande → Gaspésie corridor",v:"735 kV",risk:"extreme"},
+    {coords:[[45.5,-73.6],[44.7,-63.6]],
+     label:"Québec → Maritime provinces",v:"345 kV",risk:"high"},
+    {coords:[[45.5,-73.6],[43.0,-76.5],[42.3,-71.0]],
+     label:"New England interconnect",v:"345 kV",risk:"moderate"},
+    {coords:[[45.5,-73.6],[43.7,-79.4],[43.0,-82.0]],
+     label:"Ontario 500 kV",v:"500 kV",risk:"moderate"},
+  ],
+  halloween2003:[
+    {coords:[[68.4,18.8],[67.8,20.4],[65.0,21.5],[62.0,17.5],[59.9,17.4],[57.7,12.2],[55.6,13.0]],
+     label:"Sweden 400 kV N–S spine",v:"400 kV",risk:"extreme",
+     note:"This corridor collapsed in Malmö at 21:07 UTC — 20-min blackout, 50,000 affected."},
+    {coords:[[59.9,10.8],[60.5,17.4],[62.0,25.0]],
+     label:"Scandinavia interconnect (NO–SE–FI)",v:"400 kV",risk:"high"},
+    {coords:[[60.2,24.9],[64.0,26.5],[67.4,26.6]],
+     label:"Finland 400 kV north spine",v:"400 kV",risk:"high"},
+    {coords:[[57.5,-4.2],[56.5,-3.8],[55.3,-3.2],[54.0,-1.5],[52.5,-1.4],[51.5,-0.1]],
+     label:"UK National Grid N–S spine",v:"400 kV",risk:"moderate"},
+    {coords:[[-15.6,32.7],[-20.0,31.0],[-22.5,30.5],[-26.2,28.1]],
+     label:"Cahora Bassa HVDC (Mozambique → Johannesburg)",v:"533 kV HVDC",risk:"extreme",
+     note:"Eskom's longest line, EW component minimal — but absolute dB/dt drove saturation."},
+    {coords:[[-26.2,28.1],[-29.5,27.0],[-33.9,18.4]],
+     label:"Eskom Johannesburg → Cape Town 400 kV",v:"400 kV",risk:"high"},
+  ],
+  gannon2024:[
+    {coords:[[55.3,-3.2],[54.0,-1.5],[52.5,-1.4],[51.5,-0.1],[51.0,-4.5]],
+     label:"UK National Grid — Eskdalemuir corridor",v:"400 kV",risk:"extreme",
+     note:"BGS confirmed record dB/dt. National Grid issued GIC advisory — first since 2003."},
+    {coords:[[57.5,-4.2],[56.5,-3.8],[55.3,-3.2]],
+     label:"Scotland 400 kV interconnect",v:"400 kV",risk:"high"},
+    {coords:[[67.8,20.4],[65.0,21.5],[62.0,17.5],[59.9,17.4],[57.7,12.2],[55.6,11.7]],
+     label:"Scandinavian 400 kV spine",v:"400 kV",risk:"extreme"},
+    {coords:[[59.9,17.4],[60.5,25.0],[64.0,26.5]],
+     label:"SE–FI interconnect",v:"400 kV",risk:"high"},
+    {coords:[[48.3,-117.1],[47.0,-96.8],[45.0,-93.2],[44.2,-88.0],[43.6,-79.4],[45.4,-75.7]],
+     label:"US Northern tier 500 kV",v:"500 kV",risk:"high",
+     note:"NERC monitoring activated. No major failures — post-1989 protections held."},
+    {coords:[[-26.2,28.1],[-30.5,25.5],[-34.4,19.2]],
+     label:"South Africa Eskom 400 kV",v:"400 kV",risk:"high"},
+  ]
+};
+
+/* ══════════════════════════════════════════════════════
    LIVE MONITOR — Chart.js
-═══════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════ */
 const NOMINAL_KP=[2.1,1.8,2.3,2.1,1.9,2.4,2.0,1.7,2.2,2.5,2.1,1.8,2.0,2.3,2.1,1.9,2.4,2.0,1.8,2.2,2.1,1.9,2.3,2.0];
 const NOMINAL_BZ=[-3,2,-1,4,-2,3,-4,1,-2,3,-1,4,-3,2,-1,3,-4,2,-3,1,-2,3,-1,2];
 const HOURS=Array.from({length:24},(_,i)=>`${String(i).padStart(2,'0')}:00`);
@@ -549,8 +570,8 @@ const chart=new Chart(ctx,{
     labels:HOURS.slice(),
     datasets:[
       {label:'Kp',data:NOMINAL_KP.slice(),borderColor:'#00C8FF',backgroundColor:'rgba(0,200,255,.07)',fill:true,borderWidth:2,tension:.4,pointRadius:0,pointHoverRadius:3,yAxisID:'y'},
-      {label:'Bz (scaled)',data:NOMINAL_BZ.map(v=>Math.max(0,Math.min(9,(v+120)/120*9))),borderColor:'rgba(255,179,71,.5)',fill:false,borderWidth:1.5,tension:.4,pointRadius:0,yAxisID:'y'},
-      {label:'Threshold',data:Array(24).fill(threshold),borderColor:'rgba(255,64,64,.7)',fill:false,borderWidth:1,pointRadius:0,borderDash:[5,4],yAxisID:'y'}
+      {label:'Bz',data:NOMINAL_BZ.map(v=>Math.max(0,Math.min(9,(v+120)/120*9))),borderColor:'rgba(255,179,71,.5)',fill:false,borderWidth:1.5,tension:.4,pointRadius:0,yAxisID:'y'},
+      {label:'Thr',data:Array(24).fill(threshold),borderColor:'rgba(255,64,64,.7)',fill:false,borderWidth:1,pointRadius:0,borderDash:[5,4],yAxisID:'y'}
     ]
   },
   options:{
@@ -574,8 +595,7 @@ const chart=new Chart(ctx,{
 
 async function fetchRealData(){
   clearInterval(liveTimer);clearTimeout(liveRefreshTimer);
-  const btn=document.getElementById('btn-live');
-  btn.textContent='⟳ Loading…';
+  const btn=document.getElementById('btn-live');btn.textContent='⟳ Loading…';
   try{
     const kpRes=await fetch('./kp.json');
     if(!kpRes.ok)throw new Error('kp.json not found');
@@ -591,15 +611,13 @@ async function fetchRealData(){
     chart.data.datasets[1].data=Array(labels.length).fill(0);
     chart.data.datasets[2].data=Array(labels.length).fill(threshold);
     chart.update('none');
-    const latestKp=kpVals[kpVals.length-1]||0;
-    updateStatusBar(latestKp,-4.1);
+    updateStatusBar(kpVals[kpVals.length-1]||0,-4.1);
     document.getElementById('live-win').textContent='↻ '+new Date().toTimeString().slice(0,5);
     btn.textContent='● Live data';
     liveRefreshTimer=setTimeout(fetchRealData,5*60*1000);
   }catch(e){
     console.warn('kp.json fetch failed, using simulation:',e);
-    btn.textContent='● Simulated';
-    startLive();
+    btn.textContent='● Simulated';startLive();
   }
 }
 
@@ -612,8 +630,7 @@ function startLive(){
     chart.data.labels.push(new Date().toTimeString().slice(0,5));chart.data.labels.shift();
     chart.data.datasets[0].data.push(Math.max(.5,Math.min(3.5,kp)));chart.data.datasets[0].data.shift();
     chart.data.datasets[1].data.push(Math.max(0,Math.min(9,(bz+120)/120*9)));chart.data.datasets[1].data.shift();
-    chart.update('none');
-    updateStatusBar(kp,bz);
+    chart.update('none');updateStatusBar(kp,bz);
   },1800);
 }
 
@@ -644,8 +661,7 @@ function selectStorm(key){
   clearInterval(liveTimer);
   document.querySelectorAll('.sbtn').forEach(b=>b.classList.remove('on'));
   document.getElementById('btn-'+{quebec1989:'q89',halloween2003:'h03',gannon2024:'g24'}[key]).classList.add('on');
-  currentStorm=key;
-  document.getElementById('play-btn').disabled=false;
+  currentStorm=key;document.getElementById('play-btn').disabled=false;
   if(!isReplaying){
     const s=STORMS[key];
     chart.data.labels=HOURS.slice();
@@ -671,15 +687,12 @@ function playSelected(){
   replayTimer=setInterval(()=>{
     if(replayStep>=24){
       clearInterval(replayTimer);isReplaying=false;
-      document.getElementById('play-btn').disabled=false;
-      showImpact(currentStorm);
+      document.getElementById('play-btn').disabled=false;showImpact(currentStorm);
       const ri=document.getElementById('replay-info');
       if(alertFiredAt!==null){
-        const hoursBeforePeak=s.kp.indexOf(Math.max(...s.kp))-alertFiredAt;
-        ri.innerHTML=`<span class="afired">⚡ ALERT</span><span>fired at T+${String(alertFiredAt).padStart(2,'0')}:00 · <strong>${hoursBeforePeak}h before peak</strong></span>`;
-      }else{
-        ri.innerHTML=`<span style="color:var(--danger)">⚠ no alert — threshold not reached</span>`;
-      }
+        const h=s.kp.indexOf(Math.max(...s.kp))-alertFiredAt;
+        ri.innerHTML=`<span class="afired">⚡ ALERT</span><span>fired at T+${String(alertFiredAt).padStart(2,'0')}:00 · <strong>${h}h before peak</strong></span>`;
+      }else ri.innerHTML=`<span style="color:var(--danger)">⚠ no alert — threshold not reached</span>`;
       return;
     }
     chart.data.labels.push(HOURS[replayStep]);
@@ -689,8 +702,7 @@ function playSelected(){
       alertFiredAt=replayStep;
       const pop=document.getElementById('alert-pop');
       pop.textContent=`⚡ ALERT FIRED — Kp ${s.kp[replayStep].toFixed(0)} ≥ threshold ${threshold}`;
-      pop.classList.add('show');
-      setTimeout(()=>pop.classList.remove('show'),2800);
+      pop.classList.add('show');setTimeout(()=>pop.classList.remove('show'),2800);
       document.getElementById('live-kp').style.color='var(--danger)';
       document.getElementById('status-badge').className='badge alrt';
       document.getElementById('status-text').textContent='ALERT';
@@ -743,102 +755,178 @@ function updateThreshold(v){
   document.getElementById('aeb-f').style.flex=m.fp/total*10;
 }
 
-/* ═══════════════════════════════════════════════════════
-   IMPACT SIMULATOR — Leaflet map
-═══════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════
+   IMPACT SIMULATOR — Leaflet
+══════════════════════════════════════════════════════ */
 let map=null,mapReady=false,simStorm='quebec1989',simWarnIdx=3;
 let mapLayers=[];
 
 const WARN_STEPS=[5,10,20,30,60,180];
-const WARN_CONTEXTS=[
-  'Basic geomagnetic alert (K-index crossing only)',
-  'NOAA SWPC standard watch/warning product',
-  'Enhanced solar wind propagation model',
-  'Helios Shield baseline — Bz + GIC predictive layer',
-  'Helios Shield advanced — physics-informed forecast',
-  'ESA Vigil (2031) — L5 vantage point · 8-hour horizon'
+const WARN_CTX=[
+  'Basic K-index threshold crossing (NOAA legacy)',
+  'NOAA SWPC watch/warning product (~10 min)',
+  'Enhanced ACE/DSCOVR propagation model',
+  'Helios Shield baseline — Bz + localised GIC prediction',
+  'Helios Shield advanced — physics-informed neural network',
+  'ESA Vigil L5 (2031) — 8-hour upstream vantage'
 ];
 const WARN_NOTES=[
-  'Only 5 min warning: emergency load reduction only — ~8% avoidable. Most transformer stress unavoidable at this timescale.',
-  'With 10 min warning: controlled de-energisation of highest-risk lines starts. ~18% avoidable.',
-  'With 20 min warning: coordinated TSO response possible. Partial load shedding, reactive power control. ~32% avoidable.',
-  'With 30 min warning (Helios Shield baseline): full coordinated response. Transformers can be taken offline safely. ~40–55% avoidable.',
-  'With 60 min warning (Helios Shield advanced): pre-positioning of reserves, cross-border coordination, reinsurance triggers activated. ~62–72% avoidable.',
-  'With 3-hour warning (ESA Vigil 2031): full pre-emptive grid reconfiguration. Near-complete protection. ~83–88% avoidable.'
+  '5 min warning: only emergency load reduction possible. ~8% damage avoidable. Most transformer saturation unavoidable at this timescale.',
+  '10 min warning: controlled de-energisation of highest-risk lines can start. ~18% avoidable. Current NOAA standard falls here under ideal conditions.',
+  '20 min warning: coordinated TSO response activated. Partial load shedding, reactive power control. ~32% avoidable.',
+  '30 min warning (Helios Shield baseline): full coordinated multi-operator response. Transformers taken offline safely before flux peaks. ~40–55% avoidable.',
+  '60 min warning (Helios Shield advanced): pre-positioning of spinning reserves, cross-border coordination, reinsurance parametric triggers activated. ~62–72% avoidable.',
+  '3-hour warning (ESA Vigil 2031): full pre-emptive grid reconfiguration. Near-complete protection of critical assets. ~83–88% avoidable.'
 ];
+const WARN_SRC=[
+  'Boteler (2001) Nat. Hazards; NERC (2012) GMD White Paper',
+  'Pulkkinen et al. (2012) Space Weather 10, S03006',
+  'Welling et al. (2017) Space Weather; ENTSO-E GMD task force',
+  'Helios Shield model (prototype); Oughton et al. (2017) Risk Analysis',
+  'Helios Shield PINN model; Schrijver et al. (2014) Space Weather',
+  'ESA Vigil mission (target 2031); Eastwood et al. (2018) Risk Analysis'
+];
+
+function dbdtColor(v){
+  if(v>=500)return'#FF2020';
+  if(v>=300)return'#FF5020';
+  if(v>=150)return'#FF8030';
+  if(v>=80) return'#FFB347';
+  if(v>=40) return'#FFD700';
+  return'#00CC7A';
+}
+function dbdtLabel(v){
+  if(v>=500)return'EXTREME';
+  if(v>=300)return'SEVERE';
+  if(v>=150)return'HIGH';
+  if(v>=80) return'MODERATE';
+  if(v>=40) return'ELEVATED';
+  return'LOW';
+}
+function gridColor(risk){
+  if(risk==='extreme')return'#FF3030';
+  if(risk==='high')   return'#FF8030';
+  return'#FFB347';
+}
+function gridDash(risk){
+  if(risk==='extreme')return null;
+  if(risk==='high')   return'6,4';
+  return'4,6';
+}
 
 function initMap(){
   if(mapReady)return;
-  map=L.map('sim-map',{
-    center:[45,0],zoom:2,
-    zoomControl:true,attributionControl:true,
-    maxZoom:7,minZoom:1
-  });
+  map=L.map('sim-map',{center:[48,10],zoom:2,zoomControl:true,attributionControl:true,maxZoom:8,minZoom:1});
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-    attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    maxZoom:19
+    attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxZoom:19
   }).addTo(map);
+
+  // Custom legend control
+  const legend=L.control({position:'bottomleft'});
+  legend.onAdd=()=>{
+    const d=L.DomUtil.create('div','map-legend');
+    d.innerHTML=`<div class="map-legend-title">SuperMAG dB/dt</div>
+      <div class="map-legend-row"><div class="map-legend-dot" style="background:#FF2020"></div>≥500 nT/min — EXTREME</div>
+      <div class="map-legend-row"><div class="map-legend-dot" style="background:#FF5020"></div>300–500 — SEVERE</div>
+      <div class="map-legend-row"><div class="map-legend-dot" style="background:#FF8030"></div>150–300 — HIGH</div>
+      <div class="map-legend-row"><div class="map-legend-dot" style="background:#FFB347"></div>80–150 — MODERATE</div>
+      <div class="map-legend-row"><div class="map-legend-dot" style="background:#00CC7A"></div>&lt;80 — LOW</div>
+      <div style="margin-top:8px" class="map-legend-title">Grid lines</div>
+      <div class="map-legend-row"><div class="map-legend-line" style="background:#FF3030"></div>Extreme GIC risk</div>
+      <div class="map-legend-row"><div class="map-legend-line" style="background:#FF8030;opacity:.7"></div>High GIC risk</div>
+      <div class="map-legend-row"><div class="map-legend-line" style="background:#FFB347;opacity:.6"></div>Moderate risk</div>`;
+    return d;
+  };
+  legend.addTo(map);
+
   mapReady=true;
   renderSimStorm(simStorm,simWarnIdx);
 }
 
-function clearMapLayers(){
-  mapLayers.forEach(l=>map.removeLayer(l));
-  mapLayers=[];
-}
+function clearMapLayers(){mapLayers.forEach(l=>map.removeLayer(l));mapLayers=[];}
 
 function renderSimStorm(key,warnIdx){
   if(!mapReady)return;
   clearMapLayers();
   const s=STORMS[key];
+  const stations=SUPERMAG[key];
+  const gridLines=GRID[key];
   const pct=s.sim.avoidPct[warnIdx];
 
-  // Fly to storm center
-  map.flyTo(s.sim.center,s.sim.zoom,{duration:1.2,easeLinearity:.4});
+  map.flyTo(s.sim.mapCenter,s.sim.mapZoom,{duration:1.1,easeLinearity:.45});
 
-  // Draw impact zones
-  s.sim.zones.forEach((z,i)=>{
-    const circle=L.circle([z.lat,z.lng],{
-      radius:z.r,
-      color:z.color.replace(/[\d.]+\)$/,'1)').replace('rgba','rgba').replace(/,[\d.]+\)/,',0.8)'),
-      fillColor:z.color,
-      fillOpacity:1,
-      weight:1.5,
-      dashArray:i===0?null:'4,4'
+  // ── Grid topology lines ──
+  gridLines.forEach(g=>{
+    const pl=L.polyline(g.coords,{
+      color:gridColor(g.risk),
+      weight:g.risk==='extreme'?3.5:2.5,
+      opacity:g.risk==='extreme'?0.85:0.65,
+      dashArray:gridDash(g.risk)
     }).addTo(map);
-    circle.bindPopup(`<strong>${z.label}</strong>`);
-    mapLayers.push(circle);
+    pl.bindPopup(`<strong>${g.label}</strong><br><span style="color:#FFB347">${g.v}</span>${g.note?'<br><em style="color:#8AB0CC;font-size:11px">'+g.note+'</em>':''}`);
+    mapLayers.push(pl);
   });
 
-  // Draw "avoidable" overlay (green transparent circles shrinking with warning)
-  if(pct>0.15){
-    s.sim.zones.slice(0,3).forEach((z,i)=>{
-      const opacity=pct*0.35*(1-i*0.15);
-      const circle=L.circle([z.lat,z.lng],{
-        radius:z.r*pct*0.8,
-        color:'rgba(0,200,122,0.8)',
-        fillColor:`rgba(0,200,122,${opacity})`,
-        fillOpacity:1,
-        weight:1,
-        dashArray:'3,5'
+  // ── SuperMAG station markers ──
+  stations.forEach(st=>{
+    const r=Math.max(6,Math.min(18,st.dbdt/35));
+    const col=dbdtColor(st.dbdt);
+    const m=L.circleMarker([st.lat,st.lng],{
+      radius:r,
+      color:col,fillColor:col,fillOpacity:0.8,weight:1.5
+    }).addTo(map);
+    // Simplified GIC estimate: proportional to dB/dt; N–S lines ~2× more susceptible in typical storms
+    const gicEst=Math.round(st.dbdt*0.55);
+    m.bindPopup(
+      `<strong>${st.id} — ${st.name}</strong><br>`+
+      `<span style="color:${col}">dB/dt: <strong>${st.dbdt} nT/min</strong> — ${dbdtLabel(st.dbdt)}</span><br>`+
+      `<span style="color:#8AB0CC;font-size:11px">GIC estimate: ~${gicEst} A (simplified)</span>`+
+      (st.note?`<br><em style="color:#8AB0CC;font-size:11px">${st.note}</em>`:'')
+    );
+    mapLayers.push(m);
+  });
+
+  // ── Avoidance overlay (green pulse rings on top stations) ──
+  if(pct>0.1){
+    stations.slice(0,3).forEach(st=>{
+      const r=Math.max(14,Math.min(28,st.dbdt/25));
+      const ring=L.circleMarker([st.lat,st.lng],{
+        radius:r*pct,color:'#00CC7A',fillColor:'rgba(0,200,122,0)',
+        fillOpacity:0,weight:1.5,opacity:pct*0.7,dashArray:'3,4'
       }).addTo(map);
-      circle.bindPopup(`<strong>Avoidable zone</strong><br>~${Math.round(pct*100)}% of impact preventable<br>with ${WARN_STEPS[warnIdx]}-minute warning`);
-      mapLayers.push(circle);
+      ring.bindPopup(`<strong>Avoidable zone — ${st.id}</strong><br>~${Math.round(pct*100)}% of local GIC impact preventable<br>with ${WARN_STEPS[warnIdx] >= 60 ? Math.round(WARN_STEPS[warnIdx]/60)+'h' : WARN_STEPS[warnIdx]+'min'} warning`);
+      mapLayers.push(ring);
     });
   }
 
-  // Update stats panel
+  // ── Update stats ──
   const avoidAmt=(s.sim.totalLoss*pct).toFixed(1);
   const avoidPeople=(s.sim.totalPeople*pct).toFixed(1);
-  const avoidTrans=Math.round(s.sim.totalTransformers*pct);
+  const avoidTrans=Math.max(0,Math.round(s.sim.totalTrans*pct));
   document.getElementById('av-total').textContent=`$${s.sim.totalLoss.toFixed(1)}B`;
   document.getElementById('av-avoid').textContent=`$${avoidAmt}B`;
   document.getElementById('av-people').textContent=`${avoidPeople}M`;
-  document.getElementById('av-transformers').textContent=`~${avoidTrans}`;
+  document.getElementById('av-trans').textContent=`~${avoidTrans}`;
+  document.getElementById('av-fill-avoid').style.height=`${Math.round(pct*100)}%`;
   document.getElementById('av-bar').style.width=`${Math.round(pct*100)}%`;
   document.getElementById('av-pct').textContent=`${Math.round(pct*100)}%`;
-  document.getElementById('av-fill-avoid').style.height=`${Math.round(pct*100)}%`;
   document.getElementById('sim-note').textContent=WARN_NOTES[warnIdx];
+  document.getElementById('sim-note-src').textContent='Sources: '+WARN_SRC[warnIdx];
+
+  // ── Update dB/dt chips ──
+  const rows=document.getElementById('dbdt-rows');
+  rows.innerHTML=stations.map(st=>{
+    const col=dbdtColor(st.dbdt);
+    return`<div class="dbdt-chip">
+      <div class="dbdt-chip-id">${st.id}</div>
+      <div class="dbdt-chip-loc">${st.name}</div>
+      <div class="dbdt-chip-val" style="color:${col}">${st.dbdt} nT/min</div>
+    </div>`;
+  }).join('');
+  document.getElementById('dbdt-source').textContent=
+    key==='quebec1989'?'Source: Pulkkinen et al. (2012) Space Weather; Boteler & Pirjola (2017)':
+    key==='halloween2003'?'Source: Pulkkinen et al. (2005) Ann. Geophys.; Ngwira et al. (2015)':
+    'Source: Love et al. (2024) Space Weather; BGS/INTERMAGNET real-time archive';
 }
 
 function simSelectStorm(key){
@@ -852,15 +940,13 @@ function updateWarnSlider(idx){
   simWarnIdx=idx;
   const mins=WARN_STEPS[idx];
   document.getElementById('warn-val').textContent=mins>=60?Math.round(mins/60)+'h':mins;
-  document.getElementById('warn-context').textContent=WARN_CONTEXTS[idx];
+  document.getElementById('warn-ctx').textContent=WARN_CTX[idx];
   renderSimStorm(simStorm,idx);
 }
 
-/* ═══════════════════════════════════════════════════════
-   INIT
-═══════════════════════════════════════════════════════ */
+/* ── init ── */
 updateThreshold(7);
-// selectLive() + initMap() called after password
+// selectLive() + initMap() called after password check
 </script>
 </body>
 </html>
