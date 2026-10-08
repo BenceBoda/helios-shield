@@ -23,31 +23,25 @@ jobs:
           STATIONS="KIR,ESK,BFE,HAD,OTT,HER,FRD,BRW,YKC,MEA,ABK,TRO,UPS,HON,CNB,NEW,SIT,STJ"
           curl -s --max-time 30 \
             "https://supermag.jhuapl.edu/services/data.php?user=BenceBoda&start=${START}&interval=30&stations=${STATIONS}&delta=start&fmt=json" \
-            -o supermag_raw.json || true
+            -o supermag_raw.json || echo "curl failed, skipping"
           if [ ! -s supermag_raw.json ]; then
-            echo "Empty response"
+            echo "Empty response, skipping"
             exit 0
           fi
-          python3 - << 'EOF'
-import json, math, datetime, sys
-try:
-    raw = json.load(open('supermag_raw.json'))
-except Exception as e:
-    print(f"JSON error: {e}"); sys.exit(0)
-stations = {}
-if isinstance(raw, list):
-    for rec in raw:
-        iaga = rec.get('iaga','').upper()
-        if not iaga: continue
-        dbn = float(rec.get('dbn_nez') or 0)
-        dbe = float(rec.get('dbe_nez') or 0)
-        dbdt = math.sqrt(dbn**2 + dbe**2)
-        if iaga not in stations or dbdt > stations[iaga]['dbdt']:
-            stations[iaga] = {'id':iaga,'lat':rec.get('geolatitude',0),'lng':rec.get('geolongitude',0),'dbdt':round(dbdt,1),'time':rec.get('tval','')}
-out = {'stations':list(stations.values()),'fetched_at':datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')}
-json.dump(out, open('supermag.json','w'))
-print(f"Wrote {len(stations)} stations")
-EOF
+          TS=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+          jq --arg ts "$TS" '
+            if type == "array" then
+              reduce .[] as $r ({};
+                ($r.iaga | ascii_upcase) as $id |
+                (($r.dbn_nez // 0) as $n | ($r.dbe_nez // 0) as $e | ($n*$n + $e*$e) | sqrt) as $d |
+                if (.[$id] == null or $d > .[$id].dbdt)
+                then .[$id] = {id: $id, lat: $r.geolatitude, lng: $r.geolongitude, dbdt: ($d * 10 | round / 10), time: $r.tval}
+                else . end
+              ) | {stations: [.[]], fetched_at: $ts}
+            else {stations: [], fetched_at: $ts, error: "unexpected format"}
+            end
+          ' supermag_raw.json > supermag.json
+          echo "Done: $(jq '.stations | length' supermag.json) stations written"
 
       - name: Commit supermag.json
         run: |
