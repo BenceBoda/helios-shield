@@ -335,8 +335,8 @@ async function fetchRealData(){
   btn.textContent='⟳ Loading…';
   try{
     const [kpRes,bzRes]=await Promise.all([
-  fetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'),
-  fetch('https://services.swpc.noaa.gov/products/solar-wind/mag-1-minute.json')
+  fetch('./kp.json'),
+fetch('./bz.json')
 ]);
     if(!kpRes.ok||!bzRes.ok)throw new Error('API error');
     const kpRaw=await kpRes.json();
