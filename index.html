@@ -334,10 +334,9 @@ async function fetchRealData(){
   const btn=document.getElementById('btn-live');
   btn.textContent='⟳ Loading…';
   try{
-    const PROXY='https://api.allorigins.win/raw?url=';
-const [kpRes,bzRes]=await Promise.all([
-  fetch(PROXY+encodeURIComponent('https://services.swpc.noaa.gov/json/planetary_k_index_1m.json')),
-  fetch(PROXY+encodeURIComponent('https://services.swpc.noaa.gov/json/solar-wind/mag-1-minute.json'))
+    const [kpRes,bzRes]=await Promise.all([
+  fetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'),
+  fetch('https://services.swpc.noaa.gov/products/solar-wind/mag-1-minute.json')
 ]);
     if(!kpRes.ok||!bzRes.ok)throw new Error('API error');
     const kpRaw=await kpRes.json();
