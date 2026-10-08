@@ -5,6 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Helios Shield — GIC Early Warning Platform</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+#pw-screen{position:fixed;inset:0;z-index:9999;background:#040C18;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px}
+.pw-box{background:#08162A;border:1px solid #142B45;border-radius:10px;padding:40px 36px;display:flex;flex-direction:column;align-items:center;gap:18px;width:320px;max-width:90vw}
+.pw-logo{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:600;color:#fff;letter-spacing:-.3px}
+.pw-sub{font-size:12px;color:#4A6A8A;font-family:'JetBrains Mono',monospace;text-align:center}
+.pw-input{width:100%;background:#0C1E36;border:1px solid #142B45;border-radius:6px;padding:10px 14px;color:#C5D8EE;font-family:'JetBrains Mono',monospace;font-size:14px;outline:none;text-align:center;letter-spacing:3px;transition:border-color .2s}
+.pw-input:focus{border-color:#00C8FF}
+.pw-input.wrong{border-color:#FF4040;animation:shake .3s}
+.pw-btn{width:100%;padding:10px;background:#00C8FF;border:none;border-radius:6px;color:#040C18;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s}
+.pw-btn:hover{background:#33D4FF}
+.pw-err{font-size:11px;color:#FF4040;font-family:'JetBrains Mono',monospace;min-height:16px}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+</style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
 :root {
@@ -104,6 +117,19 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
 </style>
 </head>
 <body>
+
+<div id="pw-screen">
+  <div class="pw-box">
+    <div class="pw-logo">
+      <svg width="24" height="24" viewBox="0 0 22 22" fill="none"><path d="M11 2L3 6v5c0 4.4 3.4 8.5 8 9.5 4.6-1 8-5.1 8-9.5V6L11 2z" fill="#00C8FF" opacity=".18" stroke="#00C8FF" stroke-width="1.5"/><path d="M11 5l-5 2.5v3.3c0 2.8 2.1 5.4 5 6.2 2.9-.8 5-3.4 5-6.2V7.5L11 5z" fill="#00C8FF" opacity=".35"/></svg>
+      Helios Shield
+    </div>
+    <div class="pw-sub">concept demonstration · restricted access</div>
+    <input class="pw-input" id="pw-input" type="password" placeholder="enter password" maxlength="32" onkeydown="if(event.key==='Enter')checkPw()">
+    <button class="pw-btn" onclick="checkPw()">Access platform</button>
+    <div class="pw-err" id="pw-err"></div>
+  </div>
+</div>
 
 <header class="hdr">
   <div class="logo">
@@ -208,6 +234,23 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
 </footer>
 
 <script>
+// Password protection
+const PW_HASH = '8b1f3a2c9e4d7f6b0a5c8e1d4f7b2a9c3e6d1f4b7a0c3e6f9b2d5a8c1e4f7b0'; // change this
+function hashStr(s){let h=0;for(let i=0;i<s.length;i++){h=Math.imul(31,h)+s.charCodeAt(i)|0}return Math.abs(h).toString(16).padStart(8,'0')}
+function checkPw(){
+  const val=document.getElementById('pw-input').value;
+  // Simple check — change 'helios2026' to your preferred password
+  if(val==='helios2026'){
+    document.getElementById('pw-screen').style.display='none';
+    selectLive();
+  } else {
+    const inp=document.getElementById('pw-input');
+    inp.classList.add('wrong');
+    document.getElementById('pw-err').textContent='incorrect password';
+    setTimeout(()=>{inp.classList.remove('wrong');inp.value='';document.getElementById('pw-err').textContent=''},1500);
+  }
+}
+
 const STORMS = {
   quebec1989: {
     name:"Hydro-Québec Storm",date:"March 13, 1989",mag:"Extreme (Kp 9)",
@@ -241,7 +284,7 @@ const NOMINAL_KP=[2.1,1.8,2.3,2.1,1.9,2.4,2.0,1.7,2.2,2.5,2.1,1.8,2.0,2.3,2.1,1.
 const NOMINAL_BZ=[-3,2,-1,4,-2,3,-4,1,-2,3,-1,4,-3,2,-1,3,-4,2,-3,1,-2,3,-1,2];
 const HOURS=Array.from({length:24},(_,i)=>`${String(i).padStart(2,'0')}:00`);
 
-let threshold=7,currentStorm=null,isReplaying=false,replayTimer=null,liveTimer=null,liveOffset=0,replayStep=0,alertFiredAt=null;
+let threshold=7,currentStorm=null,isReplaying=false,replayTimer=null,liveTimer=null,liveOffset=0,replayStep=0,alertFiredAt=null,liveRefreshTimer=null;
 
 // Chart setup
 const bgZones={id:'bgZones',beforeDraw(c){
@@ -284,7 +327,59 @@ const chart=new Chart(ctx,{
   }
 });
 
-// Live feed animation
+// Real NOAA data fetch
+async function fetchRealData(){
+  clearInterval(liveTimer);
+  clearTimeout(liveRefreshTimer);
+  const btn=document.getElementById('btn-live');
+  btn.textContent='⟳ Loading…';
+  try{
+    const [kpRes,bzRes]=await Promise.all([
+      fetch('https://services.swpc.noaa.gov/json/planetary_k_index_1m.json'),
+      fetch('https://services.swpc.noaa.gov/json/solar-wind/mag-1-minute.json')
+    ]);
+    if(!kpRes.ok||!bzRes.ok)throw new Error('API error');
+    const kpRaw=await kpRes.json();
+    const bzRaw=await bzRes.json();
+    const bzData=bzRaw.slice(1); // skip header row
+
+    // Sample ~24 hourly points from ~1440 minute points
+    const step=Math.max(1,Math.floor(kpRaw.length/24));
+    const labels=[],kpVals=[],bzVals=[];
+    for(let i=0;i<kpRaw.length&&labels.length<24;i+=step){
+      labels.push(kpRaw[i][0].slice(11,16));
+      kpVals.push(Math.max(0,parseFloat(kpRaw[i][2])||0));
+    }
+    const bzStep=Math.max(1,Math.floor(bzData.length/24));
+    for(let i=0;i<bzData.length&&bzVals.length<24;i+=bzStep){
+      const bz=parseFloat(bzData[i][3])||0;
+      bzVals.push(Math.max(0,Math.min(9,(bz+120)/120*9)));
+    }
+
+    chart.data.labels=labels;
+    chart.data.datasets[0].data=kpVals;
+    chart.data.datasets[1].data=bzVals.slice(0,labels.length);
+    chart.data.datasets[2].data=Array(labels.length).fill(threshold);
+    chart.update('none');
+
+    // Update header with latest values
+    const latestKp=kpVals[kpVals.length-1]||0;
+    const rawBz=parseFloat(bzData[bzData.length-1]?.[3])||0;
+    updateStatusBar(latestKp,rawBz);
+    document.getElementById('live-win').textContent='↻ '+new Date().toTimeString().slice(0,5);
+    btn.textContent='● Live data';
+
+    // Auto-refresh every 5 minutes
+    liveRefreshTimer=setTimeout(fetchRealData,5*60*1000);
+
+  }catch(e){
+    console.warn('NOAA fetch failed, falling back to simulation:',e);
+    btn.textContent='● Simulated';
+    startLive(); // fallback
+  }
+}
+
+// Simulated live feed (fallback)
 function startLive(){
   clearInterval(liveTimer);
   liveTimer=setInterval(()=>{
@@ -319,7 +414,7 @@ function selectLive(){
   chart.update('none');
   document.getElementById('replay-info').innerHTML='';
   document.getElementById('impact-body').innerHTML='<div class="imp-empty">← select a historical storm<br>to load impact data</div>';
-  startLive();
+  fetchRealData();
 }
 
 function selectStorm(key){
@@ -420,9 +515,9 @@ function updateThreshold(v){
   document.getElementById('aeb-f').style.flex=m.fp/total*10;
 }
 
-// Init
+// Init (called after password)
 updateThreshold(7);
-selectLive();
+// selectLive() is called after password check
 </script>
 </body>
 </html>
