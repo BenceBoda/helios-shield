@@ -619,6 +619,47 @@ async function fetchRealData(){
     console.warn('kp.json fetch failed, using simulation:',e);
     btn.textContent='● Simulated';startLive();
   }
+  // Try to load live SuperMAG station data (non-blocking)
+  try{
+    const smRes=await fetch('./supermag.json');
+    if(smRes.ok){
+      const smData=await smRes.json();
+      if(smData&&smData.stations&&smData.stations.length>0){
+        renderLiveStations(smData);
+      }
+    }
+  }catch(e){/* supermag.json not yet available — silent fail */}
+}
+
+// Live SuperMAG station markers on the Live Monitor map (if map is ready)
+let liveStationLayers=[];
+function renderLiveStations(smData){
+  if(!mapReady||!map)return;
+  liveStationLayers.forEach(l=>map.removeLayer(l));
+  liveStationLayers=[];
+  const fetchedAt=smData.fetched_at?smData.fetched_at.slice(11,16)+' UTC':'';
+  smData.stations.forEach(st=>{
+    if(!st.lat||!st.lng)return;
+    const col=dbdtColor(st.dbdt);
+    const r=Math.max(5,Math.min(18,4+st.dbdt/50));
+    const m=L.circleMarker([st.lat,st.lng],{
+      radius:r,color:col,fillColor:col,fillOpacity:0.75,weight:1.5,
+      className:'pulsing-marker'
+    }).bindPopup(
+      `<div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#C5D8EE;background:#08162A;padding:8px;border-radius:6px;min-width:160px">
+        <b style="color:#fff;font-size:13px">${st.id}</b><br>
+        <span style="color:#4A6A8A">dB/dt</span> <b style="color:${col}">${st.dbdt} nT/min</b><br>
+        <span style="color:#4A6A8A">GIC est.</span> ${Math.round(st.dbdt*0.55)} A<br>
+        <span style="color:#4A6A8A;font-size:10px">Live · ${fetchedAt}</span>
+      </div>`,
+      {className:'dark-popup'}
+    );
+    m.addTo(map);
+    liveStationLayers.push(m);
+  });
+  // Update live station count badge
+  const el=document.getElementById('live-stations-badge');
+  if(el) el.textContent=smData.stations.length+' stations live';
 }
 
 function startLive(){
