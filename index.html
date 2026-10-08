@@ -347,8 +347,8 @@ fetch('./bz.json')
     const step=Math.max(1,Math.floor(kpRaw.length/24));
     const labels=[],kpVals=[],bzVals=[];
     for(let i=0;i<kpRaw.length&&labels.length<24;i+=step){
-      labels.push(kpRaw[i][0].slice(11,16));
-      kpVals.push(Math.max(0,parseFloat(kpRaw[i][2])||0));
+      labels.push(kpRaw[i].time_tag.slice(11,16));
+      kpVals.push(Math.max(0,parseFloat(kpRaw[i].estimated_kp)||kpRaw[i].kp_index||0));
     }
     const bzStep=Math.max(1,Math.floor(bzData.length/24));
     for(let i=0;i<bzData.length&&bzVals.length<24;i+=bzStep){
