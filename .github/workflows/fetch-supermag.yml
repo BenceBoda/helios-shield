@@ -22,49 +22,52 @@ jobs:
           SM_USER: ${{ secrets.SUPERMAG_USER }}
         run: |
           START=$(date -u -d '60 minutes ago' '+%Y-%m-%dT%H:%M:%S.000Z')
-          ENCODED_USER=$(python3 -c "import urllib.parse,os; print(urllib.parse.quote(os.environ['SM_USER']))")
-          URL="https://supermag.jhuapl.edu/services/data.php?user=${ENCODED_USER}&start=${START}&interval=60&stations=KIR,ESK,HAD,OTT,HER,FRD,BRW&fmt=json"
-          echo "Fetching SuperMAG data..."
-          curl -sf --max-time 30 "$URL" -o supermag_raw.json || echo '[]' > supermag_raw.json
+          echo "User: ${SM_USER}"
+          curl -sf --max-time 30 -G \
+            "https://supermag.jhuapl.edu/services/data.php" \
+            --data-urlencode "user=${SM_USER}" \
+            -d "start=${START}" \
+            -d "interval=60" \
+            -d "stations=KIR,ESK,HAD,OTT,HER,FRD,BRW" \
+            -d "fmt=json" \
+            -o supermag_raw.json || echo '[]' > supermag_raw.json
           echo "Response size: $(wc -c < supermag_raw.json) bytes"
-          echo "Preview:"
           head -c 500 supermag_raw.json
 
       - name: Parse SuperMAG data
         run: |
-          python3 parse_supermag.py > supermag.json
-          echo "Result:"
-          cat supermag.json
-
-      - name: Commit results
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add supermag.json supermag_raw.json
-          git diff --cached --quiet && echo "No changes" && exit 0
-          git commit -m "chore: update supermag data [skip ci]"
-          git push origin HEAD:main          if [ ! -s supermag_raw.json ]; then
-            echo "{\"stations\":[],\"fetched_at\":\"${TS}\",\"error\":\"empty_response\"}" > supermag.json
-            exit 0
-          fi
-          jq --arg ts "$TS" '
-            def tonum: if type == "number" then . elif type == "string" then tonumber? // 0 else 0 end;
-            if type == "array" and length > 0 then
-              reduce .[] as $r ({};
-                (($r.iaga // $r.IAGA // $r.station // "") | ascii_upcase) as $id |
-                if $id == "" then . else
-                  (($r.dbn_nez // $r.Bn // $r.bn // 0 | tonum) as $n |
-                   ($r.dbe_nez // $r.Be // $r.be // 0 | tonum) as $e |
-                   ($n*$n + $e*$e) | sqrt) as $d |
-                  if (.[$id] == null or $d > .[$id].dbdt)
-                  then .[$id] = {id: $id, lat: ($r.geolatitude // $r.lat // 0 | tonum), lng: ($r.geolongitude // $r.lng // $r.lon // 0 | tonum), dbdt: ($d * 10 | round / 10), time: ($r.tval // $r.time // "")}
-                  else . end
-                end
-              ) | {stations: [.[]], fetched_at: $ts}
-            else
-              {stations: [], fetched_at: $ts, raw_type: (type), raw_preview: (. | tostring | .[0:300])}
-            end
-          ' supermag_raw.json > supermag.json || echo "{\"stations\":[],\"fetched_at\":\"${TS}\",\"error\":\"jq_failed\"}" > supermag.json
+          python3 -c '
+          import json, sys, math, datetime
+          ts = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+          try:
+              with open("supermag_raw.json") as f:
+                  data = json.load(f)
+          except Exception as e:
+              print(json.dumps({"stations": [], "fetched_at": ts, "error": str(e)}))
+              sys.exit(0)
+          if not isinstance(data, list) or not data:
+              print(json.dumps({"stations": [], "fetched_at": ts, "raw": str(data)[:300]}))
+              sys.exit(0)
+          out = {}
+          for r in data:
+              sid = (r.get("iaga") or r.get("IAGA") or r.get("station") or "").upper().strip()
+              if not sid:
+                  continue
+              try:
+                  n = float(r.get("dbn_nez") or r.get("Bn") or r.get("bn") or 0)
+                  e2 = float(r.get("dbe_nez") or r.get("Be") or r.get("be") or 0)
+              except (TypeError, ValueError):
+                  n = e2 = 0.0
+              dbdt = round(math.sqrt(n * n + e2 * e2) * 10) / 10
+              if sid not in out or dbdt > out[sid]["dbdt"]:
+                  try:
+                      lat = float(r.get("geolatitude") or r.get("lat") or 0)
+                      lng = float(r.get("geolongitude") or r.get("lng") or r.get("lon") or 0)
+                  except (TypeError, ValueError):
+                      lat = lng = 0.0
+                  out[sid] = {"id": sid, "lat": lat, "lng": lng, "dbdt": dbdt, "time": str(r.get("tval") or r.get("time") or "")}
+          print(json.dumps({"stations": list(out.values()), "fetched_at": ts}))
+          ' > supermag.json
           echo "Result:"
           cat supermag.json
 
