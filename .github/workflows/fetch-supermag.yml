@@ -22,19 +22,28 @@ jobs:
           SM_USER: ${{ secrets.SUPERMAG_USER }}
         run: |
           START=$(date -u -d '60 minutes ago' '+%Y-%m-%dT%H:%M:%S.000Z')
-          STATIONS="KIR,ESK,HAD,OTT,HER,FRD,BRW"
-          URL="https://supermag.jhuapl.edu/services/data.php?user=${SM_USER}&start=${START}&interval=60&stations=${STATIONS}&fmt=json"
+          ENCODED_USER=$(python3 -c "import urllib.parse,os; print(urllib.parse.quote(os.environ['SM_USER']))")
+          URL="https://supermag.jhuapl.edu/services/data.php?user=${ENCODED_USER}&start=${START}&interval=60&stations=KIR,ESK,HAD,OTT,HER,FRD,BRW&fmt=json"
           echo "Fetching SuperMAG data..."
-          HTTP=$(curl -s -w "\n%{http_code}" --max-time 30 "$URL" -o supermag_raw.json)
-          echo "HTTP code: $HTTP"
-          echo "File size: $(wc -c < supermag_raw.json) bytes"
-          echo "Raw response (first 1000 chars):"
-          head -c 1000 supermag_raw.json
+          curl -sf --max-time 30 "$URL" -o supermag_raw.json || echo '[]' > supermag_raw.json
+          echo "Response size: $(wc -c < supermag_raw.json) bytes"
+          echo "Preview:"
+          head -c 500 supermag_raw.json
 
-      - name: Parse and write supermag.json
+      - name: Parse SuperMAG data
         run: |
-          TS=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
-          if [ ! -s supermag_raw.json ]; then
+          python3 parse_supermag.py > supermag.json
+          echo "Result:"
+          cat supermag.json
+
+      - name: Commit results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add supermag.json supermag_raw.json
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "chore: update supermag data [skip ci]"
+          git push origin HEAD:main          if [ ! -s supermag_raw.json ]; then
             echo "{\"stations\":[],\"fetched_at\":\"${TS}\",\"error\":\"empty_response\"}" > supermag.json
             exit 0
           fi
