@@ -78,4 +78,5 @@ jobs:
           git add supermag.json supermag_raw.json
           git diff --cached --quiet && echo "No changes" && exit 0
           git commit -m "chore: update supermag data [skip ci]"
+          git pull --rebase origin main
           git push origin HEAD:main
