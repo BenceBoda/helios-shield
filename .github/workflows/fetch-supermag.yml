@@ -17,46 +17,54 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Fetch and parse SuperMAG data
+      - name: Fetch SuperMAG data
         run: |
-          set -e
-          START=$(date -u -d '30 minutes ago' '+%Y-%m-%dT%H:%M:%S.000Z')
-          STATIONS="KIR,ESK,BFE,HAD,OTT,HER,FRD,BRW,YKC,MEA,ABK,TRO,UPS,HON,CNB,NEW,SIT,STJ"
-          URL="https://supermag.jhuapl.edu/services/data.php?user=BenceBoda&start=${START}&interval=30&stations=${STATIONS}&delta=start&fmt=json"
+          START=$(date -u -d '60 minutes ago' '+%Y-%m-%dT%H:%M:%S.000Z')
+          STATIONS="KIR,ESK,HAD,OTT,HER,FRD,BRW"
+          URL="https://supermag.jhuapl.edu/services/data.php?user=BenceBoda&start=${START}&interval=60&stations=${STATIONS}&fmt=json"
+          echo "URL: $URL"
+          HTTP=$(curl -s -w "\n%{http_code}" --max-time 30 "$URL" -o supermag_raw.json)
+          echo "HTTP code: $HTTP"
+          echo "Raw response (first 1000 chars):"
+          head -c 1000 supermag_raw.json || echo "(empty)"
+          echo ""
+          echo "File size: $(wc -c < supermag_raw.json) bytes"
 
-          echo "Fetching: $URL"
-          touch supermag_raw.json
-          HTTP_CODE=$(curl -s -w "%{http_code}" --max-time 30 "$URL" -o supermag_raw.json)
-          echo "HTTP status: $HTTP_CODE"
-          echo "Response size: $(wc -c < supermag_raw.json) bytes"
-          cat supermag_raw.json | head -c 500
-
+      - name: Parse and write supermag.json
+        run: |
           if [ ! -s supermag_raw.json ]; then
-            echo "Empty response — skipping"
+            echo '{"stations":[],"fetched_at":"'$(date -u '+%Y-%m-%dT%H:%M:%SZ')'","error":"empty_response"}' > supermag.json
             exit 0
           fi
-
           TS=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
           jq --arg ts "$TS" '
-            if type == "array" then
+            def tonum: if type == "number" then . elif type == "string" then tonumber? // 0 else 0 end;
+            if type == "array" and length > 0 then
               reduce .[] as $r ({};
-                ($r.iaga | ascii_upcase) as $id |
-                (($r.dbn_nez // 0) as $n | ($r.dbe_nez // 0) as $e | ($n*$n + $e*$e) | sqrt) as $d |
-                if (.[$id] == null or $d > .[$id].dbdt)
-                then .[$id] = {id: $id, lat: $r.geolatitude, lng: $r.geolongitude, dbdt: ($d * 10 | round / 10), time: $r.tval}
-                else . end
+                ($r.iaga // $r.IAGA // $r.station // "") | ascii_upcase as $id |
+                if $id == "" then . else
+                  (($r.dbn_nez // $r.Bn // $r.bn // 0 | tonum) as $n |
+                   ($r.dbe_nez // $r.Be // $r.be // 0 | tonum) as $e |
+                   ($n*$n + $e*$e) | sqrt) as $d |
+                  if (.[$id] == null or $d > .[$id].dbdt)
+                  then .[$id] = {id: $id, lat: ($r.geolatitude // $r.lat // 0 | tonum), lng: ($r.geolongitude // $r.lng // $r.lon // 0 | tonum), dbdt: ($d * 10 | round / 10), time: ($r.tval // $r.time // "")}
+                  else . end
+                end
               ) | {stations: [.[]], fetched_at: $ts}
-            else {stations: [], fetched_at: $ts, raw: .}
+            elif type == "object" and (.data // .records // .stations) then
+              {stations: [], fetched_at: $ts, raw_keys: keys}
+            else
+              {stations: [], fetched_at: $ts, raw_type: type, raw_preview: (. | tostring | .[0:200])}
             end
-          ' supermag_raw.json > supermag.json || echo "jq failed, skipping"
+          ' supermag_raw.json > supermag.json 2>&1 || echo '{"stations":[],"fetched_at":"'$TS'","error":"jq_failed"}' > supermag.json
+          echo "supermag.json contents:"
+          cat supermag.json
 
-          echo "Result: $(cat supermag.json | head -c 200)"
-
-      - name: Commit supermag.json
+      - name: Commit results
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add supermag.json
+          git add supermag.json supermag_raw.json
           git diff --cached --quiet && echo "No changes" && exit 0
-          git commit -m "chore: update supermag.json [skip ci]"
+          git commit -m "chore: update supermag data [skip ci]"
           git push origin HEAD:main
