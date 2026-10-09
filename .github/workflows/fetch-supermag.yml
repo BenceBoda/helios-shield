@@ -21,7 +21,7 @@ jobs:
         run: |
           START=$(date -u -d '60 minutes ago' '+%Y-%m-%dT%H:%M:%S.000Z')
           STATIONS="KIR,ESK,HAD,OTT,HER,FRD,BRW"
-          URL="https://supermag.jhuapl.edu/services/data.php?user=BenceBoda&start=${START}&interval=60&stations=${STATIONS}&fmt=json"
+          URL="https://supermag.jhuapl.edu/services/data.php?user=${{ secrets.SUPERMAG_USER }}&start=${START}&interval=60&stations=${STATIONS}&fmt=json"
           echo "URL: $URL"
           HTTP=$(curl -s -w "\n%{http_code}" --max-time 30 "$URL" -o supermag_raw.json)
           echo "HTTP code: $HTTP"
@@ -35,6 +35,39 @@ jobs:
           if [ ! -s supermag_raw.json ]; then
             echo '{"stations":[],"fetched_at":"'$(date -u '+%Y-%m-%dT%H:%M:%SZ')'","error":"empty_response"}' > supermag.json
             exit 0
+          fi
+          TS=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+          jq --arg ts "$TS" '
+            def tonum: if type == "number" then . elif type == "string" then tonumber? // 0 else 0 end;
+            if type == "array" and length > 0 then
+              reduce .[] as $r ({};
+                ($r.iaga // $r.IAGA // $r.station // "") | ascii_upcase as $id |
+                if $id == "" then . else
+                  (($r.dbn_nez // $r.Bn // $r.bn // 0 | tonum) as $n |
+                   ($r.dbe_nez // $r.Be // $r.be // 0 | tonum) as $e |
+                   ($n*$n + $e*$e) | sqrt) as $d |
+                  if (.[$id] == null or $d > .[$id].dbdt)
+                  then .[$id] = {id: $id, lat: ($r.geolatitude // $r.lat // 0 | tonum), lng: ($r.geolongitude // $r.lng // $r.lon // 0 | tonum), dbdt: ($d * 10 | round / 10), time: ($r.tval // $r.time // "")}
+                  else . end
+                end
+              ) | {stations: [.[]], fetched_at: $ts}
+            elif type == "object" and (.data // .records // .stations) then
+              {stations: [], fetched_at: $ts, raw_keys: keys}
+            else
+              {stations: [], fetched_at: $ts, raw_type: type, raw_preview: (. | tostring | .[0:200])}
+            end
+          ' supermag_raw.json > supermag.json 2>&1 || echo '{"stations":[],"fetched_at":"'$TS'","error":"jq_failed"}' > supermag.json
+          echo "supermag.json contents:"
+          cat supermag.json
+
+      - name: Commit results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add supermag.json supermag_raw.json
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "chore: update supermag data [skip ci]"
+          git push origin HEAD:main            exit 0
           fi
           TS=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
           jq --arg ts "$TS" '
