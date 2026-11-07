@@ -125,9 +125,9 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 @media(max-width:960px){.sim-layout{grid-template-columns:1fr}}
 #sim-map{height:460px;border-radius:14px;border:1px solid var(--border);background:#110828;position:relative;z-index:1}
 .leaflet-container{background:#110828}
-.leaflet-tile{filter:none}
-.leaflet-container{background:#24165a!important}
-.leaflet-tile-pane{opacity:.78;mix-blend-mode:screen}
+.leaflet-tile{filter:invert(1) grayscale(1) brightness(.62) contrast(1.15)}
+.leaflet-container{background:#3a2580!important}
+.leaflet-tile-pane{mix-blend-mode:luminosity}
 .leaflet-control-attribution{background:rgba(22,11,51,.85)!important;color:#7A6BAE!important;font-size:12.5px!important}
 .leaflet-control-attribution a{color:#7A6BAE!important}
 .leaflet-control-zoom a{background:#22154A!important;color:#F3EFFF!important;border-color:#433178!important}
@@ -982,8 +982,8 @@ function gridDash(risk){
 function initMap(){
   if(mapReady)return;
   map=L.map('sim-map',{center:[48,10],zoom:2,zoomControl:true,attributionControl:true,maxZoom:8,minZoom:1});
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',{
-    attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/attributions">CARTO</a>',subdomains:'abcd',maxZoom:19
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxZoom:19
   }).addTo(map);
 
   // Custom legend control
