@@ -112,6 +112,7 @@ def fetch_omni(start, end):
                     print(f"{ds} {list(style)[0]}: {e}")
             if text is None:
                 continue
+            print(f"{ds} sample: {text.splitlines()[:2]}")
             rows = []
             for r in csv.reader(io.StringIO(text)):
                 if len(r) < 3:
