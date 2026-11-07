@@ -242,7 +242,7 @@ def main():
                     dmax[i] = max(dmax[i], v)
                 if abs(lat) <= DANGER_MAX_LAT and v >= DANGER_DBDT and (first_danger is None or t < first_danger[0]):
                     first_danger = (t, iaga, v)
-            print(f"{iaga}: peak {pv:.0f} nT/min at {isoz(pt)}")
+            print(f"{iaga}: peak {pv:.0f} nT/min at {isoz(pt)} (spikes removed: {getattr(dbdt_series, 'last_removed', 0)})")
         if stations:
             stations.sort(key=lambda s: -s["dbdt"])
             out["stations"] = stations

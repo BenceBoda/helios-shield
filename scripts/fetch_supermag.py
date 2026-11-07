@@ -88,6 +88,24 @@ def probe_inventory(logon, now):
             print(f"inventory {lag}h back: failed {e}")
 
 
+def despike(pts, jump=100.0, ratio=0.25):
+    """Remove isolated one-sample spikes: the field jumps away and straight back.
+    pts = sorted [(t, x, y)]; a sample is replaced by the mean of its neighbours when
+    both steps into and out of it exceed `jump` nT but the net change across it is
+    under `ratio` of those steps. Real storm variations do not snap back like this."""
+    out = list(pts)
+    removed = 0
+    for i in range(1, len(out) - 1):
+        (_, x0, y0), (t1, x1, y1), (_, x2, y2) = out[i - 1], out[i], out[i + 1]
+        a = math.hypot(x1 - x0, y1 - y0)
+        b = math.hypot(x2 - x1, y2 - y1)
+        net = math.hypot(x2 - x0, y2 - y0)
+        if a > jump and b > jump and net < ratio * min(a, b):
+            out[i] = (t1, (x0 + x2) / 2, (y0 + y2) / 2)
+            removed += 1
+    return out, removed
+
+
 def dbdt_series(records):
     pts = []
     for r in records:
@@ -99,6 +117,8 @@ def dbdt_series(records):
         if n is not None and e is not None:
             pts.append((t, n, e))
     pts.sort()
+    pts, removed = despike(pts)
+    dbdt_series.last_removed = removed
     out = []
     for (t0, n0, e0), (t1, n1, e1) in zip(pts, pts[1:]):
         dt_min = (t1 - t0) / 60.0
