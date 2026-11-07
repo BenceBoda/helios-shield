@@ -633,6 +633,38 @@ const GRID={
 const NOMINAL_KP=[2.1,1.8,2.3,2.1,1.9,2.4,2.0,1.7,2.2,2.5,2.1,1.8,2.0,2.3,2.1,1.9,2.4,2.0,1.8,2.2,2.1,1.9,2.3,2.0];
 const NOMINAL_BZ=[-3,2,-1,4,-2,3,-4,1,-2,3,-1,4,-3,2,-1,3,-4,2,-3,1,-2,3,-1,2];
 const HOURS=Array.from({length:24},(_,i)=>`${String(i).padStart(2,'0')}:00`);
+
+/* ── Measured storm data (storms/*.json, built by scripts/build_storm_replays.py) ── */
+function bzScale(v){return v===null||v===undefined?null:Math.max(0,Math.min(9,(v+120)/120*9))}
+function hhmm(t){return t?t.slice(11,16)+' UTC':''}
+function replaySummary(r){
+  const w=r.warning,d=r.danger;
+  if(!w&&d) return `<span style="color:var(--solar)">no solar-wind monitor data for this storm</span><span>first dB/dt ≥ ${d.threshold} nT/min: ${d.station} at ${hhmm(d.time)} (measured)</span>`;
+  if(w&&d&&w.minutes_before_danger>0){
+    const m=w.minutes_before_danger,h=Math.floor(m/60);
+    return `<span class="afired">⚡ L1 WARNING</span><span>${hhmm(w.l1_time)} · first dB/dt ≥ ${d.threshold} nT/min at ${d.station} ${hhmm(d.time)} · <strong>${h?h+'h ':''}${m%60}min earlier</strong></span>`;
+  }
+  if(w&&d) return `<span style="color:var(--danger)">⚠ L1 data gap</span><span>solar-wind data missing at storm onset — warning only at ${hhmm(w.l1_time)}, after first dB/dt ≥ ${d.threshold} nT/min (${d.station} ${hhmm(d.time)})</span>`;
+  return '';
+}
+async function loadMeasuredStorms(){
+  for(const key of Object.keys(STORMS)){
+    try{
+      const r=await fetch('./storms/'+key+'.json?_='+Date.now());
+      if(!r.ok)continue;
+      const d=await r.json(),s=STORMS[key];
+      if(d.kp&&d.kp.length===24)s.kp=d.kp.map(v=>v===null?0:v);
+      s.bz=(d.bz&&d.bz.length===24)?d.bz:Array(24).fill(null);
+      if(d.labels)s.labels=d.labels;
+      s.replay={warning:d.warning||null,danger:d.danger||null,sources:d.sources||{}};
+      if(d.stations&&d.stations.length){
+        const notes={};(SUPERMAG[key]||[]).forEach(o=>{if(o.note)notes[o.id]=o.note});
+        SUPERMAG[key]=d.stations.map(o=>({...o,note:(notes[o.id]?notes[o.id]+' · ':'')+'peak '+hhmm(o.peak_time)}));
+      }
+    }catch(e){console.warn('storm data unavailable for',key,e)}
+  }
+}
+loadMeasuredStorms();
 let threshold=7,currentStorm=null,isReplaying=false,replayTimer=null,liveTimer=null,liveOffset=0,replayStep=0,alertFiredAt=null,liveRefreshTimer=null;
 
 const bgZones={id:'bgZones',beforeDraw(c){
@@ -801,9 +833,9 @@ function selectStorm(key){
   currentStorm=key;document.getElementById('play-btn').disabled=false;
   if(!isReplaying){
     const s=STORMS[key];
-    chart.data.labels=HOURS.slice();
+    chart.data.labels=(s.labels||HOURS).slice();
     chart.data.datasets[0].data=s.kp.slice();
-    chart.data.datasets[1].data=s.bz.map(v=>Math.max(0,Math.min(9,(v+120)/120*9)));
+    chart.data.datasets[1].data=s.bz.map(bzScale);
     chart.update('none');
     document.getElementById('replay-info').innerHTML=`<span>${s.date} · ${s.mag}</span>`;
     showImpact(key);
@@ -826,15 +858,16 @@ function playSelected(){
       clearInterval(replayTimer);isReplaying=false;
       document.getElementById('play-btn').disabled=false;showImpact(currentStorm);
       const ri=document.getElementById('replay-info');
-      if(alertFiredAt!==null){
+      if(s.replay){ri.innerHTML=replaySummary(s.replay);}
+      else if(alertFiredAt!==null){
         const h=s.kp.indexOf(Math.max(...s.kp))-alertFiredAt;
         ri.innerHTML=`<span class="afired">⚡ ALERT</span><span>fired at T+${String(alertFiredAt).padStart(2,'0')}:00 · <strong>${h}h before peak</strong></span>`;
       }else ri.innerHTML=`<span style="color:var(--danger)">⚠ no alert — threshold not reached</span>`;
       return;
     }
-    chart.data.labels.push(HOURS[replayStep]);
+    chart.data.labels.push((s.labels||HOURS)[replayStep]);
     chart.data.datasets[0].data.push(s.kp[replayStep]);
-    chart.data.datasets[1].data.push(Math.max(0,Math.min(9,(s.bz[replayStep]+120)/120*9)));
+    chart.data.datasets[1].data.push(bzScale(s.bz[replayStep]));
     if(!alertFiredAt&&s.kp[replayStep]>=threshold){
       alertFiredAt=replayStep;
       const pop=document.getElementById('alert-pop');
