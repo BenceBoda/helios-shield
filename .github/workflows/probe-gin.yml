@@ -1,0 +1,12 @@
+name: Probe GIN (temporary)
+on: workflow_dispatch
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          D=$(date -u +%Y-%m-%d)
+          for O in ESK TIH; do for P in best-avail adj-or-rep; do
+            echo "=== $O $P"
+            curl -s "https://imag-data.bgs.ac.uk/GIN_V1/GINServices?Request=GetData&format=iaga2002&testObsys=0&observatoryIagaCode=$O&samplesPerDay=minute&publicationState=$P&orientation=native&dataStartDate=$D&dataDuration=1" | grep -vE '^ [A-Z#]' | sed -n '1,3p;$p' | cut -c1-160
+          done; done
