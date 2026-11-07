@@ -61,13 +61,13 @@ def good(v):
 
 
 # ---------- USGS ----------
-def fetch_usgs(iaga, start, end):
+def fetch_usgs(iaga, start, end, data_type="variation"):
     base = "https://geomag.usgs.gov/ws/data/"
     for elements in ("X,Y", "H,E"):
         q = urllib.parse.urlencode({
             "id": iaga, "starttime": start.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "endtime": end.strftime("%Y-%m-%dT%H:%M:%SZ"), "elements": elements,
-            "sampling_period": 60, "type": "variation", "format": "json",
+            "sampling_period": 60, "type": data_type, "format": "json",
         })
         d = json.loads(http_get(f"{base}?{q}"))
         times = d.get("times") or []

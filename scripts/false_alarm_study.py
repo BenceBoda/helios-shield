@@ -12,10 +12,11 @@ Definitions
            6 h to the previous one belong to the same alert episode.
   Event:   an hour in which any mid-latitude station's dB/dt reached DBDT nT/min.
            Hours closer than 6 h belong to the same event.
-  Warned:  an alert episode started 0-6 h before the event's first hour.
+  Warned:  an alert episode started 0-12 h before the event's first hour.
   Late:    the first alert came during the first 3 h of the event.
-  Missed:  no alert from 6 h before to 3 h after the event start.
-  False alarm: an alert episode with no event from its start to 6 h later.
+  Missed:  no alert from 12 h before to 3 h after the event start.
+  False alarm: an alert episode with no event from its start to 12 h later.
+  Values above MAX_PLAUSIBLE nT/min are treated as instrument artefacts (steps, glitches).
 """
 import csv
 import io
@@ -33,10 +34,11 @@ HAPI = "https://cdaweb.gsfc.nasa.gov/hapi"
 L1_KM = 1.41e6
 SUSTAIN = 10
 EPISODE_GAP_H = 6
-WARN_BEFORE_H = 6
+WARN_BEFORE_H = 12
 LATE_AFTER_H = 3
 EY_LEVELS = [5.0, 10.0, 15.0]
 DBDT_LEVELS = [100.0, 300.0]
+MAX_PLAUSIBLE = 5000.0  # nT/min; far above anything recorded at mid-latitudes
 STATIONS = [("FRD", "usgs"), ("BOU", "usgs"), ("NEW", "usgs"), ("SIT", "usgs"),
             ("NGK", "gin"), ("ESK", "gin"), ("HAD", "gin"), ("LER", "gin")]
 
@@ -106,7 +108,13 @@ def ground_hourly(year):
             pts = None
             for attempt in range(3):
                 try:
-                    pts = fetch_usgs(iaga, t, u) if src == "usgs" else fetch_gin(iaga, t, u - timedelta(minutes=1))
+                    if src == "usgs":
+                        try:  # definitive data has the instrument glitches cleaned out
+                            pts = fetch_usgs(iaga, t, u, "definitive")
+                        except Exception:  # noqa: BLE001
+                            pts = fetch_usgs(iaga, t, u, "variation")
+                    else:
+                        pts = fetch_gin(iaga, t, u - timedelta(minutes=1))
                     break
                 except Exception as e:  # noqa: BLE001
                     if attempt == 2:
@@ -114,6 +122,8 @@ def ground_hourly(year):
                     time.sleep(5)
             if pts:
                 for ts, v in dbdt([p for p in pts if t.timestamp() <= p[0] < u.timestamp()]):
+                    if v > MAX_PLAUSIBLE:
+                        continue
                     h = ts - ts % 3600
                     if v > hourly.get(h, (0, ""))[0]:
                         hourly[h] = (v, iaga)
