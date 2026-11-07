@@ -18,6 +18,8 @@ import json
 import os
 import re
 import sys
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta, timezone
@@ -28,6 +30,7 @@ from fetch_supermag import dbdt_series, fetch_station  # noqa: E402
 EY_WARN = 10.0          # mV/m
 SUSTAIN_MIN = 10
 DANGER_DBDT = 300.0     # nT/min
+DANGER_MAX_LAT = 62.0   # only mid/sub-auroral stations count: polar sites spike even in moderate storms
 L1_TO_BOWSHOCK_KM = 1.41e6
 BINS = 24
 UA = {"User-Agent": "helios-shield-demo"}
@@ -58,8 +61,12 @@ STATIONS = {  # IAGA: (name, lat, lon)
 
 def get(url, timeout=90):
     req = urllib.request.Request(url, headers=UA)
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        return r.read().decode("utf-8", "replace")
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return r.read().decode("utf-8", "replace")
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", "replace")[:300]
+        raise RuntimeError(f"HTTP {e.code} for {url[:160]}: {body}") from None
 
 
 def ts(dt):
@@ -94,12 +101,19 @@ def fetch_omni(start, end):
             if not bz or not v:
                 print(f"{ds}: could not find Bz/V among {names}")
                 continue
-            q = urllib.parse.urlencode({
-                "id": ds, "parameters": f"{bz},{v}", "format": "csv",
-                "start": start.strftime("%Y-%m-%dT%H:%M:%SZ"), "stop": end.strftime("%Y-%m-%dT%H:%M:%SZ"),
-            })
+            t0, t1 = start.strftime("%Y-%m-%dT%H:%M:%SZ"), end.strftime("%Y-%m-%dT%H:%M:%SZ")
+            text = None
+            for style in ({"start": t0, "stop": t1}, {"time.min": t0, "time.max": t1}):
+                q = urllib.parse.urlencode({"id": ds, "parameters": f"{bz},{v}", "format": "csv", **style})
+                try:
+                    text = get(f"{HAPI}/data?{q}")
+                    break
+                except Exception as e:  # noqa: BLE001
+                    print(f"{ds} {list(style)[0]}: {e}")
+            if text is None:
+                continue
             rows = []
-            for r in csv.reader(io.StringIO(get(f"{HAPI}/data?{q}"))):
+            for r in csv.reader(io.StringIO(text)):
                 if len(r) < 3:
                     continue
                 try:
@@ -197,11 +211,17 @@ def main():
         # SuperMAG stations
         stations, dmax, first_danger = [], [0.0] * BINS, None
         for iaga, (name, lat, lng) in STATIONS.items() if logon else []:
-            try:
-                series = dbdt_series(fetch_station(logon, iaga, start.strftime("%Y-%m-%dT%H:%M"),
-                                                   cfg["hours"] * 3600))
-            except Exception as e:  # noqa: BLE001
-                print(f"{iaga}: failed: {str(e)[:120]}")
+            series, err = None, None
+            for attempt in range(3):
+                try:
+                    series = dbdt_series(fetch_station(logon, iaga, start.strftime("%Y-%m-%dT%H:%M"),
+                                                       cfg["hours"] * 3600))
+                    break
+                except Exception as e:  # noqa: BLE001
+                    err = e
+                    time.sleep(5 * (attempt + 1))
+            if series is None:
+                print(f"{iaga}: failed: {str(err)[:120]}")
                 continue
             if not series:
                 continue
@@ -212,7 +232,7 @@ def main():
                 i = bin_of(t)
                 if i is not None:
                     dmax[i] = max(dmax[i], v)
-                if v >= DANGER_DBDT and (first_danger is None or t < first_danger[0]):
+                if abs(lat) <= DANGER_MAX_LAT and v >= DANGER_DBDT and (first_danger is None or t < first_danger[0]):
                     first_danger = (t, iaga, v)
             print(f"{iaga}: peak {pv:.0f} nT/min at {isoz(pt)}")
         if stations:
