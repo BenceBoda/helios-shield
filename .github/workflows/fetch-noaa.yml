@@ -4,20 +4,27 @@ on:
     - cron: '*/5 * * * *'
   workflow_dispatch:
 
+concurrency:
+  group: data-commit
+  cancel-in-progress: false
+
 jobs:
   fetch:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
-      - name: Fetch NOAA data
-        run: |
-          curl -s https://services.swpc.noaa.gov/json/planetary_k_index_1m.json > kp.json
-          curl -s https://services.swpc.noaa.gov/json/solar-wind/mag-1-minute.json > bz.json
+
+      - name: Fetch Kp and solar wind
+        run: python3 scripts/fetch_noaa.py
+
       - name: Commit data
         run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add kp.json bz.json
-          git diff --staged --quiet || git commit -m "Update NOAA data"
-            git pull --rebase origin main
-          git push
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "chore: update NOAA data [skip ci]"
+          git pull --rebase origin main
+          git push origin HEAD:main

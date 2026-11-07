@@ -427,7 +427,8 @@ async function tryLoadLiveStations(){
     const d=await r.json();
     if(d&&d.stations&&d.stations.length>0){
       const badge=document.getElementById('live-stations-badge');
-      const age=d.fetched_at?Math.round((Date.now()-new Date(d.fetched_at))/60000):null;
+      const ts=d.data_time||d.fetched_at;
+      const age=ts?Math.round((Date.now()-new Date(ts))/60000):null;
       if(badge)badge.textContent=d.stations.length+' stations · '+(age!==null?age+'min ago':'live');
       window._liveSmData=d;
     }
@@ -453,7 +454,8 @@ function _renderLiveOverlay(){
   clearMapLayers();
   // Fly to global view
   map.flyTo([30,10],2,{duration:1.2});
-  const fetchedAt=d.fetched_at?d.fetched_at.slice(11,16)+' UTC':'';
+  const dataTime=d.data_time||d.fetched_at;
+  const fetchedAt=dataTime?dataTime.slice(0,10)+' '+dataTime.slice(11,16)+' UTC'+(d.stale?' (stale)':''):'';
   d.stations.forEach(st=>{
     if(!st.lat&&!st.lng)return;
     const col=dbdtColor(st.dbdt);
@@ -680,17 +682,32 @@ async function fetchRealData(){
     if(!kpRes.ok)throw new Error('kp.json not found');
     const kpRaw=await kpRes.json();
     const step=Math.max(1,Math.floor(kpRaw.length/24));
-    const labels=[],kpVals=[];
+    const labels=[],kpVals=[],keys=[];
     for(let i=0;i<kpRaw.length&&labels.length<24;i+=step){
       labels.push(kpRaw[i].time_tag.slice(11,16));
+      keys.push(kpRaw[i].time_tag.slice(0,16));
       kpVals.push(Math.max(0,parseFloat(kpRaw[i].estimated_kp)||kpRaw[i].kp_index||0));
     }
+    // Live solar wind Bz (L1) from bz.json, matched to the Kp timestamps
+    let bzSeries=Array(labels.length).fill(null),bzNow=null;
+    try{
+      const bzRes=await fetch('./bz.json?_='+Date.now());
+      if(bzRes.ok){
+        const bzData=await bzRes.json();
+        const rows=(bzData&&bzData.data)||[];
+        if(rows.length){
+          bzNow=rows[rows.length-1].bz;
+          let j=0,last=null;
+          bzSeries=keys.map(k=>{while(j<rows.length&&rows[j].t<=k){last=rows[j].bz;j++}return last});
+        }
+      }
+    }catch(e){console.warn('bz.json unavailable:',e)}
     chart.data.labels=labels;
     chart.data.datasets[0].data=kpVals;
-    chart.data.datasets[1].data=Array(labels.length).fill(0);
+    chart.data.datasets[1].data=bzSeries.map(v=>v===null?null:Math.max(0,Math.min(9,(v+120)/120*9)));
     chart.data.datasets[2].data=Array(labels.length).fill(threshold);
     chart.update('none');
-    updateStatusBar(kpVals[kpVals.length-1]||0,-4.1);
+    updateStatusBar(kpVals[kpVals.length-1]||0,bzNow===null?0:bzNow);
     document.getElementById('live-win').textContent='↻ '+new Date().toTimeString().slice(0,5);
     btn.textContent='● Live data';
     liveRefreshTimer=setTimeout(fetchRealData,5*60*1000);
