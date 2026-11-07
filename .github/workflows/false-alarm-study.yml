@@ -2,27 +2,32 @@ name: False-alarm study
 on:
   workflow_dispatch:
     inputs:
-      year:
-        description: Year to evaluate
+      years:
+        description: Years to evaluate, separated by spaces
         default: '2024'
 
+# Own group: the 5-minute data workflows must not replace a queued study run
 concurrency:
-  group: data-commit
+  group: false-alarm-study
   cancel-in-progress: false
 
 jobs:
   study:
     runs-on: ubuntu-latest
+    timeout-minutes: 360
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run the V1 rule over a full year and compare with ground dB/dt
-        timeout-minutes: 120
+      - name: Run the V1 rule over each year and compare with ground dB/dt
         env:
-          STUDY_YEAR: ${{ inputs.year }}
-        run: python3 -u scripts/false_alarm_study.py
+          YEARS: ${{ inputs.years }}
+        run: |
+          for y in $YEARS; do
+            echo "##### $y"
+            STUDY_YEAR=$y python3 -u scripts/false_alarm_study.py || echo "year $y failed"
+          done
 
       - name: Commit results
         run: |
