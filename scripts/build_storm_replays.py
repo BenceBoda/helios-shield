@@ -214,7 +214,7 @@ def main():
                                   "l1_lead_min": lead, "speed": round(wv) if wv else None,
                                   "ey": round(wey, 1) if wey is not None else None, "rule": rule,
                                   "cadence_s": cadence}
-                print(f"warning: bow shock {isoz(wt)}, L1 {isoz(wt - lead * 60)} (lead {lead} min, V={wv:.0f})")
+                print(f"warning: bow shock {isoz(wt)}, L1 {isoz(wt - lead * 60)} (lead {lead} min, V={wv}, rule {rule})")
 
         # SuperMAG stations
         stations, dmax, first_danger = [], [0.0] * BINS, None
