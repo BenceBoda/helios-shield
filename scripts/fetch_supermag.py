@@ -55,7 +55,7 @@ def comp(rec, key):
 def fetch_station(logon, iaga, start, extent):
     # Same request shape as the official supermag-api Python client
     q = urllib.parse.urlencode({"start": start, "logon": logon, "extent": f"{extent:012d}"})
-    url = f"{API}?python&nohead&{q}&mag&geo&station={iaga}"
+    url = f"{API}?fmt=json&{q}&mag&geo&station={iaga}"
     req = urllib.request.Request(url, headers={"User-Agent": "helios-shield-demo"})
     with urllib.request.urlopen(req, timeout=40) as r:
         text = r.read().decode("utf-8", "replace").strip()
@@ -159,8 +159,7 @@ def main():
 
     if newest:
         result["data_time"] = iso(newest)
-    elif logon:
-        probe_inventory(logon, now)
+
 
     if not result["stations"]:
         try:

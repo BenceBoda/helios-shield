@@ -1,7 +1,7 @@
 name: Fetch SuperMAG data
+# SuperMAG has no near-real-time data (newest is weeks-months old), so no schedule:
+# run by hand; live dB/dt will come from a real-time magnetometer source instead.
 on:
-  schedule:
-    - cron: '*/10 * * * *'
   workflow_dispatch:
 
 concurrency:
