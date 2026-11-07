@@ -29,6 +29,7 @@ from fetch_supermag import dbdt_series, fetch_station  # noqa: E402
 
 EY_WARN = 10.0          # mV/m
 SUSTAIN_MIN = 10
+BZ_WARN = 10.0          # nT, fallback rule when solar wind speed is missing
 DANGER_DBDT = 300.0     # nT/min
 DANGER_MAX_LAT = 62.0   # only mid/sub-auroral stations count: polar sites spike even in moderate storms
 L1_TO_BOWSHOCK_KM = 1.41e6
@@ -112,7 +113,6 @@ def fetch_omni(start, end):
                     print(f"{ds} {list(style)[0]}: {e}")
             if text is None:
                 continue
-            print(f"{ds} sample: {text.splitlines()[:2]}")
             rows = []
             for r in csv.reader(io.StringIO(text)):
                 if len(r) < 3:
@@ -122,8 +122,8 @@ def fetch_omni(start, end):
                     b, s = float(r[1]), float(r[2])
                 except ValueError:
                     continue
-                if abs(b) < 999 and 0 < s < 9999:
-                    rows.append((ts(t), b, s))
+                if abs(b) < 999:  # keep Bz even when speed is missing (e.g. ACE plasma saturated in 2003)
+                    rows.append((ts(t), b, s if 0 < s < 9999 else None))
             print(f"{ds}: {len(rows)} valid rows ({bz}, {v})")
             if rows:
                 return ds, cadence, rows
@@ -146,15 +146,19 @@ def fetch_kp(start, end):
 
 # ---------- analysis ----------
 def warning_time(sw, cadence):
-    """First time Ey >= EY_WARN held for SUSTAIN_MIN (bow-shock time), with the speed then."""
+    """First time the rule holds for SUSTAIN_MIN (bow-shock time). Returns (t, v, ey, rule).
+    Rule: Ey = V*Bs >= EY_WARN mV/m; where speed is missing, Bz <= -BZ_WARN nT instead."""
     need = max(1, SUSTAIN_MIN * 60 // cadence)
     run = 0
     for t, bz, v in sw:
-        ey = v * max(0.0, -bz) * 1e-3
-        run = run + 1 if ey >= EY_WARN else 0
+        if v is not None:
+            hit, ey, rule = v * max(0.0, -bz) * 1e-3 >= EY_WARN, v * max(0.0, -bz) * 1e-3, "Ey"
+        else:
+            hit, ey, rule = bz <= -BZ_WARN, None, "Bz"
+        run = run + 1 if hit else 0
         if run >= need:
-            return t, v, ey
-    return None, None, None
+            return t, v, ey, rule
+    return None, None, None, None
 
 
 def main():
@@ -199,13 +203,16 @@ def main():
                     sums[i][1] += 1
             out["bz"] = [round(s / n, 1) if n else None for s, n in sums]
             out["bz_min"] = round(min(b for _, b, _ in sw), 1)
-            out["v_max"] = round(max(v for _, _, v in sw))
+            vs = [v for _, _, v in sw if v is not None]
+            out["v_max"] = round(max(vs)) if vs else None
             out["sources"]["solar_wind"] = f"NASA OMNI ({ds})"
-            wt, wv, wey = warning_time(sw, cadence)
+            wt, wv, wey, rule = warning_time(sw, cadence)
             if wt:
-                lead = round(L1_TO_BOWSHOCK_KM / wv / 60)
+                # Without a measured speed we cannot estimate the L1 lead: count from bow-shock time (conservative)
+                lead = round(L1_TO_BOWSHOCK_KM / wv / 60) if wv else 0
                 out["warning"] = {"bowshock_time": isoz(wt), "l1_time": isoz(wt - lead * 60),
-                                  "l1_lead_min": lead, "speed": round(wv), "ey": round(wey, 1),
+                                  "l1_lead_min": lead, "speed": round(wv) if wv else None,
+                                  "ey": round(wey, 1) if wey is not None else None, "rule": rule,
                                   "cadence_s": cadence}
                 print(f"warning: bow shock {isoz(wt)}, L1 {isoz(wt - lead * 60)} (lead {lead} min, V={wv:.0f})")
 
