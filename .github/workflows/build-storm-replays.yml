@@ -17,7 +17,8 @@ jobs:
       - name: Fetch SuperMAG, OMNI and Kp for historical storms
         env:
           SM_LOGON: ${{ secrets.SUPERMAG_USER }}
-        run: python3 scripts/build_storm_replays.py
+        timeout-minutes: 40
+        run: python3 -u scripts/build_storm_replays.py
 
       - name: Commit data
         run: |
