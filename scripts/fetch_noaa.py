@@ -14,8 +14,8 @@ from datetime import datetime, timezone
 
 BASE = "https://services.swpc.noaa.gov"
 KP_URL = BASE + "/json/planetary_k_index_1m.json"
-MAG_URLS = [BASE + "/products/solar-wind/mag-1-day.json", BASE + "/json/rtsw/rtsw_mag_1m.json"]
-PLASMA_URLS = [BASE + "/products/solar-wind/plasma-1-day.json", BASE + "/json/rtsw/rtsw_wind_1m.json"]
+MAG_URLS = [BASE + "/json/rtsw/rtsw_mag_1m.json"]
+PLASMA_URLS = [BASE + "/json/rtsw/rtsw_wind_1m.json"]
 KEEP_MINUTES = 6 * 60
 
 
