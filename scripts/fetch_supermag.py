@@ -53,11 +53,10 @@ def comp(rec, key):
 
 
 def fetch_station(logon, iaga, start, extent):
-    q = urllib.parse.urlencode({
-        "fmt": "json", "logon": logon, "start": start,
-        "extent": f"{extent:012d}", "station": iaga,
-    }) + "&mag&geo"
-    req = urllib.request.Request(f"{API}?{q}", headers={"User-Agent": "helios-shield-demo"})
+    # Same request shape as the official supermag-api Python client
+    q = urllib.parse.urlencode({"start": start, "logon": logon, "extent": f"{extent:012d}"})
+    url = f"{API}?python&nohead&{q}&mag&geo&station={iaga}"
+    req = urllib.request.Request(url, headers={"User-Agent": "helios-shield-demo"})
     with urllib.request.urlopen(req, timeout=40) as r:
         text = r.read().decode("utf-8", "replace").strip()
     if not text or text.upper().startswith("ERROR"):
@@ -73,6 +72,20 @@ def fetch_station(logon, iaga, start, extent):
     if not isinstance(data, list):
         raise RuntimeError(f"unexpected response: {str(data)[:200]}")
     return data
+
+
+def probe_inventory(logon, now):
+    """Diagnostics: how many stations SuperMAG has data for at various lags."""
+    for lag in [1, 24, 72, 168, 720, 8760]:
+        start = (now - timedelta(hours=lag)).strftime("%Y-%m-%dT%H:%M")
+        q = urllib.parse.urlencode({"start": start, "logon": logon, "extent": f"{3600:012d}"})
+        url = f"https://supermag.jhuapl.edu/services/inventory.php?python&nohead&{q}"
+        try:
+            with urllib.request.urlopen(url, timeout=40) as r:
+                lines = r.read().decode("utf-8", "replace").strip().split("\n")
+            print(f"inventory {lag}h back: {lines[0][:60]!r}, {len(lines) - 1} lines, sample {lines[1:4]}")
+        except Exception as e:  # noqa: BLE001
+            print(f"inventory {lag}h back: failed {e}")
 
 
 def dbdt_series(records):
@@ -146,6 +159,8 @@ def main():
 
     if newest:
         result["data_time"] = iso(newest)
+    elif logon:
+        probe_inventory(logon, now)
 
     if not result["stations"]:
         try:
