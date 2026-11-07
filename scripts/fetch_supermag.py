@@ -16,6 +16,7 @@ import json
 import math
 import os
 import sys
+import time
 import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta, timezone
@@ -23,6 +24,7 @@ from datetime import datetime, timedelta, timezone
 API = "https://supermag.jhuapl.edu/services/data-api.php"
 WINDOW_HOURS = 6  # SuperMAG near-real-time data can lag; ask for a wide window
 PEAK_MINUTES = 60
+LAGS_HOURS = [0, 6, 18, 42, 90, 162]  # look back up to ~7 days
 
 # IAGA code: (name, geographic lat, lon)
 STATIONS = {
@@ -60,7 +62,9 @@ def fetch_station(logon, iaga, start, extent):
         text = r.read().decode("utf-8", "replace").strip()
     if not text or text.upper().startswith("ERROR"):
         raise RuntimeError(text[:200] or "empty response")
-    # The API may prefix the JSON with a status line such as "OK"
+    # The API prefixes the JSON with a status line "OK"; "OK" alone means no data in the window
+    if text.upper() == "OK":
+        return []
     body = text[text.find("["):] if "[" in text else text
     try:
         data = json.loads(body)
@@ -101,15 +105,28 @@ def main():
     if not logon:
         result["errors"].append("SM_LOGON is not set")
 
-    start = (now - timedelta(hours=WINDOW_HOURS)).strftime("%Y-%m-%dT%H:%M")
     extent = WINDOW_HOURS * 3600
     newest = 0
     for iaga, (name, lat, lng) in STATIONS.items() if logon else []:
-        try:
-            series = dbdt_series(fetch_station(logon, iaga, start, extent))
-        except Exception as e:  # noqa: BLE001
-            result["errors"].append(f"{iaga}: {e}")
-            print(f"{iaga}: failed: {e}")
+        series, err = [], None
+        # Near-real-time data can lag; step back in time until a window has data
+        for lag_h in LAGS_HOURS:
+            start = (now - timedelta(hours=WINDOW_HOURS + lag_h)).strftime("%Y-%m-%dT%H:%M")
+            for attempt in range(2):
+                try:
+                    series = dbdt_series(fetch_station(logon, iaga, start, extent))
+                    err = None
+                    break
+                except Exception as e:  # noqa: BLE001
+                    err = e
+                    time.sleep(3)
+            if series:
+                if lag_h:
+                    print(f"{iaga}: newest data found {lag_h}h back")
+                break
+        if err and not series:
+            result["errors"].append(f"{iaga}: {err}")
+            print(f"{iaga}: failed: {err}")
             continue
         if not series:
             result["errors"].append(f"{iaga}: no samples in window")
