@@ -56,7 +56,7 @@ def fetch_station(logon, iaga, start, extent):
     q = urllib.parse.urlencode({
         "fmt": "json", "logon": logon, "start": start,
         "extent": f"{extent:012d}", "station": iaga,
-    })
+    }) + "&mag&geo"
     req = urllib.request.Request(f"{API}?{q}", headers={"User-Agent": "helios-shield-demo"})
     with urllib.request.urlopen(req, timeout=40) as r:
         text = r.read().decode("utf-8", "replace").strip()
@@ -114,7 +114,10 @@ def main():
             start = (now - timedelta(hours=WINDOW_HOURS + lag_h)).strftime("%Y-%m-%dT%H:%M")
             for attempt in range(2):
                 try:
-                    series = dbdt_series(fetch_station(logon, iaga, start, extent))
+                    recs = fetch_station(logon, iaga, start, extent)
+                    if recs and iaga == "KIR" and lag_h == 0:
+                        print(f"debug {iaga}: {len(recs)} records, first: {json.dumps(recs[0])[:300]}")
+                    series = dbdt_series(recs)
                     err = None
                     break
                 except Exception as e:  # noqa: BLE001
