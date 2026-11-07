@@ -16,7 +16,8 @@ Definitions
   Late:    the first alert came during the first 3 h of the event.
   Missed:  no alert from 12 h before to 3 h after the event start.
   False alarm: an alert episode with no event from its start to 12 h later.
-  Values above MAX_PLAUSIBLE nT/min are treated as instrument artefacts (steps, glitches).
+  An hour only counts if a second station saw at least a third of the threshold at the same
+  time; single-station jumps and values above MAX_PLAUSIBLE nT/min are instrument artefacts.
 """
 import csv
 import io
@@ -96,7 +97,14 @@ def alerts(rows, ey_thr):
 
 
 def ground_hourly(year):
-    """Max dB/dt per hour across stations: {hour_epoch: (value, station)} and coverage per station."""
+    """Per-station hourly max dB/dt: {hour_epoch: {station: value}} and coverage per station.
+    Cached in analysis/ground_hourly_<year>.json so reruns skip the download."""
+    cache = f"analysis/ground_hourly_{year}.json"
+    if os.path.exists(cache):
+        with open(cache) as f:
+            c = json.load(f)
+        print(f"using cached ground data ({cache})")
+        return {int(h): v for h, v in c["hourly"].items()}, c["coverage"]
     hourly, cover = {}, {}
     start = datetime(year, 1, 1, tzinfo=timezone.utc)
     end = datetime(year + 1, 1, 1, tzinfo=timezone.utc)
@@ -125,24 +133,39 @@ def ground_hourly(year):
                     if v > MAX_PLAUSIBLE:
                         continue
                     h = ts - ts % 3600
-                    if v > hourly.get(h, (0, ""))[0]:
-                        hourly[h] = (v, iaga)
+                    row = hourly.setdefault(h, {})
+                    if v > row.get(iaga, 0):
+                        row[iaga] = round(v, 1)
                     got += 1
             t = u
         cover[iaga] = round(got / ((end - start).total_seconds() / 60), 3)
         print(f"{iaga}: coverage {cover[iaga]:.0%}")
+    with open(cache, "w") as f:
+        json.dump({"hourly": hourly, "coverage": cover}, f, separators=(",", ":"))
     return hourly, cover
 
 
+def confirmed(row, thr):
+    """(value, station) if the hour is a real event: the top station reaches thr AND a second
+    station sees at least thr/3 at the same time. Single-station jumps are instrument artefacts."""
+    vals = sorted(((v, s) for s, v in row.items() if v <= MAX_PLAUSIBLE), reverse=True)
+    if len(vals) >= 2 and vals[0][0] >= thr and vals[1][0] >= thr / 3:
+        return vals[0]
+    return None
+
+
 def events(hourly, thr):
-    hours = sorted(h for h, (v, _) in hourly.items() if v >= thr)
+    hits = {h: confirmed(row, thr) for h, row in hourly.items()}
+    hours = sorted(h for h, c in hits.items() if c)
     ev = []
     for h in hours:
+        v, st = hits[h]
         if ev and h - ev[-1]["end"] <= EPISODE_GAP_H * 3600:
             ev[-1]["end"] = h
-            ev[-1]["peak"] = max(ev[-1]["peak"], hourly[h][0])
+            if v > ev[-1]["peak"]:
+                ev[-1]["peak"], ev[-1]["station"] = v, st
         else:
-            ev.append({"start": h, "end": h, "peak": hourly[h][0], "station": hourly[h][1]})
+            ev.append({"start": h, "end": h, "peak": v, "station": st})
     return ev
 
 
