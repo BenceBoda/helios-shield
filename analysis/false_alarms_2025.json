@@ -1,0 +1,436 @@
+{
+ "year": 2025,
+ "station_coverage": {
+  "FRD": 0.977,
+  "BOU": 0.983,
+  "NEW": 0.983,
+  "SIT": 0.983,
+  "NGK": 1.0,
+  "ESK": 1.0,
+  "HAD": 1.0,
+  "LER": 1.0
+ },
+ "omni_rows": 525600,
+ "definitions": "Alert:   Ey = V*Bs >= EY mV/m for 10 consecutive minutes (OMNI, bow-shock time),\n           moved earlier by the L1 transit time (1.41e6 km / V). Alerts closer than\n           6 h to the previous one belong to the same alert episode.\n  Event:   an hour in which any mid-latitude station's dB/dt reached DBDT nT/min.\n           Hours closer than 6 h belong to the same event.\n  Warned:  an alert episode started 0-12 h before the event's first hour.\n  Late:    the first alert came during the first 3 h of the event.\n  Missed:  no alert from 12 h before to 3 h after the event start.\n  False alarm: an alert episode with no event from its start to 12 h later.\n  An hour only counts if a second station saw at least a third of the threshold at the same\n  time; single-station jumps and values above MAX_PLAUSIBLE nT/min are instrument artefacts.",
+ "results": [
+  {
+   "ey": 5.0,
+   "dbdt": 100.0,
+   "alerts": 24,
+   "events": 16,
+   "warned": 7,
+   "late": 3,
+   "missed": 6,
+   "false_alarms": 13,
+   "detail": {
+    "warned": [
+     {
+      "event_start": "2025-01-01T12:00Z",
+      "peak_dbdt": 383,
+      "station": "SIT",
+      "lead_min": 201
+     },
+     {
+      "event_start": "2025-04-16T14:00Z",
+      "peak_dbdt": 327,
+      "station": "SIT",
+      "lead_min": 154
+     },
+     {
+      "event_start": "2025-06-01T19:00Z",
+      "peak_dbdt": 108,
+      "station": "SIT",
+      "lead_min": 607
+     },
+     {
+      "event_start": "2025-06-02T14:00Z",
+      "peak_dbdt": 130,
+      "station": "SIT",
+      "lead_min": 359
+     },
+     {
+      "event_start": "2025-06-13T08:00Z",
+      "peak_dbdt": 155,
+      "station": "SIT",
+      "lead_min": 158
+     },
+     {
+      "event_start": "2025-09-30T05:00Z",
+      "peak_dbdt": 126,
+      "station": "SIT",
+      "lead_min": 90
+     },
+     {
+      "event_start": "2025-11-06T03:00Z",
+      "peak_dbdt": 121,
+      "station": "SIT",
+      "lead_min": 184
+     }
+    ],
+    "late": [
+     {
+      "event_start": "2025-06-01T06:00Z",
+      "peak_dbdt": 484,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2025-11-12T00:00Z",
+      "peak_dbdt": 335,
+      "station": "NEW"
+     },
+     {
+      "event_start": "2025-12-03T18:00Z",
+      "peak_dbdt": 556,
+      "station": "NEW"
+     }
+    ],
+    "missed": [
+     {
+      "event_start": "2025-06-03T03:00Z",
+      "peak_dbdt": 477,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2025-06-13T00:00Z",
+      "peak_dbdt": 124,
+      "station": "LER"
+     },
+     {
+      "event_start": "2025-09-01T21:00Z",
+      "peak_dbdt": 123,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2025-10-01T20:00Z",
+      "peak_dbdt": 115,
+      "station": "LER"
+     },
+     {
+      "event_start": "2025-10-02T03:00Z",
+      "peak_dbdt": 158,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2025-11-13T14:00Z",
+      "peak_dbdt": 179,
+      "station": "SIT"
+     }
+    ],
+    "false_alarms": [
+     "2025-01-04T04:33Z",
+     "2025-02-09T14:33Z",
+     "2025-03-08T17:19Z",
+     "2025-03-26T11:50Z",
+     "2025-04-15T18:17Z",
+     "2025-06-14T02:11Z",
+     "2025-08-08T19:21Z",
+     "2025-08-09T08:50Z",
+     "2025-09-02T19:07Z",
+     "2025-09-14T22:44Z",
+     "2025-11-08T01:48Z",
+     "2025-12-03T20:13Z",
+     "2025-12-10T20:48Z"
+    ]
+   }
+  },
+  {
+   "ey": 5.0,
+   "dbdt": 300.0,
+   "alerts": 24,
+   "events": 1,
+   "warned": 1,
+   "late": 0,
+   "missed": 0,
+   "false_alarms": 23,
+   "detail": {
+    "warned": [
+     {
+      "event_start": "2025-11-12T01:00Z",
+      "peak_dbdt": 335,
+      "station": "NEW",
+      "lead_min": 57
+     }
+    ],
+    "late": [],
+    "missed": [],
+    "false_alarms": [
+     "2025-01-01T08:39Z",
+     "2025-01-04T04:33Z",
+     "2025-02-09T14:33Z",
+     "2025-03-08T17:19Z",
+     "2025-03-26T11:50Z",
+     "2025-04-15T18:17Z",
+     "2025-04-16T11:25Z",
+     "2025-06-01T08:52Z",
+     "2025-06-01T18:45Z",
+     "2025-06-02T08:00Z",
+     "2025-06-13T05:21Z",
+     "2025-06-14T02:11Z",
+     "2025-08-08T19:21Z",
+     "2025-08-09T08:50Z",
+     "2025-09-02T19:07Z",
+     "2025-09-14T22:44Z",
+     "2025-09-30T03:29Z",
+     "2025-11-05T23:55Z",
+     "2025-11-08T01:48Z",
+     "2025-11-12T08:03Z",
+     "2025-11-13T00:24Z",
+     "2025-12-03T20:13Z",
+     "2025-12-10T20:48Z"
+    ]
+   }
+  },
+  {
+   "ey": 10.0,
+   "dbdt": 100.0,
+   "alerts": 5,
+   "events": 16,
+   "warned": 2,
+   "late": 2,
+   "missed": 12,
+   "false_alarms": 0,
+   "detail": {
+    "warned": [
+     {
+      "event_start": "2025-01-01T12:00Z",
+      "peak_dbdt": 383,
+      "station": "SIT",
+      "lead_min": 35
+     },
+     {
+      "event_start": "2025-06-01T19:00Z",
+      "peak_dbdt": 108,
+      "station": "SIT",
+      "lead_min": 607
+     }
+    ],
+    "late": [
+     {
+      "event_start": "2025-06-01T06:00Z",
+      "peak_dbdt": 484,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2025-11-12T00:00Z",
+      "peak_dbdt": 335,
+      "station": "NEW"
+     }
+    ],
+    "missed": [
+     {
+      "event_start": "2025-04-16T14:00Z",
+      "peak_dbdt": 327,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2025-06-02T14:00Z",
+      "peak_dbdt": 130,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2025-06-03T03:00Z",
+      "peak_dbdt": 477,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2025-06-13T00:00Z",
+      "peak_dbdt": 124,
+      "station": "LER"
+     },
+     {
+      "event_start": "2025-06-13T08:00Z",
+      "peak_dbdt": 155,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2025-09-01T21:00Z",
+      "peak_dbdt": 123,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2025-09-30T05:00Z",
+      "peak_dbdt": 126,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2025-10-01T20:00Z",
+      "peak_dbdt": 115,
+      "station": "LER"
+     },
+     {
+      "event_start": "2025-10-02T03:00Z",
+      "peak_dbdt": 158,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2025-11-06T03:00Z",
+      "peak_dbdt": 121,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2025-11-13T14:00Z",
+      "peak_dbdt": 179,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2025-12-03T18:00Z",
+      "peak_dbdt": 556,
+      "station": "NEW"
+     }
+    ],
+    "false_alarms": []
+   }
+  },
+  {
+   "ey": 10.0,
+   "dbdt": 300.0,
+   "alerts": 5,
+   "events": 1,
+   "warned": 1,
+   "late": 0,
+   "missed": 0,
+   "false_alarms": 4,
+   "detail": {
+    "warned": [
+     {
+      "event_start": "2025-11-12T01:00Z",
+      "peak_dbdt": 335,
+      "station": "NEW",
+      "lead_min": 57
+     }
+    ],
+    "late": [],
+    "missed": [],
+    "false_alarms": [
+     "2025-01-01T11:24Z",
+     "2025-06-01T08:52Z",
+     "2025-11-12T08:03Z",
+     "2025-11-13T00:24Z"
+    ]
+   }
+  },
+  {
+   "ey": 15.0,
+   "dbdt": 100.0,
+   "alerts": 2,
+   "events": 16,
+   "warned": 0,
+   "late": 1,
+   "missed": 15,
+   "false_alarms": 0,
+   "detail": {
+    "warned": [],
+    "late": [
+     {
+      "event_start": "2025-11-12T00:00Z",
+      "peak_dbdt": 335,
+      "station": "NEW"
+     }
+    ],
+    "missed": [
+     {
+      "event_start": "2025-01-01T12:00Z",
+      "peak_dbdt": 383,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2025-04-16T14:00Z",
+      "peak_dbdt": 327,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2025-06-01T06:00Z",
+      "peak_dbdt": 484,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2025-06-01T19:00Z",
+      "peak_dbdt": 108,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2025-06-02T14:00Z",
+      "peak_dbdt": 130,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2025-06-03T03:00Z",
+      "peak_dbdt": 477,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2025-06-13T00:00Z",
+      "peak_dbdt": 124,
+      "station": "LER"
+     },
+     {
+      "event_start": "2025-06-13T08:00Z",
+      "peak_dbdt": 155,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2025-09-01T21:00Z",
+      "peak_dbdt": 123,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2025-09-30T05:00Z",
+      "peak_dbdt": 126,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2025-10-01T20:00Z",
+      "peak_dbdt": 115,
+      "station": "LER"
+     },
+     {
+      "event_start": "2025-10-02T03:00Z",
+      "peak_dbdt": 158,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2025-11-06T03:00Z",
+      "peak_dbdt": 121,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2025-11-13T14:00Z",
+      "peak_dbdt": 179,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2025-12-03T18:00Z",
+      "peak_dbdt": 556,
+      "station": "NEW"
+     }
+    ],
+    "false_alarms": []
+   }
+  },
+  {
+   "ey": 15.0,
+   "dbdt": 300.0,
+   "alerts": 2,
+   "events": 1,
+   "warned": 1,
+   "late": 0,
+   "missed": 0,
+   "false_alarms": 1,
+   "detail": {
+    "warned": [
+     {
+      "event_start": "2025-11-12T01:00Z",
+      "peak_dbdt": 335,
+      "station": "NEW",
+      "lead_min": 57
+     }
+    ],
+    "late": [],
+    "missed": [],
+    "false_alarms": [
+     "2025-11-12T08:03Z"
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,328 @@
+{
+ "year": 2023,
+ "station_coverage": {
+  "FRD": 0.964,
+  "BOU": 0.943,
+  "NEW": 0.98,
+  "SIT": 0.983,
+  "NGK": 1.0,
+  "ESK": 1.0,
+  "HAD": 1.0,
+  "LER": 1.0
+ },
+ "omni_rows": 525600,
+ "definitions": "Alert:   Ey = V*Bs >= EY mV/m for 10 consecutive minutes (OMNI, bow-shock time),\n           moved earlier by the L1 transit time (1.41e6 km / V). Alerts closer than\n           6 h to the previous one belong to the same alert episode.\n  Event:   an hour in which any mid-latitude station's dB/dt reached DBDT nT/min.\n           Hours closer than 6 h belong to the same event.\n  Warned:  an alert episode started 0-12 h before the event's first hour.\n  Late:    the first alert came during the first 3 h of the event.\n  Missed:  no alert from 12 h before to 3 h after the event start.\n  False alarm: an alert episode with no event from its start to 12 h later.\n  An hour only counts if a second station saw at least a third of the threshold at the same\n  time; single-station jumps and values above MAX_PLAUSIBLE nT/min are instrument artefacts.",
+ "results": [
+  {
+   "ey": 5.0,
+   "dbdt": 100.0,
+   "alerts": 14,
+   "events": 9,
+   "warned": 5,
+   "late": 1,
+   "missed": 3,
+   "false_alarms": 8,
+   "detail": {
+    "warned": [
+     {
+      "event_start": "2023-03-23T23:00Z",
+      "peak_dbdt": 305,
+      "station": "SIT",
+      "lead_min": 164
+     },
+     {
+      "event_start": "2023-04-23T19:00Z",
+      "peak_dbdt": 273,
+      "station": "LER",
+      "lead_min": 86
+     },
+     {
+      "event_start": "2023-04-24T02:00Z",
+      "peak_dbdt": 448,
+      "station": "SIT",
+      "lead_min": 506
+     },
+     {
+      "event_start": "2023-08-05T03:00Z",
+      "peak_dbdt": 226,
+      "station": "SIT",
+      "lead_min": 32
+     },
+     {
+      "event_start": "2023-11-25T18:00Z",
+      "peak_dbdt": 157,
+      "station": "LER",
+      "lead_min": 65
+     }
+    ],
+    "late": [
+     {
+      "event_start": "2023-11-05T12:00Z",
+      "peak_dbdt": 235,
+      "station": "SIT"
+     }
+    ],
+    "missed": [
+     {
+      "event_start": "2023-02-27T06:00Z",
+      "peak_dbdt": 516,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2023-03-23T14:00Z",
+      "peak_dbdt": 167,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2023-09-24T20:00Z",
+      "peak_dbdt": 140,
+      "station": "LER"
+     }
+    ],
+    "false_alarms": [
+     "2023-02-16T04:38Z",
+     "2023-05-07T23:53Z",
+     "2023-05-20T00:38Z",
+     "2023-06-15T16:54Z",
+     "2023-09-12T14:10Z",
+     "2023-12-01T09:53Z",
+     "2023-12-01T21:14Z",
+     "2023-12-17T13:08Z"
+    ]
+   }
+  },
+  {
+   "ey": 5.0,
+   "dbdt": 300.0,
+   "alerts": 14,
+   "events": 2,
+   "warned": 2,
+   "late": 0,
+   "missed": 0,
+   "false_alarms": 12,
+   "detail": {
+    "warned": [
+     {
+      "event_start": "2023-03-24T03:00Z",
+      "peak_dbdt": 305,
+      "station": "SIT",
+      "lead_min": 404
+     },
+     {
+      "event_start": "2023-04-24T04:00Z",
+      "peak_dbdt": 448,
+      "station": "SIT",
+      "lead_min": 626
+     }
+    ],
+    "late": [],
+    "missed": [],
+    "false_alarms": [
+     "2023-02-16T04:38Z",
+     "2023-02-27T16:42Z",
+     "2023-05-07T23:53Z",
+     "2023-05-20T00:38Z",
+     "2023-06-15T16:54Z",
+     "2023-08-05T02:28Z",
+     "2023-09-12T14:10Z",
+     "2023-11-05T13:36Z",
+     "2023-11-25T16:54Z",
+     "2023-12-01T09:53Z",
+     "2023-12-01T21:14Z",
+     "2023-12-17T13:08Z"
+    ]
+   }
+  },
+  {
+   "ey": 10.0,
+   "dbdt": 100.0,
+   "alerts": 2,
+   "events": 9,
+   "warned": 2,
+   "late": 0,
+   "missed": 7,
+   "false_alarms": 1,
+   "detail": {
+    "warned": [
+     {
+      "event_start": "2023-04-23T19:00Z",
+      "peak_dbdt": 273,
+      "station": "LER",
+      "lead_min": 29
+     },
+     {
+      "event_start": "2023-04-24T02:00Z",
+      "peak_dbdt": 448,
+      "station": "SIT",
+      "lead_min": 449
+     }
+    ],
+    "late": [],
+    "missed": [
+     {
+      "event_start": "2023-02-27T06:00Z",
+      "peak_dbdt": 516,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2023-03-23T14:00Z",
+      "peak_dbdt": 167,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2023-03-23T23:00Z",
+      "peak_dbdt": 305,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2023-08-05T03:00Z",
+      "peak_dbdt": 226,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2023-09-24T20:00Z",
+      "peak_dbdt": 140,
+      "station": "LER"
+     },
+     {
+      "event_start": "2023-11-05T12:00Z",
+      "peak_dbdt": 235,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2023-11-25T18:00Z",
+      "peak_dbdt": 157,
+      "station": "LER"
+     }
+    ],
+    "false_alarms": [
+     "2023-12-01T09:53Z"
+    ]
+   }
+  },
+  {
+   "ey": 10.0,
+   "dbdt": 300.0,
+   "alerts": 2,
+   "events": 2,
+   "warned": 1,
+   "late": 0,
+   "missed": 1,
+   "false_alarms": 1,
+   "detail": {
+    "warned": [
+     {
+      "event_start": "2023-04-24T04:00Z",
+      "peak_dbdt": 448,
+      "station": "SIT",
+      "lead_min": 569
+     }
+    ],
+    "late": [],
+    "missed": [
+     {
+      "event_start": "2023-03-24T03:00Z",
+      "peak_dbdt": 305,
+      "station": "SIT"
+     }
+    ],
+    "false_alarms": [
+     "2023-12-01T09:53Z"
+    ]
+   }
+  },
+  {
+   "ey": 15.0,
+   "dbdt": 100.0,
+   "alerts": 1,
+   "events": 9,
+   "warned": 1,
+   "late": 0,
+   "missed": 8,
+   "false_alarms": 0,
+   "detail": {
+    "warned": [
+     {
+      "event_start": "2023-04-24T02:00Z",
+      "peak_dbdt": 448,
+      "station": "SIT",
+      "lead_min": 21
+     }
+    ],
+    "late": [],
+    "missed": [
+     {
+      "event_start": "2023-02-27T06:00Z",
+      "peak_dbdt": 516,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2023-03-23T14:00Z",
+      "peak_dbdt": 167,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2023-03-23T23:00Z",
+      "peak_dbdt": 305,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2023-04-23T19:00Z",
+      "peak_dbdt": 273,
+      "station": "LER"
+     },
+     {
+      "event_start": "2023-08-05T03:00Z",
+      "peak_dbdt": 226,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2023-09-24T20:00Z",
+      "peak_dbdt": 140,
+      "station": "LER"
+     },
+     {
+      "event_start": "2023-11-05T12:00Z",
+      "peak_dbdt": 235,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2023-11-25T18:00Z",
+      "peak_dbdt": 157,
+      "station": "LER"
+     }
+    ],
+    "false_alarms": []
+   }
+  },
+  {
+   "ey": 15.0,
+   "dbdt": 300.0,
+   "alerts": 1,
+   "events": 2,
+   "warned": 1,
+   "late": 0,
+   "missed": 1,
+   "false_alarms": 0,
+   "detail": {
+    "warned": [
+     {
+      "event_start": "2023-04-24T04:00Z",
+      "peak_dbdt": 448,
+      "station": "SIT",
+      "lead_min": 141
+     }
+    ],
+    "late": [],
+    "missed": [
+     {
+      "event_start": "2023-03-24T03:00Z",
+      "peak_dbdt": 305,
+      "station": "SIT"
+     }
+    ],
+    "false_alarms": []
+   }
+  }
+ ]
+}

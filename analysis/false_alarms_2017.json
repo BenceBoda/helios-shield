@@ -1,0 +1,307 @@
+{
+ "year": 2017,
+ "station_coverage": {
+  "FRD": 0.995,
+  "BOU": 0.987,
+  "NEW": 0.995,
+  "SIT": 0.994,
+  "NGK": 1.0,
+  "ESK": 1.0,
+  "HAD": 1.0,
+  "LER": 1.0
+ },
+ "omni_rows": 525600,
+ "definitions": "Alert:   Ey = V*Bs >= EY mV/m for 10 consecutive minutes (OMNI, bow-shock time),\n           moved earlier by the L1 transit time (1.41e6 km / V). Alerts closer than\n           6 h to the previous one belong to the same alert episode.\n  Event:   an hour in which any mid-latitude station's dB/dt reached DBDT nT/min.\n           Hours closer than 6 h belong to the same event.\n  Warned:  an alert episode started 0-12 h before the event's first hour.\n  Late:    the first alert came during the first 3 h of the event.\n  Missed:  no alert from 12 h before to 3 h after the event start.\n  False alarm: an alert episode with no event from its start to 12 h later.\n  An hour only counts if a second station saw at least a third of the threshold at the same\n  time; single-station jumps and values above MAX_PLAUSIBLE nT/min are instrument artefacts.",
+ "results": [
+  {
+   "ey": 5.0,
+   "dbdt": 100.0,
+   "alerts": 15,
+   "events": 7,
+   "warned": 6,
+   "late": 0,
+   "missed": 1,
+   "false_alarms": 9,
+   "detail": {
+    "warned": [
+     {
+      "event_start": "2017-05-28T03:00Z",
+      "peak_dbdt": 157,
+      "station": "SIT",
+      "lead_min": 338
+     },
+     {
+      "event_start": "2017-09-07T23:00Z",
+      "peak_dbdt": 623,
+      "station": "LER",
+      "lead_min": 16
+     },
+     {
+      "event_start": "2017-09-08T12:00Z",
+      "peak_dbdt": 657,
+      "station": "SIT",
+      "lead_min": 352
+     },
+     {
+      "event_start": "2017-09-27T22:00Z",
+      "peak_dbdt": 101,
+      "station": "LER",
+      "lead_min": 210
+     },
+     {
+      "event_start": "2017-09-28T06:00Z",
+      "peak_dbdt": 530,
+      "station": "SIT",
+      "lead_min": 690
+     },
+     {
+      "event_start": "2017-11-08T04:00Z",
+      "peak_dbdt": 147,
+      "station": "SIT",
+      "lead_min": 579
+     }
+    ],
+    "late": [],
+    "missed": [
+     {
+      "event_start": "2017-04-28T15:00Z",
+      "peak_dbdt": 1920,
+      "station": "SIT"
+     }
+    ],
+    "false_alarms": [
+     "2017-01-31T14:54Z",
+     "2017-03-21T05:59Z",
+     "2017-04-22T12:50Z",
+     "2017-05-29T12:41Z",
+     "2017-07-09T08:58Z",
+     "2017-07-16T09:36Z",
+     "2017-08-31T08:15Z",
+     "2017-09-12T22:29Z",
+     "2017-09-14T14:19Z"
+    ]
+   }
+  },
+  {
+   "ey": 5.0,
+   "dbdt": 300.0,
+   "alerts": 15,
+   "events": 3,
+   "warned": 2,
+   "late": 0,
+   "missed": 1,
+   "false_alarms": 13,
+   "detail": {
+    "warned": [
+     {
+      "event_start": "2017-09-08T00:00Z",
+      "peak_dbdt": 623,
+      "station": "LER",
+      "lead_min": 76
+     },
+     {
+      "event_start": "2017-09-08T14:00Z",
+      "peak_dbdt": 412,
+      "station": "SIT",
+      "lead_min": 472
+     }
+    ],
+    "late": [],
+    "missed": [
+     {
+      "event_start": "2017-04-28T15:00Z",
+      "peak_dbdt": 1920,
+      "station": "SIT"
+     }
+    ],
+    "false_alarms": [
+     "2017-01-31T14:54Z",
+     "2017-03-21T05:59Z",
+     "2017-04-22T12:50Z",
+     "2017-05-27T21:22Z",
+     "2017-05-29T12:41Z",
+     "2017-07-09T08:58Z",
+     "2017-07-16T09:36Z",
+     "2017-08-31T08:15Z",
+     "2017-09-12T22:29Z",
+     "2017-09-14T14:19Z",
+     "2017-09-27T18:29Z",
+     "2017-09-28T05:06Z",
+     "2017-11-07T18:20Z"
+    ]
+   }
+  },
+  {
+   "ey": 10.0,
+   "dbdt": 100.0,
+   "alerts": 1,
+   "events": 7,
+   "warned": 1,
+   "late": 0,
+   "missed": 6,
+   "false_alarms": 0,
+   "detail": {
+    "warned": [
+     {
+      "event_start": "2017-09-08T12:00Z",
+      "peak_dbdt": 657,
+      "station": "SIT",
+      "lead_min": 41
+     }
+    ],
+    "late": [],
+    "missed": [
+     {
+      "event_start": "2017-04-28T15:00Z",
+      "peak_dbdt": 1920,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2017-05-28T03:00Z",
+      "peak_dbdt": 157,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2017-09-07T23:00Z",
+      "peak_dbdt": 623,
+      "station": "LER"
+     },
+     {
+      "event_start": "2017-09-27T22:00Z",
+      "peak_dbdt": 101,
+      "station": "LER"
+     },
+     {
+      "event_start": "2017-09-28T06:00Z",
+      "peak_dbdt": 530,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2017-11-08T04:00Z",
+      "peak_dbdt": 147,
+      "station": "SIT"
+     }
+    ],
+    "false_alarms": []
+   }
+  },
+  {
+   "ey": 10.0,
+   "dbdt": 300.0,
+   "alerts": 1,
+   "events": 3,
+   "warned": 1,
+   "late": 0,
+   "missed": 2,
+   "false_alarms": 0,
+   "detail": {
+    "warned": [
+     {
+      "event_start": "2017-09-08T14:00Z",
+      "peak_dbdt": 412,
+      "station": "SIT",
+      "lead_min": 161
+     }
+    ],
+    "late": [],
+    "missed": [
+     {
+      "event_start": "2017-04-28T15:00Z",
+      "peak_dbdt": 1920,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2017-09-08T00:00Z",
+      "peak_dbdt": 623,
+      "station": "LER"
+     }
+    ],
+    "false_alarms": []
+   }
+  },
+  {
+   "ey": 15.0,
+   "dbdt": 100.0,
+   "alerts": 0,
+   "events": 7,
+   "warned": 0,
+   "late": 0,
+   "missed": 7,
+   "false_alarms": 0,
+   "detail": {
+    "warned": [],
+    "late": [],
+    "missed": [
+     {
+      "event_start": "2017-04-28T15:00Z",
+      "peak_dbdt": 1920,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2017-05-28T03:00Z",
+      "peak_dbdt": 157,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2017-09-07T23:00Z",
+      "peak_dbdt": 623,
+      "station": "LER"
+     },
+     {
+      "event_start": "2017-09-08T12:00Z",
+      "peak_dbdt": 657,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2017-09-27T22:00Z",
+      "peak_dbdt": 101,
+      "station": "LER"
+     },
+     {
+      "event_start": "2017-09-28T06:00Z",
+      "peak_dbdt": 530,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2017-11-08T04:00Z",
+      "peak_dbdt": 147,
+      "station": "SIT"
+     }
+    ],
+    "false_alarms": []
+   }
+  },
+  {
+   "ey": 15.0,
+   "dbdt": 300.0,
+   "alerts": 0,
+   "events": 3,
+   "warned": 0,
+   "late": 0,
+   "missed": 3,
+   "false_alarms": 0,
+   "detail": {
+    "warned": [],
+    "late": [],
+    "missed": [
+     {
+      "event_start": "2017-04-28T15:00Z",
+      "peak_dbdt": 1920,
+      "station": "SIT"
+     },
+     {
+      "event_start": "2017-09-08T00:00Z",
+      "peak_dbdt": 623,
+      "station": "LER"
+     },
+     {
+      "event_start": "2017-09-08T14:00Z",
+      "peak_dbdt": 412,
+      "station": "SIT"
+     }
+    ],
+    "false_alarms": []
+   }
+  }
+ ]
+}
