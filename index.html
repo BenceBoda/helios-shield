@@ -4,46 +4,46 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Helios Shield — GIC Early Warning Platform</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
 /* ── password ─── */
-#pw-screen{position:fixed;inset:0;z-index:9999;background:#040C18;display:flex;align-items:center;justify-content:center;flex-direction:column}
-.pw-box{background:#08162A;border:1px solid #142B45;border-radius:10px;padding:40px 36px;display:flex;flex-direction:column;align-items:center;gap:18px;width:320px;max-width:90vw}
+#pw-screen{position:fixed;inset:0;z-index:9999;background:#160B33;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.pw-box{background:#22154A;border:1px solid #433178;border-radius:14px;padding:40px 36px;display:flex;flex-direction:column;align-items:center;gap:18px;width:320px;max-width:90vw}
 .pw-logo{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:600;color:#fff;letter-spacing:-.3px}
-.pw-sub{font-size:12px;color:#4A6A8A;font-family:'JetBrains Mono',monospace;text-align:center}
-.pw-input{width:100%;background:#0C1E36;border:1px solid #142B45;border-radius:6px;padding:10px 14px;color:#C5D8EE;font-family:'JetBrains Mono',monospace;font-size:14px;outline:none;text-align:center;letter-spacing:3px;transition:border-color .2s}
-.pw-input:focus{border-color:#00C8FF}
-.pw-input.wrong{border-color:#FF4040;animation:shake .3s}
-.pw-btn{width:100%;padding:10px;background:#00C8FF;border:none;border-radius:6px;color:#040C18;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s}
-.pw-btn:hover{background:#33D4FF}
-.pw-err{font-size:11px;color:#FF4040;font-family:'JetBrains Mono',monospace;min-height:16px}
+.pw-sub{font-size:12px;color:#C3B9E6;font-family:'IBM Plex Mono',monospace;text-align:center}
+.pw-input{width:100%;background:#2C1D5C;border:1px solid #433178;border-radius:6px;padding:10px 14px;color:#F3EFFF;font-family:'IBM Plex Mono',monospace;font-size:14px;outline:none;text-align:center;letter-spacing:3px;transition:border-color .2s}
+.pw-input:focus{border-color:#F2A93B}
+.pw-input.wrong{border-color:#FF5C74;animation:shake .3s}
+.pw-btn{width:100%;padding:10px;background:#F2A93B;border:none;border-radius:6px;color:#160B33;font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s}
+.pw-btn:hover{background:#F7BE62}
+.pw-err{font-size:12.5px;color:#FF5C74;font-family:'IBM Plex Mono',monospace;min-height:16px}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 
 /* ── tokens ─── */
 :root{
-  --bg:#040C18;--surface:#08162A;--surface2:#0C1E36;--border:#142B45;
-  --text:#C5D8EE;--muted:#4A6A8A;--dim:#1E3550;
-  --accent:#00C8FF;--solar:#FFB347;--danger:#FF4040;--safe:#00CC7A;
+  --bg:#160B33;--surface:#22154A;--surface2:#2C1D5C;--border:#433178;
+  --text:#F3EFFF;--muted:#C3B9E6;--dim:#5A4A8C;
+  --accent:#F2A93B;--solar:#FF8F6B;--danger:#FF5C74;--safe:#7FDB8A;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
 }
 *,*::before,*::after{box-sizing:inherit;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:14px;line-height:1.5}
+body{background:radial-gradient(1100px 1100px at 88% -18%,rgba(126,94,220,.38),rgba(126,94,220,0) 60%),radial-gradient(900px 900px at -12% 115%,rgba(255,143,107,.13),rgba(255,143,107,0) 55%),var(--bg);background-attachment:fixed;color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:14px;line-height:1.5}
 
 /* ── header ─── */
-.hdr{position:sticky;top:env(safe-area-inset-top,0px);z-index:200;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:20px;padding:11px 24px;flex-wrap:wrap}
+.hdr{position:sticky;top:env(safe-area-inset-top,0px);z-index:200;background:rgba(22,11,51,.82);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:20px;padding:11px 24px;flex-wrap:wrap}
 .logo{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:600;color:#fff;letter-spacing:-.3px;flex-shrink:0}
 .status-bar{display:flex;align-items:center;gap:20px;flex-wrap:wrap;flex:1}
 .stat{display:flex;flex-direction:column;gap:1px}
-.stat-lbl{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace}
-.stat-val{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;color:#fff;transition:color .3s}
-.badge{display:flex;align-items:center;gap:7px;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:500;background:rgba(0,200,122,.1);color:var(--safe);border:1px solid rgba(0,200,122,.25);transition:all .3s;margin-left:auto}
-.badge.warn{background:rgba(255,179,71,.1);color:var(--solar);border-color:rgba(255,179,71,.25)}
-.badge.alrt{background:rgba(255,64,64,.15);color:var(--danger);border-color:rgba(255,64,64,.3)}
+.stat-lbl{font-size:11.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace}
+.stat-val{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:500;color:#fff;transition:color .3s}
+.badge{display:flex;align-items:center;gap:7px;padding:4px 11px;border-radius:20px;font-size:12.5px;font-weight:500;background:rgba(127,219,138,.1);color:var(--safe);border:1px solid rgba(127,219,138,.25);transition:all .3s;margin-left:auto}
+.badge.warn{background:rgba(255,143,107,.1);color:var(--solar);border-color:rgba(255,143,107,.25)}
+.badge.alrt{background:rgba(255,92,116,.15);color:var(--danger);border-color:rgba(255,92,116,.3)}
 .pulse{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 2s ease-in-out infinite}
 .badge.alrt .pulse{animation:pulse-f .8s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
@@ -51,7 +51,7 @@ body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-ser
 
 /* ── tabs ─── */
 .tab-nav{max-width:1200px;margin:0 auto;padding:16px 24px 0;display:flex;gap:4px}
-.tab-btn{padding:7px 18px;border-radius:6px 6px 0 0;border:1px solid var(--border);border-bottom:none;background:transparent;color:var(--muted);font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;position:relative;bottom:-1px}
+.tab-btn{padding:7px 18px;border-radius:6px 6px 0 0;border:1px solid var(--border);border-bottom:none;background:transparent;color:var(--muted);font-family:'IBM Plex Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;position:relative;bottom:-1px}
 .tab-btn:hover{color:var(--text)}
 .tab-btn.active{background:var(--surface);color:#fff;border-color:var(--border)}
 .tab-panel{display:none}
@@ -59,41 +59,41 @@ body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-ser
 .main{max-width:1200px;margin:0 auto;padding:20px 24px;border-top:1px solid var(--border)}
 
 /* ── chart section ─── */
-.chart-section{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:14px}
+.chart-section{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:14px}
 .chart-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;gap:12px;flex-wrap:wrap}
-.chart-title{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:2px}
+.chart-title{font-size:11.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:2px}
 .chart-sub{font-size:15px;font-weight:500;color:#fff}
 .controls{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
-.sbtn{padding:5px 10px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:500;cursor:pointer;transition:all .2s}
+.sbtn{padding:5px 10px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;transition:all .2s}
 .sbtn:hover{border-color:var(--accent);color:var(--accent)}
-.sbtn.on{background:rgba(0,200,255,.1);border-color:var(--accent);color:var(--accent)}
-.sbtn.live.on{background:rgba(0,204,122,.1);border-color:rgba(0,204,122,.4);color:var(--safe)}
-.pbtn{padding:5px 14px;border-radius:4px;border:none;background:var(--accent);color:var(--bg);font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:background .2s;display:flex;align-items:center;gap:5px}
-.pbtn:hover{background:#33D4FF}
+.sbtn.on{background:rgba(242,169,59,.1);border-color:var(--accent);color:var(--accent)}
+.sbtn.live.on{background:rgba(127,219,138,.1);border-color:rgba(127,219,138,.4);color:var(--safe)}
+.pbtn{padding:5px 14px;border-radius:4px;border:none;background:var(--accent);color:var(--bg);font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;transition:background .2s;display:flex;align-items:center;gap:5px}
+.pbtn:hover{background:#F7BE62}
 .pbtn:disabled{background:var(--dim);color:var(--muted);cursor:not-allowed}
 .chart-wrap{position:relative;height:260px}
-.alert-pop{position:absolute;top:8px;left:50%;transform:translateX(-50%);background:rgba(255,50,50,.92);backdrop-filter:blur(4px);color:#fff;padding:7px 18px;border-radius:4px;font-size:11px;font-weight:600;letter-spacing:.4px;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;z-index:10;font-family:'JetBrains Mono',monospace}
+.alert-pop{position:absolute;top:8px;left:50%;transform:translateX(-50%);background:rgba(255,50,50,.92);backdrop-filter:blur(4px);color:#fff;padding:7px 18px;border-radius:4px;font-size:12.5px;font-weight:600;letter-spacing:.4px;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;z-index:10;font-family:'IBM Plex Mono',monospace}
 .alert-pop.show{opacity:1}
 .chart-foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:12px;flex-wrap:wrap}
 .legend{display:flex;gap:16px;flex-wrap:wrap}
-.leg-item{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace}
 .leg-line{width:16px;height:2px;border-radius:1px}
-.replay-info{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.replay-info{font-size:11.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .rtime{color:var(--accent);font-weight:500}
-.afired{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:10px;background:rgba(255,64,64,.15);border:1px solid rgba(255,64,64,.3);color:var(--danger);font-size:10px;font-weight:600}
+.afired{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:14px;background:rgba(255,92,116,.15);border:1px solid rgba(255,92,116,.3);color:var(--danger);font-size:11.5px;font-weight:600}
 
 /* ── panels ─── */
 .panels{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:680px){.panels{grid-template-columns:1fr}}
-.panel{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px}
-.panel-lbl{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:3px}
+.panel{background:rgba(52,34,110,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid var(--border);border-radius:14px;padding:20px}
+.panel-lbl{font-size:11.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:3px}
 .panel-hdg{font-size:15px;font-weight:500;color:#fff;margin-bottom:18px}
 .th-display{text-align:center;margin-bottom:4px}
-.th-val{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:500;transition:color .3s}
-.th-desc{font-size:11px;color:var(--muted);text-align:center;margin-bottom:16px;min-height:28px}
-.th-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:5px}
-input[type=range]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;outline:none;background:linear-gradient(to right,#00CC7A 0%,#FFD700 35%,#FF8C00 65%,#FF4040 100%);cursor:pointer;display:block}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff;border:2px solid var(--accent);cursor:pointer;box-shadow:0 0 8px rgba(0,200,255,.4)}
+.th-val{font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:500;transition:color .3s}
+.th-desc{font-size:12.5px;color:var(--muted);text-align:center;margin-bottom:16px;min-height:28px}
+.th-labels{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:5px}
+input[type=range]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;outline:none;background:linear-gradient(to right,#7FDB8A 0%,#FFD700 35%,#FF8C00 65%,#FF5C74 100%);cursor:pointer;display:block}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff;border:2px solid var(--accent);cursor:pointer;box-shadow:0 0 8px rgba(242,169,59,.4)}
 input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:2px solid var(--accent);cursor:pointer}
 .th-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
 .tstat{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px}
@@ -101,88 +101,89 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .tstat.fp{border-left:3px solid var(--solar)}
 .tstat.tp{border-left:3px solid var(--safe)}
 .tstat.al{border-left:3px solid var(--accent)}
-.tstat-v{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:500;margin-bottom:2px;transition:color .3s}
-.tstat-l{font-size:10px;color:var(--muted)}
+.tstat-v{font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:500;margin-bottom:2px;transition:color .3s}
+.tstat-l{font-size:11.5px;color:var(--muted)}
 .aeb-wrap{margin-top:16px}
-.aeb-title{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:6px}
+.aeb-title{font-size:11.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:6px}
 .aeb-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;gap:1px}
 .aeb-seg{transition:flex .4s ease;border-radius:1px;min-width:2px}
 .aeb-c{background:var(--safe)}.aeb-m{background:var(--danger)}.aeb-f{background:var(--solar)}
 .aeb-leg{display:flex;gap:12px;margin-top:6px;flex-wrap:wrap}
-.aeb-li{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.aeb-li{display:flex;align-items:center;gap:4px;font-size:11.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace}
 .aeb-dot{width:8px;height:8px;border-radius:2px}
 .impact-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .imp{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px}
-.imp-l{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:3px}
-.imp-v{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;color:#fff}
-.imp-note{margin-top:10px;padding:10px 12px;background:rgba(255,64,64,.06);border:1px solid rgba(255,64,64,.15);border-radius:6px;font-size:11px;color:var(--text);font-style:italic}
-.imp-empty{color:var(--muted);font-size:11px;text-align:center;padding:28px 0;font-family:'JetBrains Mono',monospace}
+.imp-l{font-size:11.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:3px}
+.imp-v{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;color:#fff}
+.imp-src{margin-top:8px;font-size:12.5px;color:var(--muted);line-height:1.45}
+.imp-note{margin-top:10px;padding:10px 12px;background:rgba(255,92,116,.06);border:1px solid rgba(255,92,116,.15);border-radius:6px;font-size:12.5px;color:var(--text);font-style:italic}
+.imp-empty{color:var(--muted);font-size:12.5px;text-align:center;padding:28px 0;font-family:'IBM Plex Mono',monospace}
 .imp-region{grid-column:1/-1}
 
 /* ── simulator ─── */
 .sim-layout{display:grid;grid-template-columns:1fr 360px;gap:14px;align-items:start}
 @media(max-width:960px){.sim-layout{grid-template-columns:1fr}}
-#sim-map{height:460px;border-radius:8px;border:1px solid var(--border);background:#03090F;position:relative;z-index:1}
-.leaflet-container{background:#03090F}
-.leaflet-tile{filter:brightness(.38) saturate(.4) hue-rotate(190deg)}
-.leaflet-control-attribution{background:rgba(4,12,24,.85)!important;color:#2A4A6A!important;font-size:9px!important}
-.leaflet-control-attribution a{color:#2A4A6A!important}
-.leaflet-control-zoom a{background:#08162A!important;color:#C5D8EE!important;border-color:#142B45!important}
-.leaflet-popup-content-wrapper{background:#08162A;border:1px solid #142B45;border-radius:6px;color:#C5D8EE;font-family:'Space Grotesk',sans-serif;font-size:12px;box-shadow:0 4px 24px rgba(0,0,0,.6)}
-.leaflet-popup-tip{background:#08162A}
+#sim-map{height:460px;border-radius:14px;border:1px solid var(--border);background:#110828;position:relative;z-index:1}
+.leaflet-container{background:#110828}
+.leaflet-tile{filter:brightness(.5) saturate(.35) hue-rotate(225deg)}
+.leaflet-control-attribution{background:rgba(22,11,51,.85)!important;color:#7A6BAE!important;font-size:12.5px!important}
+.leaflet-control-attribution a{color:#7A6BAE!important}
+.leaflet-control-zoom a{background:#22154A!important;color:#F3EFFF!important;border-color:#433178!important}
+.leaflet-popup-content-wrapper{background:#22154A;border:1px solid #433178;border-radius:6px;color:#F3EFFF;font-family:'IBM Plex Sans',sans-serif;font-size:12px;box-shadow:0 4px 24px rgba(0,0,0,.6)}
+.leaflet-popup-tip{background:#22154A}
 .leaflet-popup-content{margin:12px 16px}
 
-.map-legend{background:rgba(8,22,42,.92);border:1px solid #142B45;border-radius:6px;padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:10px;color:#4A6A8A}
-.map-legend-title{color:#C5D8EE;font-weight:500;margin-bottom:7px;font-size:10px}
+.map-legend{background:rgba(34,21,74,.92);border:1px solid #433178;border-radius:6px;padding:10px 12px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#C3B9E6}
+.map-legend-title{color:#F3EFFF;font-weight:500;margin-bottom:7px;font-size:11.5px}
 .map-legend-row{display:flex;align-items:center;gap:7px;margin-bottom:4px}
 .map-legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .map-legend-line{width:16px;height:2px;flex-shrink:0}
 
-.sim-ctrl{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;display:flex;flex-direction:column;gap:18px}
-.sim-lbl{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:8px}
+.sim-ctrl{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:18px}
+.sim-lbl{font-size:11.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:8px}
 .storm-cards{display:flex;flex-direction:column;gap:6px}
-.storm-card{padding:10px 14px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:all .2s;text-align:left;width:100%}
-.storm-live-btn{padding:6px 14px;border-radius:20px;border:1px solid rgba(0,204,122,.35);background:rgba(0,204,122,.08);color:#00CC7A;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center}
-.storm-live-btn:hover,.storm-live-btn.active{background:rgba(0,204,122,.18);border-color:rgba(0,204,122,.6)}
+.storm-card{padding:10px 14px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'IBM Plex Sans',sans-serif;cursor:pointer;transition:all .2s;text-align:left;width:100%}
+.storm-live-btn{padding:6px 14px;border-radius:20px;border:1px solid rgba(127,219,138,.35);background:rgba(127,219,138,.08);color:#7FDB8A;font-family:'IBM Plex Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center}
+.storm-live-btn:hover,.storm-live-btn.active{background:rgba(127,219,138,.18);border-color:rgba(127,219,138,.6)}
 .storm-card:hover{border-color:var(--accent);color:var(--text)}
-.storm-card.active{background:rgba(0,200,255,.07);border-color:var(--accent);color:#fff}
+.storm-card.active{background:rgba(242,169,59,.07);border-color:var(--accent);color:#fff}
 .storm-card-name{font-size:12px;font-weight:500}
-.storm-card-date{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:1px}
-.storm-card.active .storm-card-date{color:rgba(0,200,255,.6)}
+.storm-card-date{font-size:11.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-top:1px}
+.storm-card.active .storm-card-date{color:rgba(242,169,59,.6)}
 
 .warn-display{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
-.warn-val{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:500;color:var(--accent)}
-.warn-unit{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace}
-.warn-labels{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:3px}
-#warn-slider{background:linear-gradient(to right,#00C8FF,#00C8FF)}
-.warn-ctx{font-size:10px;color:var(--accent);font-family:'JetBrains Mono',monospace;margin-top:5px;opacity:.75}
+.warn-val{font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;color:var(--accent)}
+.warn-unit{font-size:11.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace}
+.warn-labels{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:3px}
+#warn-slider{background:linear-gradient(to right,#F2A93B,#F2A93B)}
+.warn-ctx{font-size:11.5px;color:var(--accent);font-family:'IBM Plex Mono',monospace;margin-top:5px;opacity:.75}
 
 .av-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .av-stat{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;overflow:hidden;position:relative}
 .av-fill{position:absolute;bottom:0;left:0;right:0;transition:height .45s ease}
-.av-v{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:500;position:relative;z-index:1;transition:color .3s}
-.av-l{font-size:10px;color:var(--muted);position:relative;z-index:1;margin-top:2px}
+.av-v{font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:500;position:relative;z-index:1;transition:color .3s}
+.av-l{font-size:11.5px;color:var(--muted);position:relative;z-index:1;margin-top:2px}
 .av-full{grid-column:1/-1}
 .av-bar-wrap{margin-top:4px}
-.av-bar{height:8px;border-radius:4px;background:rgba(20,43,69,.9);overflow:hidden}
+.av-bar{height:8px;border-radius:4px;background:rgba(67,49,120,.9);overflow:hidden}
 .av-bar-fill{height:100%;background:linear-gradient(90deg,var(--safe),#00F0B0);border-radius:4px;transition:width .5s ease}
-.av-pct-row{display:flex;justify-content:space-between;margin-top:4px;font-size:10px;font-family:'JetBrains Mono',monospace}
+.av-pct-row{display:flex;justify-content:space-between;margin-top:4px;font-size:11.5px;font-family:'IBM Plex Mono',monospace}
 
-.sim-note{padding:10px 12px;background:rgba(0,200,255,.04);border:1px solid rgba(0,200,255,.1);border-radius:6px;font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;line-height:1.65}
-.sim-source{font-size:9px;color:rgba(74,106,138,.6);font-family:'JetBrains Mono',monospace;margin-top:4px}
+.sim-note{padding:10px 12px;background:rgba(242,169,59,.04);border:1px solid rgba(242,169,59,.1);border-radius:6px;font-size:11.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace;line-height:1.65}
+.sim-source{font-size:12.5px;color:rgba(195,185,230,.6);font-family:'IBM Plex Mono',monospace;margin-top:4px}
 
 /* ── dbdt chip ─── */
-.map-dbdt-panel{margin-top:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
-.dbdt-title{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:8px}
+.map-dbdt-panel{margin-top:8px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px}
+.dbdt-title{font-size:11.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:8px}
 .dbdt-rows{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px}
 .dbdt-chip{background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:6px 9px;display:flex;flex-direction:column;gap:1px}
-.dbdt-chip-id{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;color:#fff}
-.dbdt-chip-loc{font-size:9px;color:var(--muted)}
-.dbdt-chip-val{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;margin-top:2px}
+.dbdt-chip-id{font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:500;color:#fff}
+.dbdt-chip-loc{font-size:12.5px;color:var(--muted)}
+.dbdt-chip-val{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;margin-top:2px}
 
 footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
-.fn{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace}
-.vigil{font-size:10px;color:var(--accent);opacity:.6;font-family:'JetBrains Mono',monospace}
+.fn{font-size:11.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace}
+.vigil{font-size:11.5px;color:var(--accent);opacity:.6;font-family:'IBM Plex Mono',monospace}
 </style>
 </head>
 <body>
@@ -191,7 +192,7 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
 <div id="pw-screen">
   <div class="pw-box">
     <div class="pw-logo">
-      <svg width="24" height="24" viewBox="0 0 22 22" fill="none"><path d="M11 2L3 6v5c0 4.4 3.4 8.5 8 9.5 4.6-1 8-5.1 8-9.5V6L11 2z" fill="#00C8FF" opacity=".18" stroke="#00C8FF" stroke-width="1.5"/><path d="M11 5l-5 2.5v3.3c0 2.8 2.1 5.4 5 6.2 2.9-.8 5-3.4 5-6.2V7.5L11 5z" fill="#00C8FF" opacity=".35"/></svg>
+      <svg width="24" height="24" viewBox="0 0 22 22" fill="none"><path d="M11 2L3 6v5c0 4.4 3.4 8.5 8 9.5 4.6-1 8-5.1 8-9.5V6L11 2z" fill="#F2A93B" opacity=".18" stroke="#F2A93B" stroke-width="1.5"/><path d="M11 5l-5 2.5v3.3c0 2.8 2.1 5.4 5 6.2 2.9-.8 5-3.4 5-6.2V7.5L11 5z" fill="#F2A93B" opacity=".35"/></svg>
       Helios Shield
     </div>
     <div class="pw-sub">concept demonstration · restricted access</div>
@@ -204,7 +205,7 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
 <!-- header -->
 <header class="hdr">
   <div class="logo">
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2L3 6v5c0 4.4 3.4 8.5 8 9.5 4.6-1 8-5.1 8-9.5V6L11 2z" fill="#00C8FF" opacity=".18" stroke="#00C8FF" stroke-width="1.5"/><path d="M11 5l-5 2.5v3.3c0 2.8 2.1 5.4 5 6.2 2.9-.8 5-3.4 5-6.2V7.5L11 5z" fill="#00C8FF" opacity=".35"/></svg>
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2L3 6v5c0 4.4 3.4 8.5 8 9.5 4.6-1 8-5.1 8-9.5V6L11 2z" fill="#F2A93B" opacity=".18" stroke="#F2A93B" stroke-width="1.5"/><path d="M11 5l-5 2.5v3.3c0 2.8 2.1 5.4 5 6.2 2.9-.8 5-3.4 5-6.2V7.5L11 5z" fill="#F2A93B" opacity=".35"/></svg>
     Helios Shield
   </div>
   <div class="status-bar">
@@ -292,7 +293,7 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
 <div class="tab-panel" id="tab-simulator">
 <div class="main">
   <div style="margin-bottom:16px">
-    <div style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:4px">impact simulator · SuperMAG magnetometer network + HV grid topology</div>
+    <div style="font-size:11.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:4px">impact simulator · measured SuperMAG dB/dt + simplified HV corridors · loss figures illustrative</div>
     <div style="font-size:18px;font-weight:500;color:#fff">What if we had advance warning?</div>
     <div style="font-size:12px;color:var(--muted);margin-top:4px">Real dB/dt measurements from the SuperMAG global magnetometer network, overlaid on actual HV transmission corridors. Drag the slider to model avoidable damage at each warning window.</div>
   </div>
@@ -313,9 +314,9 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
         <div class="sim-lbl">01 · select storm event</div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
           <button class="storm-live-btn" id="sc-live" onclick="simSelectLive()" title="Overlay current magnetometer readings (USGS / INTERMAGNET) on the map">
-            <span class="pulse" style="width:6px;height:6px;border-radius:50%;background:#00CC7A;display:inline-block;margin-right:6px"></span>Live now
+            <span class="pulse" style="width:6px;height:6px;border-radius:50%;background:#7FDB8A;display:inline-block;margin-right:6px"></span>Live now
           </button>
-          <span style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace" id="live-stations-badge"></span>
+          <span style="font-size:11.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace" id="live-stations-badge"></span>
         </div>
         <div class="storm-cards">
           <button class="storm-card active" id="sc-q89" onclick="simSelectStorm('quebec1989')">
@@ -348,24 +349,24 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
         <div class="sim-lbl">03 · estimated avoidable damage</div>
         <div class="av-grid">
           <div class="av-stat" style="border-left:3px solid var(--danger)">
-            <div class="av-fill" id="av-fill-total" style="height:100%;background:rgba(255,64,64,.06)"></div>
+            <div class="av-fill" id="av-fill-total" style="height:100%;background:rgba(255,92,116,.06)"></div>
             <div class="av-v" style="color:var(--danger)" id="av-total">$6.0B</div>
             <div class="av-l">total economic loss</div>
           </div>
           <div class="av-stat" style="border-left:3px solid var(--safe)">
-            <div class="av-fill" id="av-fill-avoid" style="height:0%;background:rgba(0,204,122,.08)"></div>
+            <div class="av-fill" id="av-fill-avoid" style="height:0%;background:rgba(127,219,138,.08)"></div>
             <div class="av-v" style="color:var(--safe)" id="av-avoid">$2.4B</div>
             <div class="av-l">avoidable with warning</div>
           </div>
           <div class="av-stat av-full" style="border-left:3px solid var(--accent)">
-            <div class="av-fill" style="height:0%;background:rgba(0,200,255,.05)"></div>
+            <div class="av-fill" style="height:0%;background:rgba(242,169,59,.05)"></div>
             <div class="av-v" style="color:var(--accent)" id="av-people">3.6M</div>
             <div class="av-l">people spared from outage</div>
           </div>
           <div class="av-stat av-full" style="border-left:3px solid var(--solar)">
-            <div class="av-fill" style="height:0%;background:rgba(255,179,71,.06)"></div>
+            <div class="av-fill" style="height:0%;background:rgba(255,143,107,.06)"></div>
             <div class="av-v" style="color:var(--solar)" id="av-trans">~4</div>
-            <div class="av-l">EHV transformers preserved (×$10–50M, 12–18 mo lead time)</div>
+            <div class="av-l">large transformers preserved ($2–7.5M each, 5–16 mo lead time — US DOE 2014)</div>
           </div>
         </div>
         <div class="av-bar-wrap" style="margin-top:10px">
@@ -378,7 +379,7 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
       </div>
 
       <div class="sim-note" id="sim-note">With 30 min warning, TSOs can reduce transformer loading by 40–60%, enabling controlled load shedding instead of catastrophic failure.</div>
-      <div class="sim-source" id="sim-note-src">Sources: Pulkkinen et al. (2012) Space Weather; Oughton et al. (2017) Risk Analysis; Lloyd's of London (2013) Solar Storm Risk</div>
+      <div class="sim-source" id="sim-note-src">Illustrative assumptions for the demo, not results from a study.</div>
     </div>
   </div>
 </div>
@@ -463,11 +464,11 @@ function _renderLiveOverlay(){
     const m=L.circleMarker([st.lat,st.lng],{
       radius:r,color:col,fillColor:col,fillOpacity:0.82,weight:1.5
     }).bindPopup(
-      `<div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#C5D8EE;background:#08162A;padding:8px;border-radius:6px;min-width:160px">
+      `<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#F3EFFF;background:#22154A;padding:8px;border-radius:6px;min-width:160px">
         <b style="color:#fff;font-size:13px">${st.id}</b>${st.name?' · '+st.name:''}<br>
-        <span style="color:#4A6A8A">dB/dt</span> <b style="color:${col}">${st.dbdt} nT/min</b><br>
-        <span style="color:#4A6A8A">GIC est.</span> ${Math.round(st.dbdt*0.55)} A<br>
-        <span style="color:#4A6A8A;font-size:10px">Live · ${fetchedAt}</span>
+        <span style="color:#C3B9E6">dB/dt</span> <b style="color:${col}">${st.dbdt} nT/min</b><br>
+        <span style="color:#C3B9E6">GIC est.</span> ${Math.round(st.dbdt*0.55)} A<br>
+        <span style="color:#C3B9E6;font-size:11.5px">Live · ${fetchedAt}</span>
       </div>`,{className:'dark-popup'}
     );
     m.addTo(map);
@@ -500,7 +501,7 @@ const STORMS={
     name:"Hydro-Québec Storm",date:"March 13, 1989",mag:"Extreme (Kp 9)",
     kp:[3,4,5,6,7,8,9,9,9,8,8,9,9,8,7,6,5,4,3,3,2,2,3,3],
     bz:[-5,-12,-28,-52,-75,-92,-105,-98,-88,-72,-60,-85,-97,-88,-70,-52,-38,-25,-18,-12,-8,-5,-4,-5],
-    imp:{gic:"~300 A",econ:"$6B (today)",outage:"9 hours",people:"6 million",region:"Québec, Canada",note:"Grid collapsed in 92 seconds. Multiple EHV transformers permanently destroyed."},
+    imp:{gic:"not measured",outage:"9 hours",people:"6+ million people",equip:"Salem GSU transformer (New Jersey) failed",region:"Québec, Canada",note:"Seven static VAR compensators tripped within 59 s; the grid collapsed 25 s later, at 02:44 EST (07:44 UTC).",src:"NERC (2012) Effects of Geomagnetic Disturbances on the Bulk Power System; Hydro-Québec"},
     sim:{
       totalLoss:6.0,totalPeople:6,totalTrans:7,
       avoidPct:[0.08,0.18,0.32,0.40,0.62,0.83],
@@ -511,7 +512,7 @@ const STORMS={
     name:"Halloween Storms",date:"Oct 29–30, 2003",mag:"Extreme (Kp 9+)",
     kp:[4,5,5,7,8,9,9,9,8,7,6,5,5,7,8,9,9,8,7,6,5,4,4,3],
     bz:[-8,-18,-35,-65,-88,-82,-78,-72,-58,-42,-30,-22,-28,-55,-75,-85,-82,-68,-52,-38,-25,-16,-10,-8],
-    imp:{gic:"~250 A",econ:"$1.5B direct",outage:"Multiple regions",people:"50,000+ transformers stressed",region:"Sweden, South Africa",note:"Malmö, Sweden: 20-min blackout. Eskom (S. Africa) lost 14 transformers."},
+    imp:{gic:"~330 A (estimated, Sweden)",outage:"20–50 min (Malmö)",people:"~50,000 customers",equip:"12 transformers damaged (South Africa)",region:"Southern Sweden, South Africa",note:"30 Oct 2003: blackout in Malmö, southern Sweden. In South Africa, twelve transformers were damaged and removed from service.",src:"NERC (2012); Lloyd's & AER (2013) Solar Storm Risk to the North American Electric Grid; Pulkkinen et al. (2005) Space Weather"},
     sim:{
       totalLoss:1.5,totalPeople:0.8,totalTrans:14,
       avoidPct:[0.10,0.22,0.38,0.50,0.68,0.85],
@@ -522,7 +523,7 @@ const STORMS={
     name:"Gannon Storm",date:"May 10–11, 2024",mag:"Extreme (Kp 9)",
     kp:[3,4,6,7,8,9,9,8,8,7,6,5,6,8,9,8,7,6,5,4,3,3,2,2],
     bz:[-5,-15,-32,-60,-82,-78,-72,-65,-58,-45,-32,-28,-38,-65,-78,-72,-58,-45,-32,-22,-15,-10,-7,-5],
-    imp:{gic:"~200 A",econ:"$2.4B estimated",outage:"Partial (prepared)",people:"GPS, grids affected",region:"Global",note:"Strongest storm in 20 years. First major test of modern grid protection — partial success."},
+    imp:{gic:"113 A (New Zealand)",outage:"no loss of supply",people:"strongest storm since 2003",equip:"lines switched out to protect transformers (NZ)",region:"Global",note:"Transpower (New Zealand) disconnected lines on a pre-planned GIC strategy; modelling suggests ~200 A without it. No GIC-related equipment failures were reported in the US.",src:"Mac Manus et al. (2025) Space Weather e2025SW004388; Wilkerson et al. (2025) arXiv:2507.07009"},
     sim:{
       totalLoss:2.4,totalPeople:2.1,totalTrans:3,
       avoidPct:[0.12,0.25,0.42,0.55,0.72,0.88],
@@ -532,9 +533,8 @@ const STORMS={
 };
 
 /* ══════════════════════════════════════════════════════
-   DATA — SuperMAG stations (real published peak values)
-   Sources: Pulkkinen et al. 2012; Ngwira et al. 2015;
-            Love et al. 2024 (Gannon); BGS/INTERMAGNET
+   DATA — station fallback values (replaced at load time by the
+   measured SuperMAG peaks in storms/*.json)
 ══════════════════════════════════════════════════════ */
 const SUPERMAG={
   quebec1989:[
@@ -583,7 +583,7 @@ const GRID={
   quebec1989:[
     {coords:[[53.8,-77.7],[52.0,-75.5],[50.2,-73.2],[47.5,-72.5],[45.5,-73.6]],
      label:"Hydro-Québec 735 kV — La Grande → Montréal",v:"735 kV",risk:"extreme",
-     note:"N–S orientation maximises induction in E–W storm field. Grid collapsed T+92s."},
+     note:"Collapse ~90 s after the first compensator trip (NERC 2012)."},
     {coords:[[53.8,-77.7],[49.5,-68.5],[47.0,-64.5]],
      label:"La Grande → Gaspésie corridor",v:"735 kV",risk:"extreme"},
     {coords:[[45.5,-73.6],[44.7,-63.6]],
@@ -596,7 +596,7 @@ const GRID={
   halloween2003:[
     {coords:[[68.4,18.8],[67.8,20.4],[65.0,21.5],[62.0,17.5],[59.9,17.4],[57.7,12.2],[55.6,13.0]],
      label:"Sweden 400 kV N–S spine",v:"400 kV",risk:"extreme",
-     note:"This corridor collapsed in Malmö at 21:07 UTC — 20-min blackout, 50,000 affected."},
+     note:"30 Oct 2003: Malmö blackout, 20–50 min, ~50,000 customers (NERC 2012; Lloyd's & AER 2013)."},
     {coords:[[59.9,10.8],[60.5,17.4],[62.0,25.0]],
      label:"Scandinavia interconnect (NO–SE–FI)",v:"400 kV",risk:"high"},
     {coords:[[60.2,24.9],[64.0,26.5],[67.4,26.6]],
@@ -605,14 +605,14 @@ const GRID={
      label:"UK National Grid N–S spine",v:"400 kV",risk:"moderate"},
     {coords:[[-15.6,32.7],[-20.0,31.0],[-22.5,30.5],[-26.2,28.1]],
      label:"Cahora Bassa HVDC (Mozambique → Johannesburg)",v:"533 kV HVDC",risk:"extreme",
-     note:"Eskom's longest line, EW component minimal — but absolute dB/dt drove saturation."},
+     note:""},
     {coords:[[-26.2,28.1],[-29.5,27.0],[-33.9,18.4]],
      label:"Eskom Johannesburg → Cape Town 400 kV",v:"400 kV",risk:"high"},
   ],
   gannon2024:[
     {coords:[[55.3,-3.2],[54.0,-1.5],[52.5,-1.4],[51.5,-0.1],[51.0,-4.5]],
      label:"UK National Grid — Eskdalemuir corridor",v:"400 kV",risk:"extreme",
-     note:"BGS confirmed record dB/dt. National Grid issued GIC advisory — first since 2003."},
+     note:""},
     {coords:[[57.5,-4.2],[56.5,-3.8],[55.3,-3.2]],
      label:"Scotland 400 kV interconnect",v:"400 kV",risk:"high"},
     {coords:[[67.8,20.4],[65.0,21.5],[62.0,17.5],[59.9,17.4],[57.7,12.2],[55.6,11.7]],
@@ -621,7 +621,7 @@ const GRID={
      label:"SE–FI interconnect",v:"400 kV",risk:"high"},
     {coords:[[48.3,-117.1],[47.0,-96.8],[45.0,-93.2],[44.2,-88.0],[43.6,-79.4],[45.4,-75.7]],
      label:"US Northern tier 500 kV",v:"500 kV",risk:"high",
-     note:"NERC monitoring activated. No major failures — post-1989 protections held."},
+     note:"No GIC-related equipment failures reported in the US (Wilkerson et al. 2025)."},
     {coords:[[-26.2,28.1],[-30.5,25.5],[-34.4,19.2]],
      label:"South Africa Eskom 400 kV",v:"400 kV",risk:"high"},
   ]
@@ -658,8 +658,7 @@ async function loadMeasuredStorms(){
       if(d.labels)s.labels=d.labels;
       s.replay={warning:d.warning||null,danger:d.danger||null,sources:d.sources||{}};
       if(d.stations&&d.stations.length){
-        const notes={};(SUPERMAG[key]||[]).forEach(o=>{if(o.note)notes[o.id]=o.note});
-        SUPERMAG[key]=d.stations.map(o=>({...o,note:(notes[o.id]?notes[o.id]+' · ':'')+'peak '+hhmm(o.peak_time)}));
+        SUPERMAG[key]=d.stations.map(o=>({...o,note:'measured peak at '+hhmm(o.peak_time)+' · SuperMAG'}));
       }
     }catch(e){console.warn('storm data unavailable for',key,e)}
   }
@@ -670,7 +669,7 @@ let threshold=7,currentStorm=null,isReplaying=false,replayTimer=null,liveTimer=n
 const bgZones={id:'bgZones',beforeDraw(c){
   const{ctx,chartArea:{top,bottom,left,right,width},scales}=c;
   if(!scales.y)return;
-  [[0,4,'rgba(0,204,122,.06)'],[4,6,'rgba(255,210,0,.06)'],[6,8,'rgba(255,130,0,.08)'],[8,9.5,'rgba(255,60,60,.1)']].forEach(([mn,mx,col])=>{
+  [[0,4,'rgba(127,219,138,.06)'],[4,6,'rgba(255,210,0,.06)'],[6,8,'rgba(255,130,0,.08)'],[8,9.5,'rgba(255,60,60,.1)']].forEach(([mn,mx,col])=>{
     const yT=scales.y.getPixelForValue(mx),yB=scales.y.getPixelForValue(mn);
     ctx.fillStyle=col;ctx.fillRect(left,yT,width,yB-yT);
   });
@@ -682,17 +681,17 @@ const chart=new Chart(ctx,{
   data:{
     labels:HOURS.slice(),
     datasets:[
-      {label:'Kp',data:NOMINAL_KP.slice(),borderColor:'#00C8FF',backgroundColor:'rgba(0,200,255,.07)',fill:true,borderWidth:2,tension:.4,pointRadius:0,pointHoverRadius:3,yAxisID:'y'},
-      {label:'Bz',data:NOMINAL_BZ.map(v=>Math.max(0,Math.min(9,(v+120)/120*9))),borderColor:'rgba(255,179,71,.5)',fill:false,borderWidth:1.5,tension:.4,pointRadius:0,yAxisID:'y'},
-      {label:'Thr',data:Array(24).fill(threshold),borderColor:'rgba(255,64,64,.7)',fill:false,borderWidth:1,pointRadius:0,borderDash:[5,4],yAxisID:'y'}
+      {label:'Kp',data:NOMINAL_KP.slice(),borderColor:'#F2A93B',backgroundColor:'rgba(242,169,59,.07)',fill:true,borderWidth:2,tension:.4,pointRadius:0,pointHoverRadius:3,yAxisID:'y'},
+      {label:'Bz',data:NOMINAL_BZ.map(v=>Math.max(0,Math.min(9,(v+120)/120*9))),borderColor:'rgba(255,143,107,.5)',fill:false,borderWidth:1.5,tension:.4,pointRadius:0,yAxisID:'y'},
+      {label:'Thr',data:Array(24).fill(threshold),borderColor:'rgba(255,92,116,.7)',fill:false,borderWidth:1,pointRadius:0,borderDash:[5,4],yAxisID:'y'}
     ]
   },
   options:{
     responsive:true,maintainAspectRatio:false,animation:{duration:0},
     interaction:{mode:'index',intersect:false},
     plugins:{legend:{display:false},tooltip:{
-      backgroundColor:'rgba(8,22,42,.95)',borderColor:'#142B45',borderWidth:1,
-      titleColor:'#C5D8EE',bodyColor:'#4A6A8A',titleFont:{family:'JetBrains Mono'},bodyFont:{family:'JetBrains Mono'},
+      backgroundColor:'rgba(34,21,74,.95)',borderColor:'#433178',borderWidth:1,
+      titleColor:'#F3EFFF',bodyColor:'#C3B9E6',titleFont:{family:'IBM Plex Mono'},bodyFont:{family:'IBM Plex Mono'},
       callbacks:{label:c=>{
         if(c.datasetIndex===0)return` Kp: ${c.raw.toFixed(1)}`;
         if(c.datasetIndex===1)return` Bz (norm): ${c.raw.toFixed(1)}`;
@@ -700,8 +699,8 @@ const chart=new Chart(ctx,{
       }}
     }},
     scales:{
-      x:{grid:{color:'rgba(20,43,69,.8)'},ticks:{color:'#2A4A6A',font:{family:'JetBrains Mono',size:10},maxTicksLimit:8}},
-      y:{min:0,max:9.5,grid:{color:'rgba(20,43,69,.8)'},ticks:{color:'#2A4A6A',font:{family:'JetBrains Mono',size:10},callback:v=>v%1===0?`Kp ${v}`:''},stepSize:1}
+      x:{grid:{color:'rgba(67,49,120,.8)'},ticks:{color:'#7A6BAE',font:{family:'IBM Plex Mono',size:10},maxTicksLimit:8}},
+      y:{min:0,max:9.5,grid:{color:'rgba(67,49,120,.8)'},ticks:{color:'#7A6BAE',font:{family:'IBM Plex Mono',size:10},callback:v=>v%1===0?`Kp ${v}`:''},stepSize:1}
     }
   }
 });
@@ -774,11 +773,11 @@ function renderLiveStations(smData){
       radius:r,color:col,fillColor:col,fillOpacity:0.75,weight:1.5,
       className:'pulsing-marker'
     }).bindPopup(
-      `<div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#C5D8EE;background:#08162A;padding:8px;border-radius:6px;min-width:160px">
+      `<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#F3EFFF;background:#22154A;padding:8px;border-radius:6px;min-width:160px">
         <b style="color:#fff;font-size:13px">${st.id}</b>${st.name?' · '+st.name:''}<br>
-        <span style="color:#4A6A8A">dB/dt</span> <b style="color:${col}">${st.dbdt} nT/min</b><br>
-        <span style="color:#4A6A8A">GIC est.</span> ${Math.round(st.dbdt*0.55)} A<br>
-        <span style="color:#4A6A8A;font-size:10px">Live · ${fetchedAt}</span>
+        <span style="color:#C3B9E6">dB/dt</span> <b style="color:${col}">${st.dbdt} nT/min</b><br>
+        <span style="color:#C3B9E6">GIC est.</span> ${Math.round(st.dbdt*0.55)} A<br>
+        <span style="color:#C3B9E6;font-size:11.5px">Live · ${fetchedAt}</span>
       </div>`,
       {className:'dark-popup'}
     );
@@ -888,21 +887,22 @@ function showImpact(key){
   const s=STORMS[key],i=s.imp;
   document.getElementById('impact-body').innerHTML=`
     <div class="impact-grid">
-      <div class="imp"><div class="imp-l">peak GIC current</div><div class="imp-v" style="color:var(--danger)">${i.gic}</div></div>
-      <div class="imp"><div class="imp-l">economic exposure</div><div class="imp-v" style="color:var(--solar)">${i.econ}</div></div>
-      <div class="imp"><div class="imp-l">outage duration</div><div class="imp-v">${i.outage}</div></div>
-      <div class="imp"><div class="imp-l">affected</div><div class="imp-v">${i.people}</div></div>
+      <div class="imp"><div class="imp-l">peak GIC</div><div class="imp-v" style="color:var(--danger)">${i.gic}</div></div>
+      <div class="imp"><div class="imp-l">outage</div><div class="imp-v">${i.outage}</div></div>
+      <div class="imp"><div class="imp-l">scale</div><div class="imp-v">${i.people}</div></div>
+      <div class="imp"><div class="imp-l">equipment</div><div class="imp-v" style="color:var(--solar)">${i.equip}</div></div>
       <div class="imp imp-region"><div class="imp-l">region</div><div class="imp-v">${i.region}</div></div>
     </div>
-    <div class="imp-note">${i.note}</div>`;
+    <div class="imp-note">${i.note}</div>
+    <div class="imp-src">Sources: ${i.src}</div>`;
 }
 
 const TH_META={
-  5:{desc:"G1–G5 · catches all — ~40 alerts/yr incl. minor events",color:"#00CC7A",caught:8,alerts:40,fp:32,fn:0},
+  5:{desc:"G1–G5 · catches all — ~40 alerts/yr incl. minor events",color:"#7FDB8A",caught:8,alerts:40,fp:32,fn:0},
   6:{desc:"G2+ · good coverage, lower noise",color:"#8BE040",caught:8,alerts:20,fp:12,fn:0},
-  7:{desc:"G3+ · severe GIC risk · recommended for TSOs",color:"#FFB347",caught:8,alerts:8,fp:0,fn:0},
+  7:{desc:"G3+ · severe GIC risk · recommended for TSOs",color:"#FF8F6B",caught:8,alerts:8,fp:0,fn:0},
   8:{desc:"G4+ · extreme only — some G3 events missed",color:"#FF8030",caught:5,alerts:3,fp:0,fn:3},
-  9:{desc:"G5 · Carrington-class only — high miss rate",color:"#FF4040",caught:2,alerts:0.5,fp:0,fn:6}
+  9:{desc:"G5 · Carrington-class only — high miss rate",color:"#FF5C74",caught:2,alerts:0.5,fp:0,fn:6}
 };
 
 function updateThreshold(v){
@@ -948,22 +948,15 @@ const WARN_NOTES=[
   '60 min warning (Helios Shield advanced): pre-positioning of spinning reserves, cross-border coordination, reinsurance parametric triggers activated. ~62–72% avoidable.',
   '3-hour warning (ESA Vigil 2031): full pre-emptive grid reconfiguration. Near-complete protection of critical assets. ~83–88% avoidable.'
 ];
-const WARN_SRC=[
-  'Boteler (2001) Nat. Hazards; NERC (2012) GMD White Paper',
-  'Pulkkinen et al. (2012) Space Weather 10, S03006',
-  'Welling et al. (2017) Space Weather; ENTSO-E GMD task force',
-  'Helios Shield model (prototype); Oughton et al. (2017) Risk Analysis',
-  'Helios Shield PINN model; Schrijver et al. (2014) Space Weather',
-  'ESA Vigil mission (target 2031); Eastwood et al. (2018) Risk Analysis'
-];
+const WARN_SRC=Array(6).fill('Illustrative assumptions for the demo, not results from a study. Loss totals and avoidable shares are placeholders to be calibrated.');
 
 function dbdtColor(v){
   if(v>=500)return'#FF2020';
   if(v>=300)return'#FF5020';
   if(v>=150)return'#FF8030';
-  if(v>=80) return'#FFB347';
+  if(v>=80) return'#FF8F6B';
   if(v>=40) return'#FFD700';
-  return'#00CC7A';
+  return'#7FDB8A';
 }
 function dbdtLabel(v){
   if(v>=500)return'EXTREME';
@@ -976,7 +969,7 @@ function dbdtLabel(v){
 function gridColor(risk){
   if(risk==='extreme')return'#FF3030';
   if(risk==='high')   return'#FF8030';
-  return'#FFB347';
+  return'#FF8F6B';
 }
 function gridDash(risk){
   if(risk==='extreme')return null;
@@ -999,12 +992,12 @@ function initMap(){
       <div class="map-legend-row"><div class="map-legend-dot" style="background:#FF2020"></div>≥500 nT/min — EXTREME</div>
       <div class="map-legend-row"><div class="map-legend-dot" style="background:#FF5020"></div>300–500 — SEVERE</div>
       <div class="map-legend-row"><div class="map-legend-dot" style="background:#FF8030"></div>150–300 — HIGH</div>
-      <div class="map-legend-row"><div class="map-legend-dot" style="background:#FFB347"></div>80–150 — MODERATE</div>
-      <div class="map-legend-row"><div class="map-legend-dot" style="background:#00CC7A"></div>&lt;80 — LOW</div>
+      <div class="map-legend-row"><div class="map-legend-dot" style="background:#FF8F6B"></div>80–150 — MODERATE</div>
+      <div class="map-legend-row"><div class="map-legend-dot" style="background:#7FDB8A"></div>&lt;80 — LOW</div>
       <div style="margin-top:8px" class="map-legend-title">Grid lines</div>
       <div class="map-legend-row"><div class="map-legend-line" style="background:#FF3030"></div>Extreme GIC risk</div>
       <div class="map-legend-row"><div class="map-legend-line" style="background:#FF8030;opacity:.7"></div>High GIC risk</div>
-      <div class="map-legend-row"><div class="map-legend-line" style="background:#FFB347;opacity:.6"></div>Moderate risk</div>`;
+      <div class="map-legend-row"><div class="map-legend-line" style="background:#FF8F6B;opacity:.6"></div>Moderate risk</div>`;
     return d;
   };
   legend.addTo(map);
@@ -1033,7 +1026,7 @@ function renderSimStorm(key,warnIdx){
       opacity:g.risk==='extreme'?0.85:0.65,
       dashArray:gridDash(g.risk)
     }).addTo(map);
-    pl.bindPopup(`<strong>${g.label}</strong><br><span style="color:#FFB347">${g.v}</span>${g.note?'<br><em style="color:#8AB0CC;font-size:11px">'+g.note+'</em>':''}`);
+    pl.bindPopup(`<strong>${g.label}</strong><br><span style="color:#FF8F6B">${g.v}</span>${g.note?'<br><em style="color:#D9D1F4;font-size:12.5px">'+g.note+'</em>':''}`);
     mapLayers.push(pl);
   });
 
@@ -1050,8 +1043,8 @@ function renderSimStorm(key,warnIdx){
     m.bindPopup(
       `<strong>${st.id} — ${st.name}</strong><br>`+
       `<span style="color:${col}">dB/dt: <strong>${st.dbdt} nT/min</strong> — ${dbdtLabel(st.dbdt)}</span><br>`+
-      `<span style="color:#8AB0CC;font-size:11px">GIC estimate: ~${gicEst} A (simplified)</span>`+
-      (st.note?`<br><em style="color:#8AB0CC;font-size:11px">${st.note}</em>`:'')
+      `<span style="color:#D9D1F4;font-size:12.5px">GIC estimate: ~${gicEst} A (simplified)</span>`+
+      (st.note?`<br><em style="color:#D9D1F4;font-size:12.5px">${st.note}</em>`:'')
     );
     mapLayers.push(m);
   });
@@ -1061,7 +1054,7 @@ function renderSimStorm(key,warnIdx){
     stations.slice(0,3).forEach(st=>{
       const r=Math.max(14,Math.min(28,st.dbdt/25));
       const ring=L.circleMarker([st.lat,st.lng],{
-        radius:r*pct,color:'#00CC7A',fillColor:'rgba(0,200,122,0)',
+        radius:r*pct,color:'#7FDB8A',fillColor:'rgba(127,219,138,0)',
         fillOpacity:0,weight:1.5,opacity:pct*0.7,dashArray:'3,4'
       }).addTo(map);
       ring.bindPopup(`<strong>Avoidable zone — ${st.id}</strong><br>~${Math.round(pct*100)}% of local GIC impact preventable<br>with ${WARN_STEPS[warnIdx] >= 60 ? Math.round(WARN_STEPS[warnIdx]/60)+'h' : WARN_STEPS[warnIdx]+'min'} warning`);
@@ -1081,7 +1074,7 @@ function renderSimStorm(key,warnIdx){
   document.getElementById('av-bar').style.width=`${Math.round(pct*100)}%`;
   document.getElementById('av-pct').textContent=`${Math.round(pct*100)}%`;
   document.getElementById('sim-note').textContent=WARN_NOTES[warnIdx];
-  document.getElementById('sim-note-src').textContent='Sources: '+WARN_SRC[warnIdx];
+  document.getElementById('sim-note-src').textContent=WARN_SRC[warnIdx];
 
   // ── Update dB/dt chips ──
   const rows=document.getElementById('dbdt-rows');
