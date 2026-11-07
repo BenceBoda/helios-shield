@@ -37,7 +37,6 @@ USGS = {  # IAGA: (name, lat, lon)
     "BRW": ("Barrow, US", 71.32, -156.62),
 }
 INTERMAGNET = {
-    "TIH": ("Tihany, HU", 46.90, 17.89),
     "NGK": ("Niemegk, DE", 52.07, 12.68),
     "ESK": ("Eskdalemuir, UK", 55.31, -3.21),
     "HAD": ("Hartland, UK", 50.98, -4.48),
