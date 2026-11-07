@@ -337,7 +337,7 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
       </div>
 
       <div>
-        <div class="sim-lbl">02 · warning window (minutes before peak GIC)</div>
+        <div class="sim-lbl">02 · warning window (minutes before a station’s peak dB/dt)</div>
         <div class="warn-display">
           <span class="warn-val" id="warn-val">30</span>
           <span class="warn-unit">min advance warning</span>
@@ -348,40 +348,36 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
       </div>
 
       <div>
-        <div class="sim-lbl">03 · estimated avoidable damage</div>
+        <div class="sim-lbl">03 · what the replay shows (measured)</div>
         <div class="av-grid">
           <div class="av-stat" style="border-left:3px solid var(--danger)">
-            <div class="av-fill" id="av-fill-total" style="height:100%;background:rgba(255,92,116,.06)"></div>
-            <div class="av-v" style="color:var(--danger)" id="av-total">$6.0B</div>
-            <div class="av-l">total economic loss (illustrative)</div>
+            <div class="av-v" style="color:var(--danger)" id="av-peak">—</div>
+            <div class="av-l" id="av-peak-l">peak dB/dt</div>
           </div>
-          <div class="av-stat" style="border-left:3px solid var(--safe)">
-            <div class="av-fill" id="av-fill-avoid" style="height:0%;background:rgba(127,219,138,.08)"></div>
-            <div class="av-v" style="color:var(--safe)" id="av-avoid">$2.4B</div>
-            <div class="av-l">avoidable with warning</div>
+          <div class="av-stat" style="border-left:3px solid var(--solar)">
+            <div class="av-v" style="color:var(--solar)" id="av-risk">—</div>
+            <div class="av-l">mid-latitude stations ≥ 300 nT/min</div>
           </div>
           <div class="av-stat av-full" style="border-left:3px solid var(--accent)">
-            <div class="av-fill" style="height:0%;background:rgba(242,169,59,.05)"></div>
-            <div class="av-v" style="color:var(--accent)" id="av-people">3.6M</div>
-            <div class="av-l">people spared from outage</div>
+            <div class="av-v" style="color:var(--accent)" id="av-lead">—</div>
+            <div class="av-l" id="av-lead-l">L1 warning lead (storm replay)</div>
           </div>
-          <div class="av-stat av-full" style="border-left:3px solid var(--solar)">
-            <div class="av-fill" style="height:0%;background:rgba(255,143,107,.06)"></div>
-            <div class="av-v" style="color:var(--solar)" id="av-trans">~4</div>
-            <div class="av-l">large transformers preserved ($2–7.5M each, 5–16 mo lead time — US DOE 2014)</div>
+          <div class="av-stat av-full" style="border-left:3px solid var(--safe)">
+            <div class="av-v" style="color:var(--safe)" id="av-covered">—</div>
+            <div class="av-l" id="av-covered-l">high-risk stations warned in time</div>
           </div>
         </div>
         <div class="av-bar-wrap" style="margin-top:10px">
           <div class="av-pct-row">
-            <span style="color:var(--muted)">damage preventable</span>
-            <span style="color:var(--safe)" id="av-pct">40%</span>
+            <span style="color:var(--muted)">high-risk stations warned at least the chosen window before their peak</span>
+            <span style="color:var(--safe)" id="av-pct">—</span>
           </div>
-          <div class="av-bar"><div class="av-bar-fill" id="av-bar" style="width:40%"></div></div>
+          <div class="av-bar"><div class="av-bar-fill" id="av-bar" style="width:0%"></div></div>
         </div>
       </div>
 
       <div class="sim-note" id="sim-note">With 30 min warning, TSOs can reduce transformer loading by 40–60%, enabling controlled load shedding instead of catastrophic failure.</div>
-      <div class="sim-source" id="sim-note-src">Illustrative assumptions for the demo, not results from a study.</div>
+      <div class="sim-source" id="sim-note-src">Station figures: measured SuperMAG dB/dt and NASA OMNI solar wind (storm replay).</div>
     </div>
   </div>
 </div>
@@ -505,8 +501,6 @@ const STORMS={
     bz:[-5,-12,-28,-52,-75,-92,-105,-98,-88,-72,-60,-85,-97,-88,-70,-52,-38,-25,-18,-12,-8,-5,-4,-5],
     imp:{gic:"not measured",outage:"9 hours",people:"6+ million people",equip:"Salem GSU transformer (New Jersey) failed",region:"Québec, Canada",note:"Seven static VAR compensators tripped within 59 s; the grid collapsed 25 s later, at 02:44 EST (07:44 UTC).",src:"NERC (2012) Effects of Geomagnetic Disturbances on the Bulk Power System; Hydro-Québec"},
     sim:{
-      totalLoss:6.0,totalPeople:6,totalTrans:7,
-      avoidPct:[0.08,0.18,0.32,0.40,0.62,0.83],
       mapCenter:[52,-78],mapZoom:3
     }
   },
@@ -516,8 +510,6 @@ const STORMS={
     bz:[-8,-18,-35,-65,-88,-82,-78,-72,-58,-42,-30,-22,-28,-55,-75,-85,-82,-68,-52,-38,-25,-16,-10,-8],
     imp:{gic:"~330 A (estimated, Sweden)",outage:"20–50 min (Malmö)",people:"~50,000 customers",equip:"12 transformers damaged (South Africa)",region:"Southern Sweden, South Africa",note:"30 Oct 2003: blackout in Malmö, southern Sweden. In South Africa, twelve transformers were damaged and removed from service.",src:"NERC (2012); Lloyd's & AER (2013) Solar Storm Risk to the North American Electric Grid; Pulkkinen et al. (2005) Space Weather"},
     sim:{
-      totalLoss:1.5,totalPeople:0.8,totalTrans:14,
-      avoidPct:[0.10,0.22,0.38,0.50,0.68,0.85],
       mapCenter:[45,15],mapZoom:2
     }
   },
@@ -527,8 +519,6 @@ const STORMS={
     bz:[-5,-15,-32,-60,-82,-78,-72,-65,-58,-45,-32,-28,-38,-65,-78,-72,-58,-45,-32,-22,-15,-10,-7,-5],
     imp:{gic:"113 A (New Zealand)",outage:"no loss of supply",people:"strongest storm since 2003",equip:"lines switched out to protect transformers (NZ)",region:"Global",note:"Transpower (New Zealand) disconnected lines on a pre-planned GIC strategy; modelling suggests ~200 A without it. No GIC-related equipment failures were reported in the US.",src:"Mac Manus et al. (2025) Space Weather e2025SW004388; Wilkerson et al. (2025) arXiv:2507.07009"},
     sim:{
-      totalLoss:2.4,totalPeople:2.1,totalTrans:3,
-      avoidPct:[0.12,0.25,0.42,0.55,0.72,0.88],
       mapCenter:[48,5],mapZoom:2
     }
   }
@@ -639,6 +629,15 @@ const HOURS=Array.from({length:24},(_,i)=>`${String(i).padStart(2,'0')}:00`);
 /* ── Measured storm data (storms/*.json, built by scripts/build_storm_replays.py) ── */
 function bzScale(v){return v===null||v===undefined?null:Math.max(0,Math.min(9,(v+120)/120*9))}
 function hhmm(t){return t?t.slice(11,16)+' UTC':''}
+function coverage(key,windowMin){
+  // high-risk = mid-latitude stations (|lat| <= 62) whose measured peak reached 300 nT/min
+  const st=(SUPERMAG[key]||[]).filter(o=>Math.abs(o.lat)<=62&&o.dbdt>=300&&o.peak_time);
+  const s=STORMS[key],w=s.replay&&s.replay.warning;
+  if(!w)return{risky:st,warnedIds:[],share:0};
+  const l1=Date.parse(w.l1_time.replace('Z',':00Z'));
+  const warned=st.filter(o=>(Date.parse(o.peak_time.replace('Z',':00Z'))-l1)/60000>=windowMin);
+  return{risky:st,warnedIds:warned.map(o=>o.id),share:st.length?warned.length/st.length:0};
+}
 function replaySummary(r){
   const w=r.warning,d=r.danger;
   if(!w&&d) return `<span style="color:var(--solar)">no solar-wind monitor data for this storm</span><span>first dB/dt ≥ ${d.threshold} nT/min: ${d.station} at ${hhmm(d.time)} (measured)</span>`;
@@ -943,14 +942,14 @@ const WARN_CTX=[
   'ESA Vigil L5 (2031) — 8-hour upstream vantage'
 ];
 const WARN_NOTES=[
-  '5 min warning: only emergency load reduction possible. ~8% damage avoidable. Most transformer saturation unavoidable at this timescale.',
-  '10 min warning: controlled de-energisation of highest-risk lines can start. ~18% avoidable. Current NOAA standard falls here under ideal conditions.',
-  '20 min warning: coordinated TSO response activated. Partial load shedding, reactive power control. ~32% avoidable.',
-  '30 min warning (Helios Shield baseline): full coordinated multi-operator response. Transformers taken offline safely before flux peaks. ~40–55% avoidable.',
-  '60 min warning (Helios Shield advanced): pre-positioning of spinning reserves, cross-border coordination, reinsurance parametric triggers activated. ~62–72% avoidable.',
-  '3-hour warning (ESA Vigil 2031): full pre-emptive grid reconfiguration. Near-complete protection of critical assets. ~83–88% avoidable.'
+  '5 minutes: emergency measures only — little time to change the network before the disturbance arrives.',
+  '10 minutes: operators can start switching out the most exposed lines and transformers.',
+  '20 minutes: a coordinated response becomes possible — reactive power reserves, line switching, alerting neighbouring operators.',
+  '30 minutes: roughly the solar-wind transit time from the L1 monitor to Earth — the window upstream data gives today.',
+  '1 hour: enough time to run a pre-planned mitigation scheme, as Transpower (New Zealand) did in May 2024.',
+  '3 hours: pre-emptive reconfiguration of network and generation — needs forecasts beyond L1 data (CME arrival models, ESA Vigil from ~2031).'
 ];
-const WARN_SRC=Array(6).fill('Illustrative assumptions for the demo, not results from a study. Loss totals and avoidable shares are placeholders to be calibrated.');
+const WARN_SRC=Array(6).fill('Station figures: measured SuperMAG dB/dt and NASA OMNI solar wind (storm replay). Example action: Mac Manus et al. (2025) Space Weather.');
 
 function dbdtColor(v){
   if(v>=500)return'#FF2020';
@@ -1016,7 +1015,8 @@ function renderSimStorm(key,warnIdx){
   const s=STORMS[key];
   const stations=SUPERMAG[key];
   const gridLines=GRID[key];
-  const pct=s.sim.avoidPct[warnIdx];
+  const cov=coverage(key,WARN_STEPS[warnIdx]);
+  const pct=cov.share;
 
   map.flyTo(s.sim.mapCenter,s.sim.mapZoom,{duration:1.1,easeLinearity:.45});
 
@@ -1052,29 +1052,33 @@ function renderSimStorm(key,warnIdx){
   });
 
   // ── Avoidance overlay (green pulse rings on top stations) ──
-  if(pct>0.1){
-    stations.slice(0,3).forEach(st=>{
+  if(cov.warnedIds.length){
+    stations.filter(st=>cov.warnedIds.includes(st.id)).forEach(st=>{
       const r=Math.max(14,Math.min(28,st.dbdt/25));
       const ring=L.circleMarker([st.lat,st.lng],{
         radius:r*pct,color:'#7FDB8A',fillColor:'rgba(127,219,138,0)',
         fillOpacity:0,weight:1.5,opacity:pct*0.7,dashArray:'3,4'
       }).addTo(map);
-      ring.bindPopup(`<strong>Avoidable zone — ${st.id}</strong><br>~${Math.round(pct*100)}% of local GIC impact preventable<br>with ${WARN_STEPS[warnIdx] >= 60 ? Math.round(WARN_STEPS[warnIdx]/60)+'h' : WARN_STEPS[warnIdx]+'min'} warning`);
+      ring.bindPopup(`<strong>Warned in time — ${st.id}</strong><br>the L1 warning came at least ${WARN_STEPS[warnIdx] >= 60 ? Math.round(WARN_STEPS[warnIdx]/60)+' h' : WARN_STEPS[warnIdx]+' min'}<br>before this station's measured peak`);
       mapLayers.push(ring);
     });
   }
 
   // ── Update stats ──
-  const avoidAmt=(s.sim.totalLoss*pct).toFixed(1);
-  const avoidPeople=(s.sim.totalPeople*pct).toFixed(1);
-  const avoidTrans=Math.max(0,Math.round(s.sim.totalTrans*pct));
-  document.getElementById('av-total').textContent=`$${s.sim.totalLoss.toFixed(1)}B`;
-  document.getElementById('av-avoid').textContent=`$${avoidAmt}B`;
-  document.getElementById('av-people').textContent=`${avoidPeople}M`;
-  document.getElementById('av-trans').textContent=`~${avoidTrans}`;
-  document.getElementById('av-fill-avoid').style.height=`${Math.round(pct*100)}%`;
+  const top=stations.reduce((a,b)=>(!a||b.dbdt>a.dbdt)?b:a,null);
+  document.getElementById('av-peak').textContent=top?`${top.dbdt} nT/min`:'—';
+  document.getElementById('av-peak-l').textContent=top?`peak dB/dt · ${top.id} ${top.name||''}`:'peak dB/dt';
+  document.getElementById('av-risk').textContent=`${cov.risky.length}`;
+  const w=s.replay&&s.replay.warning, d=s.replay&&s.replay.danger;
+  let lead='no L1 data',leadL='no solar-wind monitor data for this storm';
+  if(w&&d&&w.minutes_before_danger>0){const m=w.minutes_before_danger;lead=`${Math.floor(m/60)?Math.floor(m/60)+'h ':''}${m%60} min`;leadL=`L1 warning ${hhmm(w.l1_time)} → first dB/dt ≥ 300 nT/min at ${d.station} ${hhmm(d.time)}`;}
+  else if(w&&d){lead='too late';leadL=`solar-wind data gap at onset: warning ${hhmm(w.l1_time)}, first dB/dt ≥ 300 nT/min already at ${hhmm(d.time)}`;}
+  document.getElementById('av-lead').textContent=lead;
+  document.getElementById('av-lead-l').textContent=leadL;
+  document.getElementById('av-covered').textContent=`${cov.warnedIds.length} of ${cov.risky.length}`;
+  document.getElementById('av-covered-l').textContent=`high-risk stations warned ≥ ${WARN_STEPS[warnIdx]>=60?Math.round(WARN_STEPS[warnIdx]/60)+' h':WARN_STEPS[warnIdx]+' min'} before their peak`;
   document.getElementById('av-bar').style.width=`${Math.round(pct*100)}%`;
-  document.getElementById('av-pct').textContent=`${Math.round(pct*100)}%`;
+  document.getElementById('av-pct').textContent=cov.risky.length?`${Math.round(pct*100)}%`:'—';
   document.getElementById('sim-note').textContent=WARN_NOTES[warnIdx];
   document.getElementById('sim-note-src').textContent=WARN_SRC[warnIdx];
 
