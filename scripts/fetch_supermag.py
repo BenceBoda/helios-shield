@@ -60,7 +60,12 @@ def fetch_station(logon, iaga, start, extent):
         text = r.read().decode("utf-8", "replace").strip()
     if not text or text.upper().startswith("ERROR"):
         raise RuntimeError(text[:200] or "empty response")
-    data = json.loads(text)
+    # The API may prefix the JSON with a status line such as "OK"
+    body = text[text.find("["):] if "[" in text else text
+    try:
+        data = json.loads(body)
+    except ValueError:
+        raise RuntimeError(f"not JSON: {text[:300]!r}")
     if not isinstance(data, list):
         raise RuntimeError(f"unexpected response: {str(data)[:200]}")
     return data
