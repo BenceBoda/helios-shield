@@ -256,7 +256,17 @@ def main():
                 out["warning"]["minutes_before_danger"] = round((first_danger[0] - ts(l1)) / 60)
             print(f"danger: {out['danger']}  -> warning lead {out.get('warning', {}).get('minutes_before_danger')}")
 
-        with open(f"storms/{key}.json", "w") as f:
+        path = f"storms/{key}.json"
+        try:
+            with open(path) as f:
+                prev = json.load(f)
+        except Exception:  # noqa: BLE001
+            prev = {}
+        # Never replace good data with a degraded run (e.g. SuperMAG outage)
+        if len(out.get("stations", [])) < len(prev.get("stations", [])):
+            print(f"{key}: only {len(out.get('stations', []))} stations vs {len(prev['stations'])} before - keeping previous file")
+            continue
+        with open(path, "w") as f:
             json.dump(out, f, separators=(",", ":"))
     return 0
 
