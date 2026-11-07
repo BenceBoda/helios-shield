@@ -125,7 +125,9 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 @media(max-width:960px){.sim-layout{grid-template-columns:1fr}}
 #sim-map{height:460px;border-radius:14px;border:1px solid var(--border);background:#110828;position:relative;z-index:1}
 .leaflet-container{background:#110828}
-.leaflet-tile{filter:brightness(.5) saturate(.35) hue-rotate(225deg)}
+.leaflet-tile{filter:none}
+.leaflet-container{background:#24165a!important}
+.leaflet-tile-pane{opacity:.78;mix-blend-mode:screen}
 .leaflet-control-attribution{background:rgba(22,11,51,.85)!important;color:#7A6BAE!important;font-size:12.5px!important}
 .leaflet-control-attribution a{color:#7A6BAE!important}
 .leaflet-control-zoom a{background:#22154A!important;color:#F3EFFF!important;border-color:#433178!important}
@@ -295,7 +297,7 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
   <div style="margin-bottom:16px">
     <div style="font-size:11.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:4px">impact simulator · measured SuperMAG dB/dt + simplified HV corridors · loss figures illustrative</div>
     <div style="font-size:18px;font-weight:500;color:#fff">What if we had advance warning?</div>
-    <div style="font-size:12px;color:var(--muted);margin-top:4px">Real dB/dt measurements from the SuperMAG global magnetometer network, overlaid on actual HV transmission corridors. Drag the slider to model avoidable damage at each warning window.</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:4px">Measured dB/dt from the SuperMAG magnetometer network, over simplified high-voltage corridors. Drag the slider to see an illustrative estimate of avoidable damage at each warning window.</div>
   </div>
 
   <div class="sim-layout">
@@ -303,7 +305,7 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
       <div id="sim-map"></div>
       <!-- legend rendered by JS into map -->
       <div class="map-dbdt-panel" id="dbdt-panel">
-        <div class="dbdt-title">SuperMAG station readings · peak storm hour (measured dB/dt, nT/min)</div>
+        <div class="dbdt-title">SuperMAG stations · measured peak dB/dt during the storm (nT/min)</div>
         <div class="dbdt-rows" id="dbdt-rows"></div>
         <div class="sim-source" id="dbdt-source"></div>
       </div>
@@ -351,7 +353,7 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
           <div class="av-stat" style="border-left:3px solid var(--danger)">
             <div class="av-fill" id="av-fill-total" style="height:100%;background:rgba(255,92,116,.06)"></div>
             <div class="av-v" style="color:var(--danger)" id="av-total">$6.0B</div>
-            <div class="av-l">total economic loss</div>
+            <div class="av-l">total economic loss (illustrative)</div>
           </div>
           <div class="av-stat" style="border-left:3px solid var(--safe)">
             <div class="av-fill" id="av-fill-avoid" style="height:0%;background:rgba(127,219,138,.08)"></div>
@@ -980,8 +982,8 @@ function gridDash(risk){
 function initMap(){
   if(mapReady)return;
   map=L.map('sim-map',{center:[48,10],zoom:2,zoomControl:true,attributionControl:true,maxZoom:8,minZoom:1});
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-    attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxZoom:19
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',{
+    attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/attributions">CARTO</a>',subdomains:'abcd',maxZoom:19
   }).addTo(map);
 
   // Custom legend control
