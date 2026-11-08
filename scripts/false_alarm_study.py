@@ -18,6 +18,11 @@ Definitions
   False alarm: an alert episode with no event from its start to 12 h later.
   An hour only counts if a second station saw at least a third of the threshold at the same
   time; single-station jumps and values above MAX_PLAUSIBLE nT/min are instrument artefacts.
+  It is also dropped if another station in the same region (US or Europe) stayed below
+  QUIET_MATE nT/min that hour: a real storm moves every nearby station at least a little,
+  so a dead-quiet neighbour means a data glitch shared by several stations.
+  Missed events get a diagnosis: the strongest Ey and the minutes of missing OMNI data in
+  the 12 h before the event.
 """
 import csv
 import io
@@ -40,6 +45,8 @@ LATE_AFTER_H = 3
 EY_LEVELS = [5.0, 10.0, 15.0]
 DBDT_LEVELS = [100.0, 300.0]
 MAX_PLAUSIBLE = 5000.0  # nT/min; far above anything recorded at mid-latitudes
+QUIET_MATE = 5.0      # nT/min
+REGIONS = [{"FRD", "BOU", "NEW", "SIT"}, {"NGK", "ESK", "HAD", "LER"}]
 STATIONS = [("FRD", "usgs"), ("BOU", "usgs"), ("NEW", "usgs"), ("SIT", "usgs"),
             ("NGK", "gin"), ("ESK", "gin"), ("HAD", "gin"), ("LER", "gin")]
 
@@ -150,6 +157,9 @@ def confirmed(row, thr):
     station sees at least thr/3 at the same time. Single-station jumps are instrument artefacts."""
     vals = sorted(((v, s) for s, v in row.items() if v <= MAX_PLAUSIBLE), reverse=True)
     if len(vals) >= 2 and vals[0][0] >= thr and vals[1][0] >= thr / 3:
+        region = next((r for r in REGIONS if vals[0][1] in r), set())
+        if any(row[s] < QUIET_MATE for s in region if s in row):
+            return None
         return vals[0]
     return None
 
@@ -173,7 +183,16 @@ def iso(t):
     return datetime.fromtimestamp(t, timezone.utc).strftime("%Y-%m-%dT%H:%MZ")
 
 
-def evaluate(al, ev):
+def diagnose(rows, start):
+    """Strongest Ey (mV/m) and minutes without OMNI data in the 12 h before start."""
+    lo = start - WARN_BEFORE_H * 3600
+    win = [r for r in rows if lo <= r[0] < start]
+    eys = [v * max(0.0, -bz) * 1e-3 for _, bz, v in win if bz is not None and v is not None]
+    return {"max_ey": round(max(eys), 1) if eys else None,
+            "omni_gap_min": WARN_BEFORE_H * 60 - len(eys)}
+
+
+def evaluate(al, ev, rows=None):
     res = {"warned": [], "late": [], "missed": [], "false_alarms": []}
     for e in ev:
         before = [a for a in al if e["start"] - WARN_BEFORE_H * 3600 <= a < e["start"]]
@@ -185,6 +204,8 @@ def evaluate(al, ev):
         elif during:
             res["late"].append(item)
         else:
+            if rows is not None:
+                item.update(diagnose(rows, e["start"]))
             res["missed"].append(item)
     for a in al:
         hit = any(a <= e["start"] <= a + WARN_BEFORE_H * 3600 or e["start"] <= a <= e["end"] + 3600 for e in ev)
@@ -204,11 +225,15 @@ def main():
         al = alerts(rows, ey)
         for thr in DBDT_LEVELS:
             ev = events(hourly, thr)
-            r = evaluate(al, ev)
+            r = evaluate(al, ev, rows)
             out["results"].append({"ey": ey, "dbdt": thr, "alerts": len(al), "events": len(ev),
                                    **{k: len(v) for k, v in r.items()}, "detail": r})
             print(f"{ey:7.0f} | {thr:12.0f} | {len(al):6d} | {len(ev):6d} | {len(r['warned']):6d} | "
                   f"{len(r['late']):4d} | {len(r['missed']):6d} | {len(r['false_alarms']):12d}")
+            if thr >= 300:
+                for m in r["missed"]:
+                    print(f"    missed {m['event_start']} {m['peak_dbdt']} nT/min {m['station']}: "
+                          f"max Ey {m.get('max_ey')} mV/m, OMNI gap {m.get('omni_gap_min')} min")
     with open(f"analysis/false_alarms_{YEAR}.json", "w") as f:
         json.dump(out, f, indent=1)
     return 0
