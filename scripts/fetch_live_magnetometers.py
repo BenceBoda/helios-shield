@@ -184,6 +184,23 @@ def main():
             res["errors"].append(f"{iaga}: {e}")
             print(f"{iaga} ({src}): failed: {str(e)[:200]}")
 
+    # A station that failed this time keeps its previous reading while that is still recent,
+    # marked stale, so a short outage at one provider does not empty the map.
+    try:
+        with open(OUT) as f:
+            prev = {st["id"]: st for st in json.load(f).get("stations", [])}
+    except Exception:  # noqa: BLE001
+        prev = {}
+    got = {st["id"] for st in res["stations"]}
+    for sid, st in prev.items():
+        if sid in got or not st.get("time"):
+            continue
+        t = datetime.strptime(st["time"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+        lag = round((now - t).total_seconds() / 60)
+        if lag <= MAX_LAG_MIN:
+            res["stations"].append({**st, "lag_min": lag, "stale": True})
+            print(f"{sid}: kept previous reading ({lag} min old)")
+
     if newest:
         res["data_time"] = iso(newest)
     else:
