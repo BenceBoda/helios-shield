@@ -43,6 +43,21 @@ body{background:radial-gradient(1100px 1100px at 88% -18%,rgba(126,94,220,.38),r
 .stat-val{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:500;color:#fff;transition:color .3s}
 .badge{display:flex;align-items:center;gap:7px;padding:4px 11px;border-radius:20px;font-size:12.5px;font-weight:500;background:rgba(127,219,138,.1);color:var(--safe);border:1px solid rgba(127,219,138,.25);transition:all .3s;margin-left:auto}
 .badge.warn{background:rgba(255,143,107,.1);color:var(--solar);border-color:rgba(255,143,107,.25)}
+.tip{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;margin-left:5px;border-radius:50%;border:1px solid rgba(195,185,230,.55);color:var(--muted);font:600 9.5px/1 'IBM Plex Sans',sans-serif;font-style:italic;cursor:help;vertical-align:1px;user-select:none;flex-shrink:0}
+.tip:hover,.tip:focus{color:#fff;border-color:#F2A93B;outline:none}
+.tip-bubble{position:fixed;z-index:3000;display:none;background:#2A1A5C;border:1px solid #5A4A8C;border-radius:8px;padding:10px 12px;color:#F3EFFF;font:13px/1.45 'IBM Plex Sans',sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.45);pointer-events:auto}
+.tip-bubble b{color:#F2A93B;font-weight:600}
+.how-btn{margin-left:auto;align-self:center;padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font:500 12.5px 'IBM Plex Sans',sans-serif;cursor:pointer}
+.how-btn:hover{color:#fff;border-color:#F2A93B}
+.how-ov{position:fixed;inset:0;z-index:2500;background:rgba(10,5,30,.72);display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:40px 16px}
+.how-ov.open{display:flex}
+.how-box{max-width:720px;width:100%;background:#1E1246;border:1px solid #433178;border-radius:12px;padding:26px 28px;color:#F3EFFF;font:14.5px/1.6 'IBM Plex Sans',sans-serif;position:relative}
+.how-box h2{font-size:20px;margin:0 0 4px}.how-box h3{font-size:14px;color:#F2A93B;margin:20px 0 6px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.how-box p,.how-box li{color:#D9D1F4;margin:0 0 8px}.how-box ul{padding-left:18px;margin:0}
+.how-box table{width:100%;border-collapse:collapse;font:13px 'IBM Plex Mono',monospace;margin:6px 0 4px}
+.how-box th,.how-box td{text-align:left;padding:6px 8px;border-bottom:1px solid #433178}.how-box th{color:var(--muted);font-weight:500}
+.how-x{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer}
+.th-note{font-size:11.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-top:8px;line-height:1.5}
 .badge.blind{background:rgba(195,185,230,.08);color:var(--muted);border-color:rgba(195,185,230,.3)}
 .feed-ok{color:var(--safe)!important}.feed-part{color:var(--solar)!important}.feed-blind{color:var(--danger)!important}
 .badge.alrt{background:rgba(255,92,116,.15);color:var(--danger);border-color:rgba(255,92,116,.3)}
@@ -213,11 +228,11 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
     Helios Shield
   </div>
   <div class="status-bar">
-    <div class="stat"><span class="stat-lbl">Kp-index</span><span class="stat-val" id="live-kp">2.3</span></div>
-    <div class="stat"><span class="stat-lbl">Bz (nT)</span><span class="stat-val" id="live-bz">−4.1</span></div>
-    <div class="stat"><span class="stat-lbl">Ey (mV/m)</span><span class="stat-val" id="live-ey">—</span></div>
-    <div class="stat" id="feed-stat" title="Solar wind from the L1 spacecraft. Without it the V1 rule cannot warn."><span class="stat-lbl">L1 feed</span><span class="stat-val" id="live-feed">—</span></div>
-    <div class="badge" id="status-badge"><span class="pulse"></span><span id="status-text">NOMINAL</span></div>
+    <div class="stat"><span class="stat-lbl">Kp-index<span class="tip" tabindex="0" role="button" aria-label="Explain" data-tip="&lt;b&gt;Kp-index&lt;/b&gt; — planetary geomagnetic activity on a 0–9 scale, estimated by NOAA every minute. Kp 7+ is a G3 “strong” storm. It averages the whole planet, so it lags and says little about any one grid.">i</span></span><span class="stat-val" id="live-kp">2.3</span></div>
+    <div class="stat"><span class="stat-lbl">Bz (nT)<span class="tip" tabindex="0" role="button" aria-label="Explain" data-tip="&lt;b&gt;Bz&lt;/b&gt; — the north–south part of the interplanetary magnetic field, measured at L1. Strongly negative (southward) Bz lets solar-wind energy into Earth’s magnetosphere: the main driver of geomagnetic storms.">i</span></span><span class="stat-val" id="live-bz">−4.1</span></div>
+    <div class="stat"><span class="stat-lbl">Ey (mV/m)<span class="tip" tabindex="0" role="button" aria-label="Explain" data-tip="&lt;b&gt;Ey&lt;/b&gt; — the solar-wind electric field: speed × southward Bz. The V1 rule fires when Ey stays at or above the threshold (default 15 mV/m) for 10 consecutive minutes. Turns red above the threshold.">i</span></span><span class="stat-val" id="live-ey">—</span></div>
+    <div class="stat" id="feed-stat"><span class="stat-lbl">L1 feed<span class="tip" tabindex="0" role="button" aria-label="Explain" data-tip="&lt;b&gt;L1 feed&lt;/b&gt; — live solar wind from the spacecraft at the L1 point, 1.5 million km towards the Sun (NOAA SOLAR-1, with DSCOVR and ACE as backups).&lt;br&gt;&lt;span style=&#x27;color:#7FDB8A&#x27;&gt;Green&lt;/span&gt;: fresh and complete. &lt;span style=&#x27;color:#FF8F6B&#x27;&gt;Amber&lt;/span&gt;: gaps — a warning may come late. &lt;span style=&#x27;color:#FF5C74&#x27;&gt;Red&lt;/span&gt;: no recent data — no early warning is possible.">i</span></span><span class="stat-val" id="live-feed">—</span></div>
+    <div class="badge" id="status-badge"><span class="pulse"></span><span id="status-text">NOMINAL</span></div><span class="tip" tabindex="0" role="button" aria-label="Explain" data-tip="&lt;b&gt;Status&lt;/b&gt;&lt;br&gt;NOMINAL — quiet conditions.&lt;br&gt;WATCH — Kp ≥ 5.&lt;br&gt;ALERT — Kp ≥ 7, or the V1 solar-wind rule has fired.&lt;br&gt;L1 BLIND — no solar-wind data, so the system cannot warn ahead.">i</span>
   </div>
 </header>
 
@@ -225,6 +240,7 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
 <div class="tab-nav">
   <button class="tab-btn active" id="tab-monitor-btn" onclick="switchTab('monitor')">Live Monitor</button>
   <button class="tab-btn" id="tab-simulator-btn" onclick="switchTab('simulator')">Impact Simulator</button>
+  <button class="how-btn" onclick="openHow()">ⓘ How it works</button>
 </div>
 
 <!-- ══ TAB 1: LIVE MONITOR ══ -->
@@ -234,14 +250,14 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
     <div class="chart-hdr">
       <div>
         <div class="chart-title">geomagnetic activity monitor · 24-hour rolling window</div>
-        <div class="chart-sub">Planetary Kp-index &amp; Bz component</div>
+        <div class="chart-sub">Planetary Kp-index &amp; Bz component<span class="tip" tabindex="0" role="button" aria-label="Explain" data-tip="The last 24 hours of Kp (left scale) with solar-wind Bz overlaid (scaled; lower = more southward). The storm buttons replay three historical storms from measured data.">i</span></div>
       </div>
       <div class="controls">
         <button class="sbtn live on" id="btn-live" onclick="selectLive()">● Live feed</button>
         <button class="sbtn" id="btn-q89" onclick="selectStorm('quebec1989')">Québec 1989</button>
         <button class="sbtn" id="btn-h03" onclick="selectStorm('halloween2003')">Halloween 2003</button>
         <button class="sbtn" id="btn-g24" onclick="selectStorm('gannon2024')">Gannon 2024</button>
-        <button class="pbtn" id="play-btn" onclick="playSelected()" disabled>▶ Replay</button>
+        <button class="pbtn" id="play-btn" onclick="playSelected()" disabled>▶ Replay</button><span class="tip" tabindex="0" role="button" aria-label="Explain" data-tip="Replays use measured data: NASA OMNI solar wind and SuperMAG ground magnetometers. Québec 1989 predates continuous solar-wind monitoring, so no L1 warning is possible there; in Halloween 2003 a data gap delayed it.">i</span>
       </div>
     </div>
     <div class="chart-wrap">
@@ -252,41 +268,42 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
       <div class="legend">
         <div class="leg-item"><div class="leg-line" style="background:var(--accent)"></div>Kp-index</div>
         <div class="leg-item"><div class="leg-line" style="background:var(--solar);opacity:.6"></div>Bz (nT, scaled)</div>
-        <div class="leg-item"><div class="leg-line" style="background:var(--danger);border-top:2px dashed var(--danger);height:0"></div>Alert threshold</div>
+        <div class="leg-item"><div class="leg-line" style="background:var(--danger);border-top:2px dashed var(--danger);height:0"></div>Kp 7 (G3 storm)</div>
       </div>
       <div class="replay-info" id="replay-info"></div>
     </div>
   </div>
   <div class="panels">
     <div class="panel">
-      <div class="panel-lbl">alert calibration</div>
-      <div class="panel-hdg">Sensitivity threshold</div>
-      <div class="th-display"><div class="th-val" id="th-val" style="color:var(--solar)">Kp ≥ 7</div></div>
-      <div class="th-desc" id="th-desc">G3 storm — severe GIC risk · recommended for TSOs</div>
-      <div class="th-labels"><span>Kp 5</span><span>Kp 6</span><span>Kp 7</span><span>Kp 8</span><span>Kp 9</span></div>
-      <input type="range" id="threshold" min="5" max="9" value="7" step="1" oninput="updateThreshold(+this.value)">
+      <div class="panel-lbl">alert rule · tested on 6 years of data<span class="tip" tabindex="0" role="button" aria-label="Explain" data-tip="Results of replaying the rule over six full years (2015, 2017, 2022–2025) against 8 mid-latitude observatories (USGS + INTERMAGNET). A severe event = ≥ 300 nT/min, confirmed by a second station. Alerts without a severe event were mostly still real storms that stayed below 300 nT/min. Moving the slider also changes the live rule above.">i</span></div>
+      <div class="panel-hdg">Solar-wind threshold (Ey)</div>
+      <div class="th-display"><div class="th-val" id="th-val" style="color:var(--solar)">Ey ≥ 15 mV/m</div></div>
+      <div class="th-desc" id="th-desc"></div>
+      <div class="th-labels"><span>5 mV/m</span><span>10 mV/m</span><span>15 mV/m</span></div>
+      <input type="range" id="threshold" min="5" max="15" value="15" step="5" oninput="updateEyRule(+this.value)">
       <div class="th-stats">
-        <div class="tstat tp"><div class="tstat-v" style="color:var(--safe)" id="ts-caught">~8</div><div class="tstat-l">events caught / yr</div></div>
-        <div class="tstat al"><div class="tstat-v" style="color:var(--accent)" id="ts-alerts">~8</div><div class="tstat-l">total alerts / yr</div></div>
-        <div class="tstat fp"><div class="tstat-v" style="color:var(--solar)" id="ts-fp">~0</div><div class="tstat-l">false positives / yr</div></div>
-        <div class="tstat fn"><div class="tstat-v" style="color:var(--danger)" id="ts-fn">~0</div><div class="tstat-l">missed events / yr</div></div>
+        <div class="tstat tp"><div class="tstat-v" style="color:var(--safe)" id="ts-caught">—</div><div class="tstat-l">severe events warned in time</div></div>
+        <div class="tstat fn"><div class="tstat-v" style="color:var(--danger)" id="ts-fn">—</div><div class="tstat-l">severe events missed</div></div>
+        <div class="tstat al"><div class="tstat-v" style="color:var(--accent)" id="ts-alerts">—</div><div class="tstat-l">alerts in 6 years</div></div>
+        <div class="tstat fp"><div class="tstat-v" style="color:var(--solar)" id="ts-fp">—</div><div class="tstat-l">alerts with no severe event</div></div>
       </div>
       <div class="aeb-wrap">
-        <div class="aeb-title">event coverage ← like AEB: both over- and under-alerting carry cost</div>
+        <div class="aeb-title">6-year outcome · median lead <span id="ts-lead">—</span></div>
         <div class="aeb-bar">
-          <div class="aeb-seg aeb-c" id="aeb-c" style="flex:8"></div>
-          <div class="aeb-seg aeb-m" id="aeb-m" style="flex:0"></div>
-          <div class="aeb-seg aeb-f" id="aeb-f" style="flex:0"></div>
+          <div class="aeb-seg aeb-c" id="aeb-c" style="flex:6"></div>
+          <div class="aeb-seg aeb-m" id="aeb-m" style="flex:3"></div>
+          <div class="aeb-seg aeb-f" id="aeb-f" style="flex:3"></div>
         </div>
         <div class="aeb-leg">
-          <div class="aeb-li"><div class="aeb-dot" style="background:var(--safe)"></div>caught</div>
+          <div class="aeb-li"><div class="aeb-dot" style="background:var(--safe)"></div>warned</div>
           <div class="aeb-li"><div class="aeb-dot" style="background:var(--danger)"></div>missed</div>
-          <div class="aeb-li"><div class="aeb-dot" style="background:var(--solar)"></div>false alarm</div>
+          <div class="aeb-li"><div class="aeb-dot" style="background:var(--solar)"></div>alert, no severe event</div>
         </div>
+        <div class="th-note">2015, 2017, 2022–2025 · 8 mid-latitude observatories · severe = ≥ 300 nT/min</div>
       </div>
     </div>
     <div class="panel">
-      <div class="panel-lbl">impact model</div>
+      <div class="panel-lbl">impact model<span class="tip" tabindex="0" role="button" aria-label="Explain" data-tip="What happened in the selected storm: measured peak dB/dt and documented grid impacts, each with its source.">i</span></div>
       <div class="panel-hdg">Storm projection</div>
       <div id="impact-body"><div class="imp-empty">← select a historical storm<br>to load impact data</div></div>
     </div>
@@ -321,7 +338,7 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
           <button class="storm-live-btn" id="sc-live" onclick="simSelectLive()" title="Overlay current magnetometer readings (USGS / INTERMAGNET) on the map">
             <span class="pulse" style="width:6px;height:6px;border-radius:50%;background:#7FDB8A;display:inline-block;margin-right:6px"></span>Live now
           </button>
-          <span style="font-size:11.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace" id="live-stations-badge"></span>
+          <span class="tip" tabindex="0" role="button" aria-label="Explain" data-tip="Overlays current readings from USGS and INTERMAGNET observatories, refreshed about every 10 minutes. Stations a few hours behind are marked as stale.">i</span><span style="font-size:11.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace" id="live-stations-badge"></span>
         </div>
         <div class="storm-cards">
           <button class="storm-card active" id="sc-q89" onclick="simSelectStorm('quebec1989')">
@@ -340,7 +357,7 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
       </div>
 
       <div>
-        <div class="sim-lbl">02 · warning window (minutes before a station’s peak dB/dt)</div>
+        <div class="sim-lbl">02 · warning window (minutes before a station’s peak dB/dt)<span class="tip" tabindex="0" role="button" aria-label="Explain" data-tip="How far ahead of a station’s peak dB/dt a warning must arrive to count as useful. The figures below are measured from the storm replay, not estimated.">i</span></div>
         <div class="warn-display">
           <span class="warn-val" id="warn-val">30</span>
           <span class="warn-unit">min advance warning</span>
@@ -351,7 +368,7 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
       </div>
 
       <div>
-        <div class="sim-lbl">03 · what the replay shows (measured)</div>
+        <div class="sim-lbl">03 · what the replay shows (measured)<span class="tip" tabindex="0" role="button" aria-label="Explain" data-tip="High-risk stations = mid-latitude observatories (|lat| ≤ 62°) whose measured dB/dt reached 300 nT/min. A station counts as warned if the L1 warning came at least the chosen window before its peak.">i</span></div>
         <div class="av-grid">
           <div class="av-stat" style="border-left:3px solid var(--danger)">
             <div class="av-v" style="color:var(--danger)" id="av-peak">—</div>
@@ -379,7 +396,7 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
         </div>
       </div>
 
-      <div class="sim-note" id="sim-note">With 30 min warning, TSOs can reduce transformer loading by 40–60%, enabling controlled load shedding instead of catastrophic failure.</div>
+      <div class="sim-note" id="sim-note">30 minutes: roughly the solar-wind transit time from the L1 monitor to Earth — the window upstream data gives today.</div>
       <div class="sim-source" id="sim-note-src">Station figures: measured SuperMAG dB/dt and NASA OMNI solar wind (storm replay).</div>
     </div>
   </div>
@@ -468,7 +485,6 @@ function _renderLiveOverlay(){
       `<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#F3EFFF;background:#22154A;padding:8px;border-radius:6px;min-width:160px">
         <b style="color:#fff;font-size:13px">${st.id}</b>${st.name?' · '+st.name:''}<br>
         <span style="color:#C3B9E6">dB/dt</span> <b style="color:${col}">${st.dbdt} nT/min</b><br>
-        <span style="color:#C3B9E6">GIC est.</span> ${Math.round(st.dbdt*0.55)} A<br>
         <span style="color:#C3B9E6;font-size:11.5px">Live · ${fetchedAt}</span>
       </div>`,{className:'dark-popup'}
     );
@@ -726,7 +742,7 @@ async function fetchRealData(){
     // Live solar wind (L1): straight from NOAA when the browser allows it, else the repo copy
     let bzSeries=Array(labels.length).fill(null),bzNow=null;
     const sw=await loadSolarWind();
-    const rows=sw.rows;
+    const rows=sw.rows;liveRows=rows;
     if(rows.length){
       bzNow=rows[rows.length-1].bz;
       let j=0,last=null;
@@ -776,7 +792,6 @@ function renderLiveStations(smData){
       `<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#F3EFFF;background:#22154A;padding:8px;border-radius:6px;min-width:160px">
         <b style="color:#fff;font-size:13px">${st.id}</b>${st.name?' · '+st.name:''}<br>
         <span style="color:#C3B9E6">dB/dt</span> <b style="color:${col}">${st.dbdt} nT/min</b><br>
-        <span style="color:#C3B9E6">GIC est.</span> ${Math.round(st.dbdt*0.55)} A<br>
         <span style="color:#C3B9E6;font-size:11.5px">Live · ${fetchedAt}</span>
       </div>`,
       {className:'dark-popup'}
@@ -807,7 +822,7 @@ function startLive(){
 // minutes; when speed is missing, Bz <= -10 nT. A missing minute breaks the run.
 const V1={EY:15,BZ:-10,SUSTAIN:10};
 const NOAA='https://services.swpc.noaa.gov/json/rtsw/';
-let liveV1=null,liveFeed=null;
+let liveV1=null,liveFeed=null,liveRows=[],lastKp=null,lastBz=null;
 async function getJSON(u){const r=await fetch(u,{cache:'no-store'});if(!r.ok)throw new Error(u+' '+r.status);return r.json()}
 function mergeRtsw(mag,wind){
   const key=t=>String(t).replace(' ','T').slice(0,16),m={};
@@ -876,6 +891,7 @@ function updateFeed(f,v){
 }
 
 function updateStatusBar(kp,bz){
+  lastKp=kp;lastBz=bz;
   document.getElementById('live-kp').textContent=kp.toFixed(1);
   document.getElementById('live-bz').textContent=(bz<0?'−'+Math.abs(bz).toFixed(1):'+'+bz.toFixed(1))+' nT';
   const b=document.getElementById('status-badge'),t=document.getElementById('status-text');
@@ -973,32 +989,28 @@ function showImpact(key){
     <div class="imp-src">Sources: ${i.src}</div>`;
 }
 
-const TH_META={
-  5:{desc:"G1–G5 · catches all — ~40 alerts/yr incl. minor events",color:"#7FDB8A",caught:8,alerts:40,fp:32,fn:0},
-  6:{desc:"G2+ · good coverage, lower noise",color:"#8BE040",caught:8,alerts:20,fp:12,fn:0},
-  7:{desc:"G3+ · severe GIC risk · recommended for TSOs",color:"#FF8F6B",caught:8,alerts:8,fp:0,fn:0},
-  8:{desc:"G4+ · extreme only — some G3 events missed",color:"#FF8030",caught:5,alerts:3,fp:0,fn:3},
-  9:{desc:"G5 · Carrington-class only — high miss rate",color:"#FF5C74",caught:2,alerts:0.5,fp:0,fn:6}
+// Six-year study (scripts/false_alarm_study.py, analysis/false_alarms_*.json): strict V1 rule,
+// severe event = >= 300 nT/min at a mid-latitude station, confirmed by a second station.
+const EY_STUDY={
+  5:{warned:8,missed:1,alerts:110,fa:102,lead:'6 h 44 min',color:'#7FDB8A',desc:'Very sensitive — warns before 8 of 9 severe events, but most alerts are not followed by one.'},
+  10:{warned:6,missed:3,alerts:17,fa:11,lead:'4 h 24 min',color:'#FF8F6B',desc:'Middle ground — 6 of 9 warned, 11 alerts without a severe event.'},
+  15:{warned:6,missed:3,alerts:8,fa:3,lead:'2 h 21 min',color:'#FF8F6B',desc:'V1 default — 6 of 9 warned; 3 alerts without a severe event, two of them during a G4 storm.'}
 };
-
-function updateThreshold(v){
-  threshold=v;
-  chart.data.datasets[2].data=Array(chart.data.datasets[0].data.length).fill(v);
-  chart.update('none');
-  const m=TH_META[v];
-  document.getElementById('th-val').textContent=`Kp ≥ ${v}`;
+function updateEyRule(v){
+  const m=EY_STUDY[v];if(!m)return;
+  V1.EY=v;
+  document.getElementById('th-val').textContent=`Ey ≥ ${v} mV/m`;
   document.getElementById('th-val').style.color=m.color;
   document.getElementById('th-desc').textContent=m.desc;
-  document.getElementById('ts-caught').textContent=`~${m.caught}`;
-  document.getElementById('ts-alerts').textContent=`~${Math.max(.5,m.alerts)}`;
-  document.getElementById('ts-fp').textContent=`~${m.fp}`;
-  document.getElementById('ts-fn').textContent=`~${m.fn}`;
-  document.getElementById('ts-fn').style.color=m.fn>0?'var(--danger)':'var(--safe)';
-  document.getElementById('ts-fp').style.color=m.fp>0?'var(--solar)':'var(--safe)';
-  const total=m.caught+m.fn+m.fp||1;
-  document.getElementById('aeb-c').style.flex=m.caught/total*10;
-  document.getElementById('aeb-m').style.flex=m.fn/total*10;
-  document.getElementById('aeb-f').style.flex=m.fp/total*10;
+  document.getElementById('ts-caught').textContent=`${m.warned} / ${m.warned+m.missed}`;
+  document.getElementById('ts-fn').textContent=m.missed;
+  document.getElementById('ts-alerts').textContent=m.alerts;
+  document.getElementById('ts-fp').textContent=m.fa;
+  document.getElementById('ts-lead').textContent=m.lead;
+  document.getElementById('aeb-c').style.flex=m.warned;
+  document.getElementById('aeb-m').style.flex=m.missed;
+  document.getElementById('aeb-f').style.flex=Math.min(m.fa,30);
+  if(liveRows.length){liveV1=v1State(liveRows);if(liveFeed)updateFeed(liveFeed,liveV1);if(lastKp!==null)updateStatusBar(lastKp,lastBz)}
 }
 
 /* ══════════════════════════════════════════════════════
@@ -1064,13 +1076,13 @@ function initMap(){
   const legend=L.control({position:'bottomleft'});
   legend.onAdd=()=>{
     const d=L.DomUtil.create('div','map-legend');
-    d.innerHTML=`<div class="map-legend-title">SuperMAG dB/dt</div>
+    d.innerHTML=`<div class="map-legend-title">Ground dB/dt (nT/min)<span class="tip" tabindex="0" role="button" aria-label="Explain" data-tip="&lt;b&gt;dB/dt&lt;/b&gt; — how fast the ground magnetic field changes, in nT per minute. Fast changes induce currents (GIC) in long power lines that can overheat transformers. Mid-latitude values of several hundred nT/min have coincided with documented grid impacts, e.g. Québec 1989.">i</span></div>
       <div class="map-legend-row"><div class="map-legend-dot" style="background:#FF2020"></div>≥500 nT/min — EXTREME</div>
       <div class="map-legend-row"><div class="map-legend-dot" style="background:#FF5020"></div>300–500 — SEVERE</div>
       <div class="map-legend-row"><div class="map-legend-dot" style="background:#FF8030"></div>150–300 — HIGH</div>
       <div class="map-legend-row"><div class="map-legend-dot" style="background:#FF8F6B"></div>80–150 — MODERATE</div>
       <div class="map-legend-row"><div class="map-legend-dot" style="background:#7FDB8A"></div>&lt;80 — LOW</div>
-      <div style="margin-top:8px" class="map-legend-title">Grid lines</div>
+      <div style="margin-top:8px" class="map-legend-title">Grid lines<span class="tip" tabindex="0" role="button" aria-label="Explain" data-tip="Illustrative risk levels for major transmission corridors during the selected storm. Not a network model of any operator’s grid.">i</span></div>
       <div class="map-legend-row"><div class="map-legend-line" style="background:#FF3030"></div>Extreme GIC risk</div>
       <div class="map-legend-row"><div class="map-legend-line" style="background:#FF8030;opacity:.7"></div>High GIC risk</div>
       <div class="map-legend-row"><div class="map-legend-line" style="background:#FF8F6B;opacity:.6"></div>Moderate risk</div>`;
@@ -1115,12 +1127,9 @@ function renderSimStorm(key,warnIdx){
       radius:r,
       color:col,fillColor:col,fillOpacity:0.8,weight:1.5
     }).addTo(map);
-    // Simplified GIC estimate: proportional to dB/dt; N–S lines ~2× more susceptible in typical storms
-    const gicEst=Math.round(st.dbdt*0.55);
     m.bindPopup(
       `<strong>${st.id} — ${st.name}</strong><br>`+
-      `<span style="color:${col}">dB/dt: <strong>${st.dbdt} nT/min</strong> — ${dbdtLabel(st.dbdt)}</span><br>`+
-      `<span style="color:#D9D1F4;font-size:12.5px">GIC estimate: ~${gicEst} A (simplified)</span>`+
+      `<span style="color:${col}">dB/dt: <strong>${st.dbdt} nT/min</strong> — ${dbdtLabel(st.dbdt)}</span>`+
       (st.note?`<br><em style="color:#D9D1F4;font-size:12.5px">${st.note}</em>`:'')
     );
     mapLayers.push(m);
@@ -1189,8 +1198,72 @@ function updateWarnSlider(idx){
 }
 
 /* ── init ── */
-updateThreshold(7);
+updateEyRule(15);
 // selectLive() + initMap() called after password check
+</script>
+
+<div class="how-ov" id="how-ov" onclick="if(event.target===this)closeHow()">
+ <div class="how-box" role="dialog" aria-label="How it works">
+  <button class="how-x" onclick="closeHow()" aria-label="Close">×</button>
+  <h2>How Helios Shield works</h2>
+  <p>A rule-based early warning for geomagnetically induced currents (GIC) in power grids. A concept demonstration, not an operational service.</p>
+  <h3>The idea</h3>
+  <p>Solar wind passes a monitoring spacecraft at the L1 point, 1.5 million km towards the Sun, before it reaches Earth. When it carries a strong southward magnetic field at high speed, the ground magnetic field starts changing fast (high dB/dt), and that drives currents into long transmission lines and transformers. Watching L1 gives warning before the ground disturbance.</p>
+  <h3>The V1 rule</h3>
+  <p>Alert when the solar-wind electric field Ey = speed × southward Bz stays at or above 15 mV/m for 10 consecutive minutes. If speed is missing, southward Bz ≤ −10 nT is used instead.</p>
+  <h3>Tested on six years of data</h3>
+  <p>2015, 2017, 2022–2025: NASA OMNI solar wind against 8 mid-latitude observatories (USGS + INTERMAGNET). A severe event is ≥ 300 nT/min at one station, confirmed by a second; 2022 was held out as a check: no severe events, and no alerts at the default 15 mV/m threshold.</p>
+  <table><tr><th>Ey threshold</th><th>Severe events warned</th><th>Alerts with no severe event</th><th>Median lead</th></tr>
+  <tr><td>≥ 5 mV/m</td><td>8 / 9</td><td>102 of 110</td><td>6 h 44 min</td></tr>
+  <tr><td>≥ 10 mV/m</td><td>6 / 9</td><td>11 of 17</td><td>4 h 24 min</td></tr>
+  <tr><td>≥ 15 mV/m</td><td>6 / 9</td><td>3 of 8</td><td>2 h 21 min</td></tr></table>
+  <p style="font-size:13px">Lead times ranged from 10 minutes to 8 hours. Most “alerts with no severe event” were still real storms that stayed below 300 nT/min.</p>
+  <h3>Data sources</h3>
+  <ul>
+   <li>Live solar wind: NOAA SWPC real-time solar wind (SOLAR-1, with DSCOVR and ACE as backups), read straight from NOAA in the browser.</li>
+   <li>Kp-index: NOAA SWPC.</li>
+   <li>Live ground magnetometers: USGS Geomagnetism Program and INTERMAGNET (via BGS), about every 10 minutes.</li>
+   <li>Storm replays: NASA OMNI solar wind and SuperMAG ground magnetometers (Gjerloev, 2012).</li>
+  </ul>
+  <h3>Limits</h3>
+  <ul>
+   <li>Moderate disturbances (100–300 nT/min) are mostly not predicted.</li>
+   <li>Storms driven by weak solar wind can be missed (March 2023).</li>
+   <li>Gaps in the solar-wind data blind the rule (September 2017); the L1 feed indicator shows when this happens.</li>
+   <li>dB/dt at a few observatories is not a model of any operator’s grid: actual GIC depends on network layout and ground conductivity.</li>
+   <li>Small sample: nine severe events in six years.</li>
+  </ul>
+ </div>
+</div>
+<script>
+function openHow(){document.getElementById('how-ov').classList.add('open')}
+function closeHow(){document.getElementById('how-ov').classList.remove('open')}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeHow()});
+(function(){
+  const bub=document.createElement('div');bub.className='tip-bubble';bub.setAttribute('role','tooltip');document.body.appendChild(bub);
+  let cur=null,pinned=false;
+  function show(el){
+    cur=el;bub.innerHTML=el.dataset.tip;bub.style.display='block';
+    const r=el.getBoundingClientRect(),w=Math.min(300,window.innerWidth-24);
+    bub.style.width=w+'px';
+    const x=Math.max(12,Math.min(r.left+r.width/2-w/2,window.innerWidth-w-12));
+    bub.style.left=x+'px';bub.style.top=(r.bottom+8)+'px';
+    const h=bub.offsetHeight;
+    if(r.bottom+8+h>window.innerHeight-8)bub.style.top=Math.max(8,r.top-h-8)+'px';
+  }
+  function hide(){cur=null;pinned=false;bub.style.display='none'}
+  document.addEventListener('mouseover',e=>{const t=e.target.closest&&e.target.closest('.tip');if(t&&!pinned)show(t)});
+  document.addEventListener('mouseout',e=>{const t=e.target.closest&&e.target.closest('.tip');if(t&&!pinned&&!t.contains(e.relatedTarget))hide()});
+  document.addEventListener('click',e=>{
+    const t=e.target.closest&&e.target.closest('.tip');
+    if(t){e.preventDefault();e.stopPropagation();if(pinned&&cur===t)hide();else{show(t);pinned=true}}
+    else if(!(e.target.closest&&e.target.closest('.tip-bubble')))hide();
+  },true);
+  document.addEventListener('keydown',e=>{const t=e.target.closest&&e.target.closest('.tip');if(t&&(e.key==='Enter'||e.key===' ')){e.preventDefault();show(t);pinned=true}if(e.key==='Escape')hide()});
+  document.addEventListener('focusin',e=>{const t=e.target.closest&&e.target.closest('.tip');if(t)show(t)});
+  document.addEventListener('focusout',e=>{if(e.target.closest&&e.target.closest('.tip')&&!pinned)hide()});
+  window.addEventListener('scroll',hide,true);window.addEventListener('resize',hide);
+})();
 </script>
 </body>
 </html>
