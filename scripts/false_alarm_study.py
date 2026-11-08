@@ -39,6 +39,8 @@ YEAR = int(os.environ.get("STUDY_YEAR", "2024"))
 HAPI = "https://cdaweb.gsfc.nasa.gov/hapi"
 L1_KM = 1.41e6
 SUSTAIN = 10
+WINDOW = 15     # minutes, tolerant rule
+MAX_BELOW = 2   # valid minutes below threshold allowed inside WINDOW, tolerant rule
 EPISODE_GAP_H = 6
 WARN_BEFORE_H = 12
 LATE_AFTER_H = 3
@@ -89,13 +91,27 @@ def omni_year(year):
     return rows
 
 
-def alerts(rows, ey_thr):
-    """Return alert episode start times (L1 time, epoch s)."""
+def alerts(rows, ey_thr, tolerant=False):
+    """Return alert episode start times (L1 time, epoch s).
+    strict:   Ey >= thr for SUSTAIN consecutive minutes; a missing minute breaks the run.
+    tolerant: in the last WINDOW minutes at least SUSTAIN minutes are >= thr and at most
+              MAX_BELOW valid minutes are below it; missing minutes neither help nor break it."""
+    from collections import deque
     out, run, last = [], 0, None
+    win = deque()  # (t, state) state: 1 hit, 0 valid below, None missing
     for t, bz, v in rows:
-        hit = bz is not None and v is not None and v * max(0.0, -bz) * 1e-3 >= ey_thr
-        run = run + 1 if hit else 0
-        if run >= SUSTAIN:
+        valid = bz is not None and v is not None
+        hit = valid and v * max(0.0, -bz) * 1e-3 >= ey_thr
+        if tolerant:
+            win.append((t, 1 if hit else (0 if valid else None)))
+            while win and win[0][0] <= t - WINDOW * 60:
+                win.popleft()
+            ok = hit and sum(1 for _, s in win if s == 1) >= SUSTAIN and \
+                sum(1 for _, s in win if s == 0) <= MAX_BELOW
+        else:
+            run = run + 1 if hit else 0
+            ok = run >= SUSTAIN
+        if ok:
             t_l1 = t - int(L1_KM / v)
             if last is None or t_l1 - last > EPISODE_GAP_H * 3600:
                 out.append(t_l1)
@@ -220,13 +236,15 @@ def main():
     hourly, cover = ground_hourly(YEAR)
     out = {"year": YEAR, "station_coverage": cover, "omni_rows": len(rows),
            "definitions": __doc__.split("Definitions")[1].strip(), "results": []}
-    print("\nEY mV/m | dB/dt nT/min | alerts | events | warned | late | missed | false alarms")
-    for ey in EY_LEVELS:
-        al = alerts(rows, ey)
+    for tolerant in (False, True):
+      rule = "tolerant" if tolerant else "strict"
+      print(f"\n[{rule}] EY mV/m | dB/dt nT/min | alerts | events | warned | late | missed | false alarms")
+      for ey in EY_LEVELS:
+        al = alerts(rows, ey, tolerant)
         for thr in DBDT_LEVELS:
             ev = events(hourly, thr)
             r = evaluate(al, ev, rows)
-            out["results"].append({"ey": ey, "dbdt": thr, "alerts": len(al), "events": len(ev),
+            out["results"].append({"rule": rule, "ey": ey, "dbdt": thr, "alerts": len(al), "events": len(ev),
                                    **{k: len(v) for k, v in r.items()}, "detail": r})
             print(f"{ey:7.0f} | {thr:12.0f} | {len(al):6d} | {len(ev):6d} | {len(r['warned']):6d} | "
                   f"{len(r['late']):4d} | {len(r['missed']):6d} | {len(r['false_alarms']):12d}")
