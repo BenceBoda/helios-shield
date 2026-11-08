@@ -11,7 +11,7 @@
   "LER": 1.0
  },
  "omni_rows": 527040,
- "definitions": "Alert:   Ey = V*Bs >= EY mV/m for 10 consecutive minutes (OMNI, bow-shock time),\n           moved earlier by the L1 transit time (1.41e6 km / V). Alerts closer than\n           6 h to the previous one belong to the same alert episode.\n  Event:   an hour in which any mid-latitude station's dB/dt reached DBDT nT/min.\n           Hours closer than 6 h belong to the same event.\n  Warned:  an alert episode started 0-12 h before the event's first hour.\n  Late:    the first alert came during the first 3 h of the event.\n  Missed:  no alert from 12 h before to 3 h after the event start.\n  False alarm: an alert episode with no event from its start to 12 h later.\n  An hour only counts if a second station saw at least a third of the threshold at the same\n  time; single-station jumps and values above MAX_PLAUSIBLE nT/min are instrument artefacts.",
+ "definitions": "Alert:   Ey = V*Bs >= EY mV/m for 10 consecutive minutes (OMNI, bow-shock time),\n           moved earlier by the L1 transit time (1.41e6 km / V). Alerts closer than\n           6 h to the previous one belong to the same alert episode.\n  Event:   an hour in which any mid-latitude station's dB/dt reached DBDT nT/min.\n           Hours closer than 6 h belong to the same event.\n  Warned:  an alert episode started 0-12 h before the event's first hour.\n  Late:    the first alert came during the first 3 h of the event.\n  Missed:  no alert from 12 h before to 3 h after the event start.\n  False alarm: an alert episode with no event from its start to 12 h later.\n  An hour only counts if a second station saw at least a third of the threshold at the same\n  time; single-station jumps and values above MAX_PLAUSIBLE nT/min are instrument artefacts.\n  It is also dropped if another station in the same region (US or Europe) stayed below\n  QUIET_MATE nT/min that hour: a real storm moves every nearby station at least a little,\n  so a dead-quiet neighbour means a data glitch shared by several stations.\n  Missed events get a diagnosis: the strongest Ey and the minutes of missing OMNI data in\n  the 12 h before the event.",
  "results": [
   {
    "ey": 5.0,
@@ -81,12 +81,16 @@
      {
       "event_start": "2024-08-04T12:00Z",
       "peak_dbdt": 331,
-      "station": "SIT"
+      "station": "SIT",
+      "max_ey": 4.3,
+      "omni_gap_min": 647
      },
      {
       "event_start": "2024-08-28T06:00Z",
       "peak_dbdt": 185,
-      "station": "SIT"
+      "station": "SIT",
+      "max_ey": 5.1,
+      "omni_gap_min": 258
      }
     ],
     "false_alarms": [
@@ -138,7 +142,9 @@
      {
       "event_start": "2024-10-11T07:00Z",
       "peak_dbdt": 309,
-      "station": "SIT"
+      "station": "SIT",
+      "max_ey": 32.4,
+      "omni_gap_min": 263
      }
     ],
     "false_alarms": [
@@ -193,42 +199,58 @@
      {
       "event_start": "2024-05-02T19:00Z",
       "peak_dbdt": 168,
-      "station": "LER"
+      "station": "LER",
+      "max_ey": 8.8,
+      "omni_gap_min": 181
      },
      {
       "event_start": "2024-08-04T12:00Z",
       "peak_dbdt": 331,
-      "station": "SIT"
+      "station": "SIT",
+      "max_ey": 4.3,
+      "omni_gap_min": 647
      },
      {
       "event_start": "2024-08-12T03:00Z",
       "peak_dbdt": 478,
-      "station": "SIT"
+      "station": "SIT",
+      "max_ey": 10.5,
+      "omni_gap_min": 124
      },
      {
       "event_start": "2024-08-28T06:00Z",
       "peak_dbdt": 185,
-      "station": "SIT"
+      "station": "SIT",
+      "max_ey": 5.1,
+      "omni_gap_min": 258
      },
      {
       "event_start": "2024-09-12T09:00Z",
       "peak_dbdt": 282,
-      "station": "SIT"
+      "station": "SIT",
+      "max_ey": 7.2,
+      "omni_gap_min": 257
      },
      {
       "event_start": "2024-09-17T01:00Z",
       "peak_dbdt": 206,
-      "station": "SIT"
+      "station": "SIT",
+      "max_ey": 6.8,
+      "omni_gap_min": 234
      },
      {
       "event_start": "2024-09-17T10:00Z",
       "peak_dbdt": 295,
-      "station": "SIT"
+      "station": "SIT",
+      "max_ey": 9.7,
+      "omni_gap_min": 251
      },
      {
       "event_start": "2024-10-08T02:00Z",
       "peak_dbdt": 234,
-      "station": "SIT"
+      "station": "SIT",
+      "max_ey": 6.1,
+      "omni_gap_min": 234
      }
     ],
     "false_alarms": [
@@ -271,7 +293,9 @@
      {
       "event_start": "2024-10-11T07:00Z",
       "peak_dbdt": 309,
-      "station": "SIT"
+      "station": "SIT",
+      "max_ey": 32.4,
+      "omni_gap_min": 263
      }
     ],
     "false_alarms": [
@@ -306,47 +330,65 @@
      {
       "event_start": "2024-05-02T19:00Z",
       "peak_dbdt": 168,
-      "station": "LER"
+      "station": "LER",
+      "max_ey": 8.8,
+      "omni_gap_min": 181
      },
      {
       "event_start": "2024-08-04T12:00Z",
       "peak_dbdt": 331,
-      "station": "SIT"
+      "station": "SIT",
+      "max_ey": 4.3,
+      "omni_gap_min": 647
      },
      {
       "event_start": "2024-08-12T03:00Z",
       "peak_dbdt": 478,
-      "station": "SIT"
+      "station": "SIT",
+      "max_ey": 10.5,
+      "omni_gap_min": 124
      },
      {
       "event_start": "2024-08-28T06:00Z",
       "peak_dbdt": 185,
-      "station": "SIT"
+      "station": "SIT",
+      "max_ey": 5.1,
+      "omni_gap_min": 258
      },
      {
       "event_start": "2024-09-12T09:00Z",
       "peak_dbdt": 282,
-      "station": "SIT"
+      "station": "SIT",
+      "max_ey": 7.2,
+      "omni_gap_min": 257
      },
      {
       "event_start": "2024-09-17T01:00Z",
       "peak_dbdt": 206,
-      "station": "SIT"
+      "station": "SIT",
+      "max_ey": 6.8,
+      "omni_gap_min": 234
      },
      {
       "event_start": "2024-09-17T10:00Z",
       "peak_dbdt": 295,
-      "station": "SIT"
+      "station": "SIT",
+      "max_ey": 9.7,
+      "omni_gap_min": 251
      },
      {
       "event_start": "2024-10-08T02:00Z",
       "peak_dbdt": 234,
-      "station": "SIT"
+      "station": "SIT",
+      "max_ey": 6.1,
+      "omni_gap_min": 234
      },
      {
       "event_start": "2024-10-10T15:00Z",
       "peak_dbdt": 355,
-      "station": "LER"
+      "station": "LER",
+      "max_ey": 2.6,
+      "omni_gap_min": 262
      }
     ],
     "false_alarms": []
