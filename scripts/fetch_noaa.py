@@ -3,7 +3,8 @@
 
 bz.json format:
   {"fetched_at": ISO, "source": url, "data": [{"t": "YYYY-MM-DDTHH:MM", "bz": nT, "bt": nT,
-                                              "speed": km/s, "density": p/cc}, ...]}
+                                              "speed": km/s, "density": p/cc,
+                                              "sc": spacecraft (DSCOVR/ACE)}, ...]}
 On any failure the previous file is left untouched, so the demo never shows a broken file.
 """
 import json
@@ -85,21 +86,26 @@ def main():
         print("solar wind mag unavailable, keeping previous bz.json")
         return 0
 
+    # The RTSW feed lists every spacecraft (DSCOVR, ACE); NOAA flags the one in use as active.
+    # Take the active spacecraft first, then fill minutes it lacks from the other one.
     merged = {}
-    for r in mag:
-        k = minute_key(r.get("time_tag"))
-        bz = num(r.get("bz_gsm"))
-        if not k or bz is None:
-            continue
-        if r.get("active") is False:  # rtsw feed lists several spacecraft; keep the active one
-            continue
-        merged[k] = {"t": k, "bz": round(bz, 2), "bt": num(r.get("bt")), "speed": None, "density": None}
-    for r in plasma:
-        k = minute_key(r.get("time_tag"))
-        if k in merged and r.get("active") is not False:
-            merged[k]["speed"] = num(r.get("speed", r.get("proton_speed")))
-            merged[k]["density"] = num(r.get("density", r.get("proton_density")))
-
+    for want_active in (True, False):
+        for r in mag:
+            k = minute_key(r.get("time_tag"))
+            bz = num(r.get("bz_gsm"))
+            if not k or bz is None or k in merged or (r.get("active") is not False) != want_active:
+                continue
+            merged[k] = {"t": k, "bz": round(bz, 2), "bt": num(r.get("bt")), "speed": None,
+                         "density": None, "sc": r.get("source")}
+    for want_active in (True, False):
+        for r in plasma:
+            k = minute_key(r.get("time_tag"))
+            if k not in merged or merged[k]["speed"] is not None or (r.get("active") is not False) != want_active:
+                continue
+            sp = num(r.get("speed", r.get("proton_speed")))
+            if sp is not None:
+                merged[k]["speed"] = sp
+                merged[k]["density"] = num(r.get("density", r.get("proton_density")))
     data = [merged[k] for k in sorted(merged)][-KEEP_MINUTES:]
     if not data:
         print("no usable solar wind rows, keeping previous bz.json")

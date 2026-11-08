@@ -43,6 +43,8 @@ body{background:radial-gradient(1100px 1100px at 88% -18%,rgba(126,94,220,.38),r
 .stat-val{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:500;color:#fff;transition:color .3s}
 .badge{display:flex;align-items:center;gap:7px;padding:4px 11px;border-radius:20px;font-size:12.5px;font-weight:500;background:rgba(127,219,138,.1);color:var(--safe);border:1px solid rgba(127,219,138,.25);transition:all .3s;margin-left:auto}
 .badge.warn{background:rgba(255,143,107,.1);color:var(--solar);border-color:rgba(255,143,107,.25)}
+.badge.blind{background:rgba(195,185,230,.08);color:var(--muted);border-color:rgba(195,185,230,.3)}
+.feed-ok{color:var(--safe)!important}.feed-part{color:var(--solar)!important}.feed-blind{color:var(--danger)!important}
 .badge.alrt{background:rgba(255,92,116,.15);color:var(--danger);border-color:rgba(255,92,116,.3)}
 .pulse{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 2s ease-in-out infinite}
 .badge.alrt .pulse{animation:pulse-f .8s ease-in-out infinite}
@@ -213,7 +215,8 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
   <div class="status-bar">
     <div class="stat"><span class="stat-lbl">Kp-index</span><span class="stat-val" id="live-kp">2.3</span></div>
     <div class="stat"><span class="stat-lbl">Bz (nT)</span><span class="stat-val" id="live-bz">−4.1</span></div>
-    <div class="stat"><span class="stat-lbl">Warning window</span><span class="stat-val" id="live-win">47 min</span></div>
+    <div class="stat"><span class="stat-lbl">Ey (mV/m)</span><span class="stat-val" id="live-ey">—</span></div>
+    <div class="stat" id="feed-stat" title="Solar wind from the L1 spacecraft. Without it the V1 rule cannot warn."><span class="stat-lbl">L1 feed</span><span class="stat-val" id="live-feed">—</span></div>
     <div class="badge" id="status-badge"><span class="pulse"></span><span id="status-text">NOMINAL</span></div>
   </div>
 </header>
@@ -720,27 +723,23 @@ async function fetchRealData(){
       keys.push(kpRaw[i].time_tag.slice(0,16));
       kpVals.push(Math.max(0,parseFloat(kpRaw[i].estimated_kp)||kpRaw[i].kp_index||0));
     }
-    // Live solar wind Bz (L1) from bz.json, matched to the Kp timestamps
+    // Live solar wind (L1): straight from NOAA when the browser allows it, else the repo copy
     let bzSeries=Array(labels.length).fill(null),bzNow=null;
-    try{
-      const bzRes=await fetch('./bz.json?_='+Date.now());
-      if(bzRes.ok){
-        const bzData=await bzRes.json();
-        const rows=(bzData&&bzData.data)||[];
-        if(rows.length){
-          bzNow=rows[rows.length-1].bz;
-          let j=0,last=null;
-          bzSeries=keys.map(k=>{while(j<rows.length&&rows[j].t<=k){last=rows[j].bz;j++}return last});
-        }
-      }
-    }catch(e){console.warn('bz.json unavailable:',e)}
+    const sw=await loadSolarWind();
+    const rows=sw.rows;
+    if(rows.length){
+      bzNow=rows[rows.length-1].bz;
+      let j=0,last=null;
+      bzSeries=keys.map(k=>{while(j<rows.length&&rows[j].t<=k){last=rows[j].bz;j++}return last});
+    }
+    liveV1=v1State(rows);
+    updateFeed(feedHealth(rows,sw.via),liveV1);
     chart.data.labels=labels;
     chart.data.datasets[0].data=kpVals;
     chart.data.datasets[1].data=bzSeries.map(v=>v===null?null:Math.max(0,Math.min(9,(v+120)/120*9)));
     chart.data.datasets[2].data=Array(labels.length).fill(threshold);
     chart.update('none');
     updateStatusBar(kpVals[kpVals.length-1]||0,bzNow===null?0:bzNow);
-    document.getElementById('live-win').textContent='↻ '+new Date().toTimeString().slice(0,5);
     btn.textContent='● Live data';
     liveRefreshTimer=setTimeout(fetchRealData,5*60*1000);
   }catch(e){
@@ -803,6 +802,79 @@ function startLive(){
   },1800);
 }
 
+// ---------- L1 solar wind: feed health and the V1 rule ----------
+// V1 rule (same as the replays and the 6-year study): Ey = V*Bs >= 15 mV/m for 10 consecutive
+// minutes; when speed is missing, Bz <= -10 nT. A missing minute breaks the run.
+const V1={EY:15,BZ:-10,SUSTAIN:10};
+const NOAA='https://services.swpc.noaa.gov/json/rtsw/';
+let liveV1=null,liveFeed=null;
+async function getJSON(u){const r=await fetch(u,{cache:'no-store'});if(!r.ok)throw new Error(u+' '+r.status);return r.json()}
+function mergeRtsw(mag,wind){
+  const key=t=>String(t).replace(' ','T').slice(0,16),m={};
+  for(const act of [true,false])for(const r of mag){
+    const k=key(r.time_tag),bz=parseFloat(r.bz_gsm);
+    if(m[k]||isNaN(bz)||Math.abs(bz)>=9999||(r.active!==false)!==act)continue;
+    m[k]={t:k,bz,speed:null,sc:r.source||null};
+  }
+  for(const act of [true,false])for(const r of wind){
+    const k=key(r.time_tag),v=parseFloat(r.proton_speed??r.speed);
+    if(!m[k]||m[k].speed!==null||isNaN(v)||v<=0||v>=9999||(r.active!==false)!==act)continue;
+    m[k].speed=v;
+  }
+  return Object.keys(m).sort().map(k=>m[k]).slice(-360);
+}
+async function loadSolarWind(){
+  try{
+    const [mag,wind]=await Promise.all([getJSON(NOAA+'rtsw_mag_1m.json'),getJSON(NOAA+'rtsw_wind_1m.json')]);
+    const rows=mergeRtsw(mag,wind);
+    if(rows.length)return{rows,via:'NOAA live'};
+  }catch(e){console.warn('NOAA direct fetch failed, using repo copy:',e)}
+  try{
+    const d=await getJSON('./bz.json?_='+Date.now());
+    return{rows:(d&&d.data)||[],via:'repo copy'};
+  }catch(e){console.warn('bz.json unavailable:',e);return{rows:[],via:'none'}}
+}
+const tMs=t=>Date.parse(t+':00Z');
+function eyOf(r){return r.speed==null?null:r.speed*Math.max(0,-r.bz)*1e-3}
+function feedHealth(rows,via){
+  if(!rows.length)return{state:'blind',text:'no data',via};
+  const last=rows[rows.length-1],age=Math.round((Date.now()-tMs(last.t))/60000);
+  const from=tMs(last.t)-59*60000,have=new Set(),haveV=new Set();
+  rows.forEach(r=>{const m=tMs(r.t);if(m>=from){have.add(m);if(r.speed!=null)haveV.add(m)}});
+  const gap=60-have.size,gapV=60-haveV.size,sc=last.sc||'L1';
+  const ageTxt=age<120?age+' min':Math.round(age/60)+' h';
+  if(age>30)return{state:'blind',text:'no data for '+ageTxt,via,age,gap};
+  if(gap>15)return{state:'partial',text:sc+' · '+gap+'/60 min missing',via,age,gap};
+  if(gapV>15)return{state:'partial',text:sc+' · no speed (Bz only)',via,age,gap};
+  return{state:'ok',text:sc+' · '+ageTxt+' ago',via,age,gap};
+}
+function v1State(rows){
+  if(!rows.length)return null;
+  let run=0,prev=null,ey=null;
+  for(let i=rows.length-1;i>=0;i--){
+    const r=rows[i],m=tMs(r.t);
+    if(prev!==null&&prev-m!==60000)break;
+    const e=eyOf(r);
+    if(i===rows.length-1)ey=e;
+    const hit=e!=null?e>=V1.EY:r.bz<=V1.BZ;
+    if(!hit)break;
+    run++;prev=m;
+  }
+  return{ey,run,alert:run>=V1.SUSTAIN};
+}
+function updateFeed(f,v){
+  liveFeed=f;
+  const el=document.getElementById('live-feed');
+  el.textContent=f.text;
+  el.className='stat-val '+(f.state==='ok'?'feed-ok':f.state==='partial'?'feed-part':'feed-blind');
+  document.getElementById('feed-stat').title='Solar wind from the L1 spacecraft ('+f.via+'). '+
+    (f.state==='blind'?'No recent data: the V1 rule cannot warn right now.':
+     f.state==='partial'?'Gaps in the data: a warning may come late or not at all.':'Data complete over the last hour.');
+  const eyEl=document.getElementById('live-ey');
+  eyEl.textContent=v&&v.ey!=null?v.ey.toFixed(1):'—';
+  eyEl.style.color=v&&v.ey!=null&&v.ey>=V1.EY?'var(--danger)':'#fff';
+}
+
 function updateStatusBar(kp,bz){
   document.getElementById('live-kp').textContent=kp.toFixed(1);
   document.getElementById('live-bz').textContent=(bz<0?'−'+Math.abs(bz).toFixed(1):'+'+bz.toFixed(1))+' nT';
@@ -810,6 +882,9 @@ function updateStatusBar(kp,bz){
   if(kp>=threshold){b.className='badge alrt';t.textContent='ALERT';document.getElementById('live-kp').style.color='var(--danger)'}
   else if(kp>=5){b.className='badge warn';t.textContent='WATCH';document.getElementById('live-kp').style.color='var(--solar)'}
   else{b.className='badge';t.textContent='NOMINAL';document.getElementById('live-kp').style.color='#fff'}
+  if(isReplaying||currentStorm)return;
+  if(liveV1&&liveV1.alert){b.className='badge alrt';t.textContent='ALERT · V1 rule'}
+  else if(liveFeed&&liveFeed.state==='blind'&&b.className==='badge'){b.className='badge blind';t.textContent='L1 BLIND'}
 }
 
 function selectLive(){
