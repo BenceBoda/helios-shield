@@ -1,7 +1,6 @@
 name: Fetch live magnetometer data
+# Superseded by refresh-live.yml (one commit for both feeds); kept for manual runs.
 on:
-  schedule:
-    - cron: '*/10 * * * *'
   workflow_dispatch:
 
 concurrency:
