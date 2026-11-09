@@ -55,7 +55,7 @@ STATIONS = {  # IAGA: (name, lat, lon)
     "GNG": ("Gingin, AU", -31.4, 115.7), "ESK": ("Eskdalemuir, UK", 55.3, -3.2),
     "BFE": ("Brorfelde, DK", 55.6, 11.7), "NEW": ("Newport, WA", 48.3, -117.1),
     "CNB": ("Canberra, AU", -35.3, 149.4), "HON": ("Honolulu, HI", 21.3, -158.0),
-    "TIH": ("Tihany, HU", 46.9, 17.9), "NGK": ("Niemegk, DE", 52.1, 12.7),
+    "THY": ("Tihany, HU", 46.9, 17.9), "NGK": ("Niemegk, DE", 52.1, 12.7),
     "LER": ("Lerwick, UK", 60.1, -1.2),
 }
 

@@ -43,6 +43,7 @@ INTERMAGNET = {
     "LER": ("Lerwick, UK", 60.14, -1.18),
     "ABK": ("Abisko, SE", 68.36, 18.82),
     "OTT": ("Ottawa, CA", 45.40, -75.55),
+    "THY": ("Tihany, HU", 46.90, 17.89),
 }
 
 
