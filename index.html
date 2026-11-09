@@ -41,7 +41,8 @@ body{background:radial-gradient(1100px 1100px at 88% -18%,rgba(126,94,220,.38),r
 .stat{display:flex;flex-direction:column;gap:1px}
 .stat-lbl{font-size:11.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace}
 .stat-val{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:500;color:#fff;transition:color .3s}
-.badge{display:flex;align-items:center;gap:7px;padding:4px 11px;border-radius:20px;font-size:12.5px;font-weight:500;background:rgba(127,219,138,.1);color:var(--safe);border:1px solid rgba(127,219,138,.25);transition:all .3s;margin-left:auto}
+.badge-wrap{display:flex;align-items:center;flex-shrink:0;margin-left:auto}
+.badge{display:flex;align-items:center;gap:7px;padding:4px 11px;border-radius:20px;font-size:12.5px;font-weight:500;background:rgba(127,219,138,.1);color:var(--safe);border:1px solid rgba(127,219,138,.25);transition:all .3s;white-space:nowrap}
 .badge.warn{background:rgba(255,143,107,.1);color:var(--solar);border-color:rgba(255,143,107,.25)}
 .tip{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;margin-left:5px;border-radius:50%;border:1px solid rgba(195,185,230,.55);color:var(--muted);font:600 9.5px/1 'IBM Plex Sans',sans-serif;font-style:italic;cursor:help;vertical-align:1px;user-select:none;flex-shrink:0}
 .tip:hover,.tip:focus{color:#fff;border-color:#F2A93B;outline:none}
@@ -102,6 +103,18 @@ body{background:radial-gradient(1100px 1100px at 88% -18%,rgba(126,94,220,.38),r
 /* ── panels ─── */
 .panels{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:680px){.panels{grid-template-columns:1fr}}
+@media(max-width:680px){
+  .hdr{position:static;display:grid;grid-template-columns:1fr auto;gap:10px 12px;padding:10px 16px}
+  .badge-wrap{margin-left:0;grid-row:1;grid-column:2}
+  .status-bar{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 12px}
+  #feed-stat{grid-column:1/-1;flex-direction:row;align-items:baseline;gap:8px}
+  .stat-val{font-size:13.5px}
+  .tab-nav{padding:12px 16px 0}
+  .tab-btn{padding:7px 11px;white-space:nowrap}
+  .how-btn{padding:5px 10px;white-space:nowrap}
+}
+@media(max-width:400px){.how-txt{display:none}.how-btn{font-size:15px;padding:3px 10px}}
+
 .panel{background:rgba(52,34,110,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid var(--border);border-radius:14px;padding:20px}
 .panel-lbl{font-size:11.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:3px}
 .panel-hdg{font-size:15px;font-weight:500;color:#fff;margin-bottom:18px}
@@ -232,6 +245,8 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
     <div class="stat"><span class="stat-lbl">Bz (nT)<span class="tip" tabindex="0" role="button" aria-label="Explain" data-tip="&lt;b&gt;Bz&lt;/b&gt; — the north–south part of the interplanetary magnetic field, measured at L1. Strongly negative (southward) Bz lets solar-wind energy into Earth’s magnetosphere: the main driver of geomagnetic storms.">i</span></span><span class="stat-val" id="live-bz">−4.1</span></div>
     <div class="stat"><span class="stat-lbl">Ey (mV/m)<span class="tip" tabindex="0" role="button" aria-label="Explain" data-tip="&lt;b&gt;Ey&lt;/b&gt; — the solar-wind electric field: speed × southward Bz. The V1 rule fires when Ey stays at or above the threshold (default 15 mV/m) for 10 consecutive minutes. Turns red above the threshold.">i</span></span><span class="stat-val" id="live-ey">—</span></div>
     <div class="stat" id="feed-stat"><span class="stat-lbl">L1 feed<span class="tip" tabindex="0" role="button" aria-label="Explain" data-tip="&lt;b&gt;L1 feed&lt;/b&gt; — live solar wind from the spacecraft at the L1 point, 1.5 million km towards the Sun (NOAA SOLAR-1, with DSCOVR and ACE as backups).&lt;br&gt;&lt;span style=&#x27;color:#7FDB8A&#x27;&gt;Green&lt;/span&gt;: fresh and complete. &lt;span style=&#x27;color:#FF8F6B&#x27;&gt;Amber&lt;/span&gt;: gaps — a warning may come late. &lt;span style=&#x27;color:#FF5C74&#x27;&gt;Red&lt;/span&gt;: no recent data — no early warning is possible.">i</span></span><span class="stat-val" id="live-feed">—</span></div>
+  </div>
+  <div class="badge-wrap">
     <div class="badge" id="status-badge"><span class="pulse"></span><span id="status-text">NOMINAL</span></div><span class="tip" tabindex="0" role="button" aria-label="Explain" data-tip="&lt;b&gt;Status&lt;/b&gt;&lt;br&gt;NOMINAL — quiet conditions.&lt;br&gt;WATCH — Kp ≥ 5.&lt;br&gt;ALERT — Kp ≥ 7, or the V1 solar-wind rule has fired.&lt;br&gt;L1 BLIND — no solar-wind data, so the system cannot warn ahead.">i</span>
   </div>
 </header>
@@ -240,7 +255,7 @@ footer{max-width:1200px;margin:20px auto 0;padding:14px 24px;border-top:1px soli
 <div class="tab-nav">
   <button class="tab-btn active" id="tab-monitor-btn" onclick="switchTab('monitor')">Live Monitor</button>
   <button class="tab-btn" id="tab-simulator-btn" onclick="switchTab('simulator')">Impact Simulator</button>
-  <button class="how-btn" onclick="openHow()">ⓘ How it works</button>
+  <button class="how-btn" onclick="openHow()">ⓘ<span class="how-txt"> How it works</span></button>
 </div>
 
 <!-- ══ TAB 1: LIVE MONITOR ══ -->
