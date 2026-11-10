@@ -1,0 +1,390 @@
+{
+ "years": [
+  2015,
+  2017,
+  2022,
+  2023,
+  2024,
+  2025
+ ],
+ "definitions": "Local dB/dt forecast: can a small ML model beat the plain Ey rule, station by station?\n\nQuestion per station and hour h: will the hourly max dB/dt reach THR nT/min?\nInputs are only what is known before hour h starts:\n  - hourly solar-wind features from OMNI for hours h-1 .. h-6   (model \"sw\")\n  - plus the station's own dB/dt in hours h-1, h-2               (model \"sw+ground\")\n  \"sw_lin\" is a plain logistic regression on the solar-wind features, as a sturdier check.\nBaselines scored on the same hours:\n  - ey_max:      strongest Ey in hour h-1 (the quantity the V1 rule watches)\n  - persistence: the station's own dB/dt in hour h-1\nEvaluation is leave-one-year-out: each year is predicted by a model trained on the other\nyears. Reported per station and threshold: positives, average precision (AP; chance level =\nshare of positive hours) and recall at precision >= 0.5 (hit rate when half the alerts are right).\nHours whose high value no second station confirms are dropped as instrument artefacts.\nHours with under 30 valid OMNI minutes in h-1 are skipped for every method (\"blind\" hours).\nOutput: analysis/local_forecast_eval.json",
+ "results": [
+  {
+   "station": "BOU",
+   "thr": 30.0,
+   "positives": 63,
+   "hours": 40741,
+   "chance": 0.00155,
+   "ap": {
+    "ey_max": 0.393,
+    "persistence": 0.259,
+    "sw_lin": 0.298,
+    "sw": 0.272,
+    "sw+ground": 0.318
+   },
+   "recall_at_p50": {
+    "ey_max": 0.413,
+    "persistence": 0.095,
+    "sw_lin": 0.27,
+    "sw": 0.175,
+    "sw+ground": 0.381
+   },
+   "positives_by_year": {
+    "2015": 7,
+    "2017": 2,
+    "2022": 1,
+    "2023": 5,
+    "2024": 36,
+    "2025": 12
+   }
+  },
+  {
+   "station": "ESK",
+   "thr": 30.0,
+   "positives": 190,
+   "hours": 41839,
+   "chance": 0.00454,
+   "ap": {
+    "ey_max": 0.373,
+    "persistence": 0.417,
+    "sw_lin": 0.426,
+    "sw": 0.415,
+    "sw+ground": 0.446
+   },
+   "recall_at_p50": {
+    "ey_max": 0.358,
+    "persistence": 0.442,
+    "sw_lin": 0.321,
+    "sw": 0.416,
+    "sw+ground": 0.411
+   },
+   "positives_by_year": {
+    "2015": 25,
+    "2017": 12,
+    "2022": 11,
+    "2023": 19,
+    "2024": 80,
+    "2025": 43
+   }
+  },
+  {
+   "station": "ESK",
+   "thr": 100.0,
+   "positives": 21,
+   "hours": 41839,
+   "chance": 0.0005,
+   "ap": {
+    "ey_max": 0.34,
+    "persistence": 0.295,
+    "sw_lin": 0.151,
+    "sw": 0.016,
+    "sw+ground": 0.017
+   },
+   "recall_at_p50": {
+    "ey_max": 0.429,
+    "persistence": 0.286,
+    "sw_lin": 0.143,
+    "sw": 0.0,
+    "sw+ground": 0.0
+   },
+   "positives_by_year": {
+    "2015": 1,
+    "2017": 0,
+    "2022": 0,
+    "2023": 1,
+    "2024": 16,
+    "2025": 3
+   }
+  },
+  {
+   "station": "FRD",
+   "thr": 30.0,
+   "positives": 54,
+   "hours": 41014,
+   "chance": 0.00132,
+   "ap": {
+    "ey_max": 0.274,
+    "persistence": 0.161,
+    "sw_lin": 0.196,
+    "sw": 0.166,
+    "sw+ground": 0.2
+   },
+   "recall_at_p50": {
+    "ey_max": 0.278,
+    "persistence": 0.037,
+    "sw_lin": 0.148,
+    "sw": 0.0,
+    "sw+ground": 0.0
+   },
+   "positives_by_year": {
+    "2015": 8,
+    "2017": 5,
+    "2022": 2,
+    "2023": 2,
+    "2024": 28,
+    "2025": 9
+   }
+  },
+  {
+   "station": "HAD",
+   "thr": 30.0,
+   "positives": 62,
+   "hours": 41839,
+   "chance": 0.00148,
+   "ap": {
+    "ey_max": 0.293,
+    "persistence": 0.248,
+    "sw_lin": 0.204,
+    "sw": 0.119,
+    "sw+ground": 0.123
+   },
+   "recall_at_p50": {
+    "ey_max": 0.258,
+    "persistence": 0.226,
+    "sw_lin": 0.242,
+    "sw": 0.0,
+    "sw+ground": 0.0
+   },
+   "positives_by_year": {
+    "2015": 7,
+    "2017": 2,
+    "2022": 2,
+    "2023": 7,
+    "2024": 33,
+    "2025": 11
+   }
+  },
+  {
+   "station": "LER",
+   "thr": 30.0,
+   "positives": 259,
+   "hours": 41697,
+   "chance": 0.00621,
+   "ap": {
+    "ey_max": 0.394,
+    "persistence": 0.425,
+    "sw_lin": 0.447,
+    "sw": 0.435,
+    "sw+ground": 0.494
+   },
+   "recall_at_p50": {
+    "ey_max": 0.344,
+    "persistence": 0.436,
+    "sw_lin": 0.378,
+    "sw": 0.371,
+    "sw+ground": 0.467
+   },
+   "positives_by_year": {
+    "2015": 40,
+    "2017": 18,
+    "2022": 18,
+    "2023": 26,
+    "2024": 95,
+    "2025": 62
+   }
+  },
+  {
+   "station": "LER",
+   "thr": 100.0,
+   "positives": 36,
+   "hours": 41697,
+   "chance": 0.00086,
+   "ap": {
+    "ey_max": 0.418,
+    "persistence": 0.366,
+    "sw_lin": 0.293,
+    "sw": 0.276,
+    "sw+ground": 0.355
+   },
+   "recall_at_p50": {
+    "ey_max": 0.444,
+    "persistence": 0.222,
+    "sw_lin": 0.167,
+    "sw": 0.222,
+    "sw+ground": 0.222
+   },
+   "positives_by_year": {
+    "2015": 5,
+    "2017": 1,
+    "2022": 0,
+    "2023": 3,
+    "2024": 19,
+    "2025": 8
+   }
+  },
+  {
+   "station": "NEW",
+   "thr": 30.0,
+   "positives": 208,
+   "hours": 41030,
+   "chance": 0.00507,
+   "ap": {
+    "ey_max": 0.471,
+    "persistence": 0.432,
+    "sw_lin": 0.52,
+    "sw": 0.421,
+    "sw+ground": 0.447
+   },
+   "recall_at_p50": {
+    "ey_max": 0.438,
+    "persistence": 0.495,
+    "sw_lin": 0.529,
+    "sw": 0.433,
+    "sw+ground": 0.49
+   },
+   "positives_by_year": {
+    "2015": 23,
+    "2017": 13,
+    "2022": 4,
+    "2023": 28,
+    "2024": 89,
+    "2025": 51
+   }
+  },
+  {
+   "station": "NEW",
+   "thr": 100.0,
+   "positives": 38,
+   "hours": 41030,
+   "chance": 0.00093,
+   "ap": {
+    "ey_max": 0.57,
+    "persistence": 0.326,
+    "sw_lin": 0.289,
+    "sw": 0.175,
+    "sw+ground": 0.181
+   },
+   "recall_at_p50": {
+    "ey_max": 0.605,
+    "persistence": 0.526,
+    "sw_lin": 0.289,
+    "sw": 0.079,
+    "sw+ground": 0.0
+   },
+   "positives_by_year": {
+    "2015": 2,
+    "2017": 2,
+    "2022": 0,
+    "2023": 4,
+    "2024": 25,
+    "2025": 5
+   }
+  },
+  {
+   "station": "NGK",
+   "thr": 30.0,
+   "positives": 75,
+   "hours": 41839,
+   "chance": 0.00179,
+   "ap": {
+    "ey_max": 0.3,
+    "persistence": 0.293,
+    "sw_lin": 0.297,
+    "sw": 0.12,
+    "sw+ground": 0.112
+   },
+   "recall_at_p50": {
+    "ey_max": 0.307,
+    "persistence": 0.32,
+    "sw_lin": 0.32,
+    "sw": 0.027,
+    "sw+ground": 0.013
+   },
+   "positives_by_year": {
+    "2015": 4,
+    "2017": 4,
+    "2022": 2,
+    "2023": 9,
+    "2024": 43,
+    "2025": 13
+   }
+  },
+  {
+   "station": "SIT",
+   "thr": 30.0,
+   "positives": 397,
+   "hours": 39815,
+   "chance": 0.00997,
+   "ap": {
+    "ey_max": 0.401,
+    "persistence": 0.452,
+    "sw_lin": 0.507,
+    "sw": 0.488,
+    "sw+ground": 0.546
+   },
+   "recall_at_p50": {
+    "ey_max": 0.373,
+    "persistence": 0.401,
+    "sw_lin": 0.471,
+    "sw": 0.431,
+    "sw+ground": 0.514
+   },
+   "positives_by_year": {
+    "2015": 69,
+    "2017": 27,
+    "2022": 22,
+    "2023": 59,
+    "2024": 103,
+    "2025": 117
+   }
+  },
+  {
+   "station": "SIT",
+   "thr": 100.0,
+   "positives": 71,
+   "hours": 39815,
+   "chance": 0.00178,
+   "ap": {
+    "ey_max": 0.61,
+    "persistence": 0.396,
+    "sw_lin": 0.494,
+    "sw": 0.467,
+    "sw+ground": 0.477
+   },
+   "recall_at_p50": {
+    "ey_max": 0.648,
+    "persistence": 0.324,
+    "sw_lin": 0.577,
+    "sw": 0.606,
+    "sw+ground": 0.676
+   },
+   "positives_by_year": {
+    "2015": 6,
+    "2017": 4,
+    "2022": 0,
+    "2023": 5,
+    "2024": 40,
+    "2025": 16
+   }
+  },
+  {
+   "station": "THY",
+   "thr": 30.0,
+   "positives": 50,
+   "hours": 41839,
+   "chance": 0.0012,
+   "ap": {
+    "ey_max": 0.252,
+    "persistence": 0.229,
+    "sw_lin": 0.215,
+    "sw": 0.097,
+    "sw+ground": 0.078
+   },
+   "recall_at_p50": {
+    "ey_max": 0.3,
+    "persistence": 0.18,
+    "sw_lin": 0.22,
+    "sw": 0.0,
+    "sw+ground": 0.0
+   },
+   "positives_by_year": {
+    "2015": 2,
+    "2017": 2,
+    "2022": 1,
+    "2023": 6,
+    "2024": 31,
+    "2025": 8
+   }
+  }
+ ]
+}
