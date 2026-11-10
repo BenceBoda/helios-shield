@@ -44,6 +44,11 @@ INTERMAGNET = {
     "ABK": ("Abisko, SE", 68.36, 18.82),
     "OTT": ("Ottawa, CA", 45.40, -75.55),
     "THY": ("Tihany, HU", 46.90, 17.89),
+    "HRB": ("Hurbanovo, SK", 47.86, 18.19),
+    "BEL": ("Belsk, PL", 51.84, 20.79),
+    "FUR": ("Fürstenfeldbruck, DE", 48.17, 11.28),
+    "WNG": ("Wingst, DE", 53.74, 9.07),
+    "CLF": ("Chambon-la-Forêt, FR", 48.02, 2.26),
 }
 
 
