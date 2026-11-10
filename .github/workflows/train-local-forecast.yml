@@ -3,8 +3,8 @@ on:
   workflow_dispatch:
     inputs:
       years:
-        description: Years to use, separated by spaces
-        default: '2015 2017 2022 2023 2024 2025'
+        description: Years to use, separated by spaces (cached years are skipped)
+        default: '1998 1999 2000 2001 2002 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 2024 2025'
       extra_stations:
         description: Extra INTERMAGNET stations to download (IAGA codes)
         default: 'THY'
@@ -14,24 +14,62 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  train:
+  setup:
     runs-on: ubuntu-latest
-    timeout-minutes: 300
+    outputs:
+      years: ${{ steps.y.outputs.years }}
+    steps:
+      - id: y
+        env:
+          YEARS: ${{ inputs.years }}
+        run: echo "years=$(python3 -c "import os,json;print(json.dumps(os.environ['YEARS'].split()))")" >> "$GITHUB_OUTPUT"
+
+  cache:
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      max-parallel: 6   # stay polite to the NASA, USGS and BGS data services
+      matrix:
+        year: ${{ fromJson(needs.setup.outputs.years) }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and cache one year (OMNI hourly features, ground stations)
+        env:
+          YEARS: ${{ matrix.year }}
+          EXTRA_STATIONS: ${{ inputs.extra_stations }}
+          BASE_STATIONS: '1'
+          STUDY_YEAR: ${{ matrix.year }}
+        run: python3 -u scripts/build_training_cache.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cache-${{ matrix.year }}
+          path: |
+            analysis/omni_hourly_${{ matrix.year }}.json
+            analysis/ground_hourly_${{ matrix.year }}.json
+            analysis/ground_hourly_*_${{ matrix.year }}.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+  train:
+    needs: cache
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: cache-*
+          path: analysis
+          merge-multiple: true
       - run: pip install -q numpy scikit-learn
-
-      - name: Build cached inputs (OMNI hourly features, extra ground stations)
-        env:
-          YEARS: ${{ inputs.years }}
-          EXTRA_STATIONS: ${{ inputs.extra_stations }}
-        run: python3 -u scripts/build_training_cache.py
-
       - name: Train and evaluate (leave-one-year-out)
         run: python3 -u scripts/train_local_forecast.py
-
       - name: Commit results
         if: always()
         run: |

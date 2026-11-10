@@ -16,7 +16,7 @@ import urllib.parse
 from datetime import datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from false_alarm_study import HAPI, MAX_PLAUSIBLE, http  # noqa: E402
+from false_alarm_study import HAPI, MAX_PLAUSIBLE, ground_hourly, http  # noqa: E402
 from fetch_live_magnetometers import dbdt, fetch_gin  # noqa: E402
 
 YEARS = [int(y) for y in os.environ.get("YEARS", "2024").split()]
@@ -138,6 +138,10 @@ def main():
     for y in YEARS:
         for s in EXTRA:
             ground_station(s, y)
+    if os.environ.get("BASE_STATIONS") == "1":
+        for y in YEARS:
+            print(f"##### base stations {y}")
+            ground_hourly(y)  # the eight study stations, cached in analysis/ground_hourly_<year>.json
     return 0
 
 
