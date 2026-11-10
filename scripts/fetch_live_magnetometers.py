@@ -117,10 +117,14 @@ def fetch_gin(iaga, start, end):
         elif v.get("H") is not None and v.get("E") is not None:
             x, y = v["H"], v["E"]
         else:
+            fetch_gin.missing = getattr(fetch_gin, "missing", 0) + 1
             continue
         pts.append((int(ts.timestamp()), x, y))
     if cols is None:
         raise RuntimeError(f"no IAGA-2002 data: {text[:150]!r}")
+    if not pts:
+        rows = [l for l in text.splitlines() if l[:4].isdigit()]
+        raise RuntimeError(f"cols {cols}, {len(rows)} rows all missing; last row {rows[-1][:60] if rows else None!r}")
     return pts
 
 
@@ -165,10 +169,12 @@ def main():
            [(k, v, "INTERMAGNET", fetch_gin) for k, v in INTERMAGNET.items()]
     for iaga, (name, lat, lng), src, fn in jobs:
         try:
-            pts = [p for p in fn(iaga, start, now) if p[0] >= start.timestamp()]
+            raw = fn(iaga, start, now)
+            pts = [p for p in raw if p[0] >= start.timestamp()]
             series = dbdt(pts)
             if not series:
-                raise RuntimeError("no samples in window")
+                last = iso(max(p[0] for p in raw)) if raw else "none"
+                raise RuntimeError(f"no samples in window ({len(raw)} usable rows, newest {last})")
             last_t = series[-1][0]
             lag = round((now.timestamp() - last_t) / 60)
             if lag > MAX_LAG_MIN:
