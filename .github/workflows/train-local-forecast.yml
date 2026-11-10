@@ -1,0 +1,47 @@
+name: Train local forecast
+on:
+  workflow_dispatch:
+    inputs:
+      years:
+        description: Years to use, separated by spaces
+        default: '2015 2017 2022 2023 2024 2025'
+      extra_stations:
+        description: Extra INTERMAGNET stations to download (IAGA codes)
+        default: 'THY'
+
+concurrency:
+  group: train-local-forecast
+  cancel-in-progress: false
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -q numpy scikit-learn
+
+      - name: Build cached inputs (OMNI hourly features, extra ground stations)
+        env:
+          YEARS: ${{ inputs.years }}
+          EXTRA_STATIONS: ${{ inputs.extra_stations }}
+        run: python3 -u scripts/build_training_cache.py
+
+      - name: Train and evaluate (leave-one-year-out)
+        run: python3 -u scripts/train_local_forecast.py
+
+      - name: Commit results
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add analysis/
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -q -m "chore: local forecast inputs and evaluation [skip ci]"
+          for i in 1 2 3 4; do
+            git pull -q --rebase origin main && git push -q origin HEAD:main && exit 0
+            sleep $((i * 5))
+          done
+          exit 1
