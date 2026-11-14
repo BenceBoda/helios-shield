@@ -432,7 +432,8 @@ function checkPw(){
   if(val==='helios2026'){
     document.getElementById('pw-screen').style.display='none';
     selectLive();
-    setTimeout(initMap,120);
+    // The map is built when the Impact Simulator tab first opens (switchTab): Leaflet cannot
+    // size a map inside a hidden panel, and doing it here threw dozens of NaN errors on load.
   } else {
     const inp=document.getElementById('pw-input');
     inp.classList.add('wrong');
