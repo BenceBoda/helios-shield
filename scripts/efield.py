@@ -79,15 +79,19 @@ def efield(x_nt, y_nt, model):
     n = len(x_nt)
     idx = np.arange(n)
     out = []
+    ext = max(2, n // 4)
     for comp in (x_nt, y_nt):
         c = np.asarray(comp, dtype=float)
         c = c - np.polyval(np.polyfit(idx, c, 1), idx)       # remove trend
-        taper = np.ones(n)
+        # Mirror the newest quarter onto the end, so the taper falls on the mirrored part and
+        # the most recent real minute (the "now" value in live mode) is left untouched.
+        c = np.concatenate([c, c[::-1][:ext]])
+        taper = np.ones(len(c))
         m = max(1, n // 20)                                   # 5 % cosine taper at both ends
         ramp = 0.5 * (1 - np.cos(np.pi * np.arange(m) / m))
         taper[:m], taper[-m:] = ramp, ramp[::-1]
         out.append(c * taper)
-    nfft = 1 << int(math.ceil(math.log2(2 * n)))
+    nfft = 1 << int(math.ceil(math.log2(2 * len(out[0]))))
     f = np.fft.rfftfreq(nfft, d=60.0)
     z = impedance(f, model)
     bx = np.fft.rfft(out[0], nfft) * 1e-9

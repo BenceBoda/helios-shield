@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Helios Shield · Sandbox</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+:root{
+  --bg:#160B33;--surface:#22154A;--surface2:#2C1D5C;--border:#433178;
+  --text:#F3EFFF;--muted:#C3B9E6;--dim:#5A4A8C;
+  --accent:#F2A93B;--solar:#FF8F6B;--danger:#FF5C74;--safe:#7FDB8A;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:radial-gradient(1100px 1100px at 88% -18%,rgba(126,94,220,.38),rgba(126,94,220,0) 60%),var(--bg);background-attachment:fixed;color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:14px;line-height:1.5}
+.mono{font-family:'IBM Plex Mono',monospace}
+#pw{position:fixed;inset:0;z-index:5000;background:var(--bg);display:flex;align-items:center;justify-content:center}
+#pw .box{width:300px;display:flex;flex-direction:column;gap:12px;text-align:center}
+#pw input{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px;color:var(--text);font:14px 'IBM Plex Mono',monospace;text-align:center;letter-spacing:3px;outline:none}
+#pw button{padding:10px;background:var(--accent);border:none;border-radius:6px;color:#160B33;font-weight:600;cursor:pointer}
+.hdr{display:flex;align-items:center;gap:14px;padding:14px 24px;border-bottom:1px solid var(--border);background:rgba(22,11,51,.82);flex-wrap:wrap}
+.logo{font-weight:600;font-size:15px}
+.tag{font:500 11.5px 'IBM Plex Mono',monospace;color:var(--accent);border:1px solid rgba(242,169,59,.4);border-radius:20px;padding:2px 10px}
+.hdr a{margin-left:auto;color:var(--muted);font-size:13px;text-decoration:none;border:1px solid var(--border);border-radius:6px;padding:5px 12px}
+.wrap{max-width:1240px;margin:0 auto;padding:22px 24px 48px}
+h1{font-size:21px;font-weight:600;margin-bottom:4px}
+.lead{color:var(--muted);max-width:860px;margin-bottom:18px}
+.controls{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:16px}
+.group{display:flex;flex-direction:column;gap:6px}
+.group .lbl{font:11.5px 'IBM Plex Mono',monospace;color:var(--muted)}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:6px 11px;font:13px 'IBM Plex Sans',sans-serif;cursor:pointer}
+.seg button.on{background:var(--surface2);color:#fff;border-color:var(--accent)}
+.grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:16px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px}
+.card h2{font:500 12px 'IBM Plex Mono',monospace;color:var(--muted);margin-bottom:10px;text-transform:lowercase}
+#map{height:470px;border-radius:8px;background:#1d1240}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stat{background:var(--surface2);border-radius:8px;padding:10px 12px;border-left:3px solid var(--accent)}
+.stat .v{font:500 20px 'IBM Plex Mono',monospace}
+.stat .k{font-size:12.5px;color:var(--muted)}
+.chartbox{position:relative;height:210px}
+input[type=range]{width:100%;accent-color:var(--accent);margin-top:10px}
+.time{font:13px 'IBM Plex Mono',monospace;color:var(--muted);display:flex;justify-content:space-between;margin-top:4px}
+.legend{background:rgba(22,11,51,.9);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font:12px 'IBM Plex Mono',monospace;line-height:1.7}
+.legend i{display:inline-block;width:18px;height:3px;margin-right:7px;vertical-align:middle}
+.notes{margin-top:16px}
+.notes h3{font-size:13px;color:var(--accent);text-transform:uppercase;letter-spacing:.04em;margin:14px 0 6px}
+.notes p,.notes li{color:var(--muted);font-size:13.5px;max-width:900px}
+.notes ul{padding-left:18px}
+.notes a{color:var(--muted)}
+.models{font-size:12.5px;color:var(--muted);margin-top:8px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}#map{height:380px}.wrap{padding:16px}}
+</style>
+</head>
+<body>
+<div id="pw"><div class="box">
+  <div class="logo">Helios Shield · Sandbox</div>
+  <input id="pwi" type="password" placeholder="password" onkeydown="if(event.key==='Enter')unlock()">
+  <button onclick="unlock()">Enter</button>
+  <div id="pwe" class="mono" style="color:var(--danger);font-size:12px;min-height:16px"></div>
+</div></div>
+
+<div class="hdr">
+  <span class="logo">Helios Shield</span><span class="tag">SANDBOX · experimental</span>
+  <a href="./">← main demo</a>
+</div>
+
+<div class="wrap">
+  <h1>Estimated geoelectric field over the Hungarian grid</h1>
+  <p class="lead">The quantity that drives GIC is the electric field induced in the ground, not dB/dt itself. Here it is estimated from Tihany magnetometer data and a published layered ground model of the Pannonian Basin, then projected onto the 220–750&nbsp;kV lines mapped in OpenStreetMap. A first step towards a local model. It is not a GIC forecast.</p>
+
+  <div class="controls">
+    <div class="group"><span class="lbl">data</span><div class="seg" id="src"></div></div>
+    <div class="group"><span class="lbl">ground model</span><div class="seg" id="mdl"></div></div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>map · field along each line at the selected minute</h2>
+      <div id="map"></div>
+    </div>
+    <div class="card">
+      <h2>tihany · estimated |E|</h2>
+      <div class="stats">
+        <div class="stat"><div class="v" id="s-now">—</div><div class="k">|E| at selected minute (mV/km)</div></div>
+        <div class="stat" style="border-color:var(--solar)"><div class="v" id="s-peak">—</div><div class="k">peak |E| in window (mV/km)</div></div>
+        <div class="stat" style="border-color:var(--safe)"><div class="v" id="s-dir">—</div><div class="k">field direction</div></div>
+        <div class="stat" style="border-color:var(--danger)"><div class="v" id="s-line">—</div><div class="k">largest voltage on one mapped line section (V)</div></div>
+      </div>
+      <div class="chartbox"><canvas id="chart"></canvas></div>
+      <input type="range" id="slider" min="0" max="0" value="0" oninput="setIdx(+this.value)">
+      <div class="time"><span id="t-start"></span><span id="t-sel" style="color:#fff"></span><span id="t-end"></span></div>
+      <div class="models" id="model-label"></div>
+    </div>
+  </div>
+
+  <div class="card notes">
+    <h3>How it is computed</h3>
+    <ul>
+      <li><b>Magnetic data:</b> Tihany (THY) one-minute observatory data via INTERMAGNET / BGS GIN. Live: last 24 hours, recomputed every 10 minutes.</li>
+      <li><b>Ground:</b> one-dimensional layer sequences No 1 and No 3 for the Pannonian Basin from Ádám, Szarka, Novák and Wesztergom, <a href="https://real.mtak.hu/73548/" target="_blank" rel="noopener">“Key results on deep electrical conductivity anomalies in the Pannonian Basin”</a>, Table 1. The third option is a uniform 1000&nbsp;Ωm ground as used for the Czech grid in <a href="https://arxiv.org/abs/2112.02438" target="_blank" rel="noopener">this study</a>, shown only to compare: it is not a Hungarian model.</li>
+      <li><b>Method:</b> plane-wave surface impedance of the layer stack, applied to the magnetic variations in the frequency domain (the standard approach in GIC studies).</li>
+      <li><b>Lines:</b> 220, 400 and 750&nbsp;kV ways from <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (© contributors, ODbL). Colour = field component along the line; the popup gives the voltage across that mapped section.</li>
+    </ul>
+    <h3>What this is not</h3>
+    <ul>
+      <li>Not GIC. Current also depends on transformer and earthing resistances and the network topology, which public data do not give.</li>
+      <li>One station and one regional model for the whole country: real ground varies locally, and the choice of model changes the answer several-fold (compare the reference model).</li>
+      <li>One-minute data underestimate the fastest variations.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+const SOURCES=[
+  {key:'live',label:'Live · last 24 h',file:'efield.json'},
+  {key:'2024-05-10',label:'Gannon · May 2024',file:'storms/efield_2024-05-10_THY.json'},
+  {key:'2024-10-10',label:'Oct 2024',file:'storms/efield_2024-10-10_THY.json'},
+  {key:'2003-10-29',label:'Halloween 2003',file:'storms/efield_2003-10-29_THY.json'},
+  {key:'2015-03-17',label:'St Patrick’s 2015',file:'storms/efield_2015-03-17_THY.json'},
+];
+const MODELS=[{key:'pb3',label:'Pannonian No 3'},{key:'pb1',label:'Pannonian No 1'},{key:'ref1000',label:'Reference 1000 Ωm'}];
+const THY=[46.90,17.89];
+let src='live',mdl='pb3',data=null,idx=0,map,lines=[],arrow,chart;
+
+function unlock(){
+  if(document.getElementById('pwi').value==='helios2026'){
+    try{sessionStorage.setItem('hs-ok','1')}catch(e){}
+    document.getElementById('pw').style.display='none';start();
+  }else document.getElementById('pwe').textContent='wrong password';
+}
+try{if(sessionStorage.getItem('hs-ok')==='1'){document.getElementById('pw').style.display='none';window.addEventListener('load',start)}}catch(e){}
+
+function seg(id,items,cur,fn){
+  const el=document.getElementById(id);el.innerHTML='';
+  items.forEach(it=>{const b=document.createElement('button');b.textContent=it.label;if(it.key===cur)b.className='on';b.onclick=()=>fn(it.key);el.appendChild(b)});
+}
+function fmtT(ts){return new Date(ts*1000).toISOString().slice(0,16).replace('T',' ')+' UTC'}
+function color(v){v=Math.abs(v);return v>=300?'#FF2020':v>=100?'#FF5C74':v>=30?'#FF8F6B':v>=10?'#F2A93B':'#7FDB8A'}
+
+let started=false;
+async function start(){
+  if(started)return;started=true;
+  map=L.map('map',{center:[47.15,19.4],zoom:7,minZoom:5,maxZoom:11});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxZoom:19}).addTo(map);
+  const lg=L.control({position:'bottomleft'});
+  lg.onAdd=()=>{const d=L.DomUtil.create('div','legend');d.innerHTML='Field along line (mV/km)<br>'+
+    [['≥300','#FF2020'],['100–300','#FF5C74'],['30–100','#FF8F6B'],['10–30','#F2A93B'],['<10','#7FDB8A']].map(([t,c])=>`<i style="background:${c}"></i>${t}`).join('<br>')+
+    '<br><span style="color:#C3B9E6">● Tihany · arrow = E direction</span>';return d};
+  lg.addTo(map);
+  L.circleMarker(THY,{radius:6,color:'#fff',weight:2,fillColor:'#F2A93B',fillOpacity:1}).addTo(map).bindPopup('Tihany observatory (THY)');
+  const g=await (await fetch('sandbox/hu_grid.geojson')).json();
+  g.features.forEach(f=>{
+    const c=f.geometry.coordinates;let sn=0,se=0;
+    for(let i=1;i<c.length;i++){const lat=(c[i][1]+c[i-1][1])/2*Math.PI/180;sn+=(c[i][1]-c[i-1][1])*111.2;se+=(c[i][0]-c[i-1][0])*111.2*Math.cos(lat)}
+    const pl=L.polyline(c.map(p=>[p[1],p[0]]),{weight:f.properties.kv>=400?3:2,opacity:.9}).addTo(map);
+    lines.push({pl,sn,se,p:f.properties});
+  });
+  setModelButtons();
+  await loadSrc('live');
+}
+function setModelButtons(){seg('mdl',MODELS,mdl,k=>{mdl=k;setModelButtons();render(true)})}
+function setSrcButtons(){seg('src',SOURCES,src,k=>loadSrc(k))}
+
+async function loadSrc(k){
+  src=k;setSrcButtons();
+  const s=SOURCES.find(x=>x.key===k);
+  try{data=await (await fetch(s.file+'?_='+Date.now())).json()}catch(e){data=null}
+  if(!data||!data.models){document.getElementById('model-label').textContent='No data for this window yet.';return}
+  render(true);
+}
+
+function mags(m){return m.en.map((v,i)=>Math.hypot(v,m.ee[i]))}
+
+function render(resetIdx){
+  const m=data.models[mdl];if(!m)return;
+  const n=m.en.length,sl=document.getElementById('slider');
+  sl.max=n-1;
+  if(resetIdx){idx=src==='live'?n-1:Math.round((m.peak_t-data.t0)/data.step_s);idx=Math.max(0,Math.min(n-1,idx))}
+  sl.value=idx;
+  document.getElementById('t-start').textContent=fmtT(data.t0).slice(5,16);
+  document.getElementById('t-end').textContent=fmtT(data.t0+(n-1)*data.step_s).slice(5,16);
+  document.getElementById('s-peak').textContent=m.peak.toFixed(0);
+  document.getElementById('model-label').textContent='Ground: '+m.label+(data.fetched_at?' · computed '+fmtT(Date.parse(data.fetched_at)/1000):'');
+  drawChart();setIdx(idx);
+}
+
+function drawChart(){
+  const step=Math.max(1,Math.floor(data.models.pb3.en.length/720));
+  const labels=[],sets=[];
+  const n=data.models.pb3.en.length;
+  for(let i=0;i<n;i+=step)labels.push(i);
+  const col={pb3:'#F2A93B',pb1:'#FF8F6B',ref1000:'#8F7FD0'};
+  MODELS.forEach(md=>{const mm=data.models[md.key];if(!mm)return;const mg=mags(mm);
+    sets.push({label:md.label,data:labels.map(i=>mg[i]),borderColor:col[md.key],borderWidth:md.key===mdl?2:1,
+      borderDash:md.key===mdl?[]:[4,3],pointRadius:0,tension:0})});
+  const cfg={type:'line',data:{labels,datasets:sets},options:{animation:false,maintainAspectRatio:false,
+    interaction:{mode:'index',intersect:false},
+    plugins:{legend:{labels:{color:'#C3B9E6',boxWidth:14,font:{size:11}}},
+      tooltip:{callbacks:{title:it=>fmtT(data.t0+labels[it[0].dataIndex]*data.step_s),label:it=>it.dataset.label+': '+it.parsed.y.toFixed(1)+' mV/km'}}},
+    scales:{x:{ticks:{color:'#C3B9E6',maxTicksLimit:6,callback:(v,i)=>fmtT(data.t0+labels[i]*data.step_s).slice(11,16)},grid:{color:'rgba(67,49,120,.5)'}},
+      y:{type:'logarithmic',min:0.5,ticks:{color:'#C3B9E6'},grid:{color:'rgba(67,49,120,.5)'},title:{display:true,text:'mV/km',color:'#C3B9E6'}}},
+    onClick:(e,els,ch)=>{const x=ch.scales.x.getValueForPixel(e.x);if(x!=null)setIdx(labels[Math.max(0,Math.min(labels.length-1,Math.round(x)))])}}};
+  if(chart)chart.destroy();chart=new Chart(document.getElementById('chart'),cfg);
+}
+
+function setIdx(i){
+  idx=i;document.getElementById('slider').value=i;
+  const m=data.models[mdl];const en=m.en[i],ee=m.ee[i];const mag=Math.hypot(en,ee);
+  const gap=(data.gap||[]).includes(i);
+  document.getElementById('t-sel').textContent=fmtT(data.t0+i*data.step_s).slice(5)+(gap?' · data gap':'');
+  document.getElementById('s-now').textContent=mag.toFixed(1);
+  const az=(Math.atan2(ee,en)*180/Math.PI+360)%360;
+  const dirs=['N','NE','E','SE','S','SW','W','NW'];
+  document.getElementById('s-dir').textContent=mag<0.5?'—':Math.round(az)+'° '+dirs[Math.round(az/45)%8];
+  let maxV=0,maxLine=null;
+  lines.forEach(l=>{
+    const v=(en*l.sn+ee*l.se)/1000;           // volts across the section (mV/km × km / 1000)
+    const along=l.p.km>0.05?Math.abs(v)*1000/l.p.km:0;
+    l.pl.setStyle({color:color(along)});
+    l.pl.bindPopup(`<b>${l.p.name||'unnamed line'}</b><br>${l.p.kv} kV · ${l.p.km} km section${l.p.operator?' · '+l.p.operator:''}<br>field along line: ${along.toFixed(1)} mV/km<br>voltage across section: ${Math.abs(v).toFixed(1)} V`);
+    if(Math.abs(v)>maxV){maxV=Math.abs(v);maxLine=l}
+  });
+  document.getElementById('s-line').textContent=maxV.toFixed(maxV<10?1:0);
+  if(arrow)map.removeLayer(arrow);
+  if(mag>=0.5){const L0=0.9;const end=[THY[0]+L0*en/mag,THY[1]+L0*ee/mag/Math.cos(THY[0]*Math.PI/180)];
+    arrow=L.polyline([THY,end],{color:'#fff',weight:3}).addTo(map)}
+}
+</script>
+</body>
+</html>
