@@ -1,0 +1,53 @@
+name: Sandbox data (grid + E-field replays)
+# Manual: builds the static inputs of sandbox.html.
+#   grid:    Hungarian 220/400/750 kV lines from OpenStreetMap -> sandbox/hu_grid.geojson
+#   replays: geoelectric field at Tihany for past storms -> storms/efield_<date>_THY.json
+on:
+  workflow_dispatch:
+    inputs:
+      grid:
+        description: 'Refresh the OSM grid (yes/no)'
+        default: 'yes'
+      replays:
+        description: 'Storm windows START:DAYS, space separated'
+        default: '2024-05-10:2 2024-10-10:2 2003-10-29:3 2015-03-17:2'
+
+concurrency:
+  group: data-commit
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -q numpy
+      - name: Grid from OpenStreetMap
+        if: inputs.grid == 'yes'
+        run: python3 -u scripts/fetch_grid.py
+      - name: E-field replays
+        run: |
+          for r in ${{ inputs.replays }}; do
+            REPLAY=$r python3 -u scripts/efield.py || echo "replay $r failed"
+          done
+      - name: Live E-field
+        run: python3 -u scripts/efield.py || echo "live E-field failed"
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          mkdir -p /tmp/fresh && cp -r --parents sandbox storms/efield_*.json efield.json /tmp/fresh/ 2>/dev/null || true
+          for i in 1 2 3 4; do
+            git fetch -q origin main
+            git reset -q --hard origin/main
+            cp -r /tmp/fresh/. .
+            git add sandbox storms efield.json 2>/dev/null || true
+            if git diff --cached --quiet; then echo "No changes"; exit 0; fi
+            git commit -q -m "data: sandbox grid and E-field replays [skip ci]"
+            if git push -q origin HEAD:main; then echo "pushed"; exit 0; fi
+            echo "push rejected, retry $i"; sleep $((i * 5))
+          done
+          exit 1
