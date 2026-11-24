@@ -38,6 +38,11 @@ MODELS = {
             "layers": [(0.50, 5.0), (10.0, 300.0), (0.12, 0.10), (40.0, 60.0), (15.0, 15.0)], "half": 5.0},
     "pb3": {"label": "Pannonian Basin model No 3 (1.7 ohm-m sediment over 70 ohm-m crust)",
             "layers": [(1.20, 1.70), (14.0, 70.0), (0.70, 1.00), (25.0, 50.0), (25.0, 15.0)], "half": 5.0},
+    # Reference, not a Hungarian model: the uniform ground used for the Czech grid in
+    # "Modelling of Geomagnetically Induced Currents in the Czech Transmission Grid"
+    # (arXiv:2112.02438). Shows how much a resistive-ground assumption would change the answer.
+    "ref1000": {"label": "Reference: uniform 1000 ohm-m ground (as in the Czech grid study)",
+                "layers": [], "half": 1000.0},
 }
 
 

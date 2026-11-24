@@ -27,6 +27,9 @@ jobs:
       - name: USGS + INTERMAGNET magnetometers
         run: python3 -u scripts/fetch_live_magnetometers.py || echo "magnetometer fetch failed, keeping previous file"
 
+      - name: Geoelectric field at Tihany (sandbox)
+        run: pip install -q numpy && python3 -u scripts/efield.py || echo "E-field failed, keeping previous file"
+
       - name: Commit data
         run: |
           # The three files are whole-file snapshots, so the newest fetch simply wins:
@@ -34,12 +37,12 @@ jobs:
           # when another refresh pushed in between), and retry a few times.
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          mkdir -p /tmp/fresh && cp kp.json bz.json live_stations.json /tmp/fresh/
+          mkdir -p /tmp/fresh && cp kp.json bz.json live_stations.json /tmp/fresh/ && (cp efield.json /tmp/fresh/ 2>/dev/null || true)
           for i in 1 2 3 4; do
             git fetch -q origin main
             git reset -q --hard origin/main
             cp /tmp/fresh/*.json .
-            git add kp.json bz.json live_stations.json
+            git add kp.json bz.json live_stations.json efield.json
             if git diff --cached --quiet; then echo "No changes"; exit 0; fi
             git commit -q -m "chore: refresh live data [skip ci]"
             if git push -q origin HEAD:main; then echo "pushed"; exit 0; fi
